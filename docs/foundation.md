@@ -14,7 +14,14 @@ This document records how the monorepo foundation is built and why. The product 
 
 ## Local TLS
 
-`./scripts/setup-certs.sh` uses mkcert to generate `infra/certs/localhost-{cert,key}.pem` (gitignored). Both Vite dev servers and the NestJS API read them; everything speaks HTTPS locally. In containers TLS is disabled (`API_TLS=false`) — production terminates TLS at the ingress.
+`./scripts/setup-certs.sh` uses mkcert to generate `infra/certs/localhost-{cert,key}.pem` (gitignored). The Vite dev servers read them directly. The NestJS API always serves plain http — TLS is terminated in front of it: in the full docker stack by nginx, in production by the ingress. When the API runs on the host (`npm run dev`) it is plain `http://localhost:3000`; browsers exempt localhost from mixed-content blocking, so the https frontends can still call it.
+
+## Docker stacks
+
+Two compose modes, both driven from `.env`:
+
+- **Infra only** (`npm run infra:up|down|logs`): postgres, valkey, localstack, go-camo — for host-based `npm run dev`. HTTP services are plain http on `127.0.0.1` (camo `8443`, localstack `4566`).
+- **Full stack** (`npm run stack:up|down|logs`): everything above plus the API, both Python workers, and an nginx reverse proxy (`infra/docker/docker-compose.apps.yml` overlaid on the base file). nginx terminates TLS with the mkcert certs (`infra/docker/nginx/nginx.conf`) and serves per-port (the certificate only covers `localhost`): API `https://localhost:3000`, go-camo `https://localhost:8443`, localstack `https://localhost:4566`. The overlay unpublishes camo/localstack's plain-http host ports (`!override`) so nginx owns them, and rewires the app containers to the in-network service hostnames. `stack:up` builds the images (`--build`) and waits for healthchecks (`--wait`).
 
 ## Security decisions
 

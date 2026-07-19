@@ -8,4 +8,3 @@ process.env.S3_ENDPOINT ??= 'http://localhost:4566';
 process.env.S3_BUCKET ??= 'test-bucket';
 process.env.CAMO_HMAC_KEY ??= 'test-key-0123';
 process.env.CAMO_BASE_URL ??= 'http://localhost:8443';
-process.env.API_TLS ??= 'false';

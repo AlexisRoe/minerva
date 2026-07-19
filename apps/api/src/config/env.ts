@@ -3,12 +3,6 @@ import { z } from 'zod';
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   API_PORT: z.coerce.number().int().min(1).max(65535).default(3000),
-  API_TLS: z
-    .enum(['true', 'false'])
-    .default('true')
-    .transform((value) => value === 'true'),
-  TLS_CERT_PATH: z.string().default('infra/certs/localhost-cert.pem'),
-  TLS_KEY_PATH: z.string().default('infra/certs/localhost-key.pem'),
   DATABASE_URL: z.string().min(1),
   DATABASE_URL_RO: z.string().min(1),
   VALKEY_URL: z.string().min(1),

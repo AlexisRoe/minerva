@@ -20,7 +20,7 @@ FROM deps AS prod-deps
 RUN npm ci --omit=dev --ignore-scripts
 
 FROM node:24-alpine AS runtime
-ENV NODE_ENV=production API_TLS=false
+ENV NODE_ENV=production
 WORKDIR /workspace
 RUN addgroup -S minerva && adduser -S minerva -G minerva
 COPY --from=prod-deps --chown=minerva:minerva /workspace/node_modules node_modules

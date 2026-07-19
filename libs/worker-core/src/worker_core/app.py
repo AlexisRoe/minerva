@@ -19,7 +19,9 @@ class WorkerApp:
         self.name = name
         self.settings = settings or WorkerSettings(consumer_group=name)
         self.logger = configure_logging(name)
-        self._client = Redis.from_url(self.settings.valkey_url)
+        # redis-py 8 defaults socket_timeout to 5s; it must exceed the XREADGROUP block
+        # window or every idle blocking read raises TimeoutError and kills the worker.
+        self._client = Redis.from_url(self.settings.valkey_url, socket_timeout=self.settings.block_ms / 1000 + 5)
         self._consumer = StreamConsumer(
             self._client,
             stream=self.settings.event_stream,

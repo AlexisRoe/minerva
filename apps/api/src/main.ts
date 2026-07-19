@@ -1,34 +1,15 @@
 import './instrument';
 
-import { existsSync, readFileSync } from 'node:fs';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import { AppModule } from './app/app.module';
-import { validateEnv } from './config/env';
-
-function httpsOptions() {
-  // Validate eagerly so TLS paths come from the same schema as everything else.
-  const env = validateEnv(process.env);
-  if (!env.API_TLS) {
-    return undefined;
-  }
-  if (!existsSync(env.TLS_CERT_PATH) || !existsSync(env.TLS_KEY_PATH)) {
-    Logger.warn('TLS certificates not found — serving over http. Run ./scripts/setup-certs.sh', 'Bootstrap');
-    return undefined;
-  }
-  return {
-    cert: readFileSync(env.TLS_CERT_PATH),
-    key: readFileSync(env.TLS_KEY_PATH),
-  };
-}
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    httpsOptions: httpsOptions(),
-  });
+  // The app always serves plain http; TLS is terminated by the nginx proxy in the compose stack.
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const config = app.get(ConfigService);
   app.use(helmet());
