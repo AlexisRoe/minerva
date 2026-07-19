@@ -1,7 +1,7 @@
 {
   "name": "minerva",
   "version": "0.1.0",
-  "description": "TBD",
+  "description": "Minerva monorepo — React frontends, NestJS API, Python event workers",
   "homepage": "https://github.com/AlexisRoe/minerva#readme",
   "repository": {
     "type": "git",
@@ -9,10 +9,78 @@
   },
   "license": "MIT",
   "author": "Alexis Roehrling",
-  "directories": {
-    "doc": "docs"
+  "private": true,
+  "engines": {
+    "node": ">=24.15.0 <25"
   },
+  "workspaces": [
+    "apps/*",
+    "libs/*"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepare": "husky",
+    "setup": "npm ci && uv sync && ./scripts/setup-certs.sh",
+    "infra:up": "docker compose -f infra/docker/docker-compose.yml --env-file .env up -d --wait",
+    "infra:down": "docker compose -f infra/docker/docker-compose.yml --env-file .env down",
+    "infra:logs": "docker compose -f infra/docker/docker-compose.yml --env-file .env logs -f",
+    "dev": "nx run-many -t dev serve --parallel 10",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "nx run-many -t typecheck",
+    "test": "nx run-many -t test",
+    "build": "nx run-many -t build"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.5",
+    "@babel/preset-react": "^7.14.5",
+    "@biomejs/biome": "2.5.4",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
+    "@nx/js": "23.1.0",
+    "@nx/nest": "23.1.0",
+    "@nx/node": "23.1.0",
+    "@nx/react": "23.1.0",
+    "@nx/vite": "23.1.0",
+    "@nx/vitest": "23.1.0",
+    "@nx/web": "23.1.0",
+    "@nx/webpack": "23.1.0",
+    "@swc/helpers": "~0.5.18",
+    "@testing-library/dom": "10.4.0",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.0",
+    "@testing-library/user-event": "14.6.1",
+    "@types/node": "24.13.3",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "@vitest/coverage-v8": "4.1.10",
+    "@vitest/ui": "~4.1.0",
+    "husky": "9.1.7",
+    "jiti": "2.4.2",
+    "jsdom": "^27.1.0",
+    "lint-staged": "17.1.0",
+    "nx": "23.1.0",
+    "tslib": "2.8.1",
+    "typescript": "6.0.3",
+    "vite": "8.1.4",
+    "vite-plugin-pwa": "1.3.0",
+    "vitest": "4.1.10",
+    "webpack": "^5.101.3",
+    "webpack-cli": "^7.0.0",
+    "webpack-dev-server": "^5.2.1"
+  },
+  "nx": {
+    "includedScripts": []
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "@sentry/react": "10.66.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "reflect-metadata": "^0.2.0",
+    "rxjs": "^7.8.0"
   }
 }

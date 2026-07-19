@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "biomejs.biome",
+    "charliermarsh.ruff",
+    "ms-python.python",
+    "ms-python.mypy-type-checker",
+    "nrwl.angular-console",
+    "editorconfig.editorconfig",
+    "prisma.prisma",
+    "ms-azuretools.vscode-docker"
+  ]
+}

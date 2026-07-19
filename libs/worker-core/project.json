@@ -1,0 +1,33 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "worker-core",
+  "projectType": "library",
+  "sourceRoot": "libs/worker-core/src",
+  "tags": ["lang:python"],
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/uv.lock", "{workspaceRoot}/pyproject.toml"],
+      "options": {
+        "command": "uv run pytest libs/worker-core"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/ruff.toml"],
+      "options": {
+        "command": "uv run ruff check libs/worker-core && uv run ruff format --check libs/worker-core"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/uv.lock", "{workspaceRoot}/pyproject.toml"],
+      "options": {
+        "command": "uv run mypy libs/worker-core/src"
+      }
+    }
+  }
+}

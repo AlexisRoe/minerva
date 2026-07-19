@@ -1,0 +1,18 @@
+line-length = 120
+target-version = "py314"
+
+[lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "S",   # flake8-bandit (security)
+    "UP",  # pyupgrade
+    "RUF", # ruff-specific
+]
+
+[lint.per-file-ignores]
+# assert statements are expected in tests
+"**/tests/**" = ["S101"]

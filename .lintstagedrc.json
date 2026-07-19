@@ -1,0 +1,4 @@
+{
+  "*.{ts,tsx,js,jsx,json,jsonc,css}": ["biome check --write --no-errors-on-unmatched"],
+  "*.py": ["uv run ruff check --fix", "uv run ruff format"]
+}
