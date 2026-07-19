@@ -13,6 +13,10 @@ dev-dist/
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
 
+# Storybook
+storybook-static/
+*storybook.log
+
 # Test output
 coverage/
 

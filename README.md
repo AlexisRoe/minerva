@@ -44,6 +44,7 @@ Then open https://localhost:5173 — the page renders the shared UI component an
 npx nx run-many -t lint typecheck test build   # everything
 npx nx affected -t lint typecheck test build   # only what changed (also runs on pre-push)
 npx nx run inspector:dev                       # one app
+npm run storybook                              # @minerva/ui component workbench (https://localhost:6006)
 uv run pytest apps/email-parser                # python tests directly
 npm run lint:fix                               # biome autofix
 ```

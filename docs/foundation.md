@@ -8,6 +8,7 @@ This document records how the monorepo foundation is built and why. The product 
 - **BiomeJS** (single root `biome.json`): formatter + linter for all TS/JS/JSON — 120 columns, single quotes, 2-space indent. Per-project `lint` scripts run `biome check .`.
 - **uv workspace** (root `pyproject.toml`): single lockfile and venv for all Python projects; `ruff` (lint + format, 120 cols, bandit security rules) and `mypy --strict`.
 - **Vitest everywhere** for TS (jsdom for frontends, SWC transform for NestJS decorators); **pytest** for Python (`--import-mode=importlib`).
+- **Storybook 10** (`@storybook/react-vite`, docs + a11y addons, telemetry disabled) lives in `libs/ui` so shared components are developed stateless in isolation, then imported by the apps. `npm run storybook` serves it on https://localhost:6006 (mkcert certs); `nx run @minerva/ui:build-storybook` builds the static workbench (Nx-cached, verified in `ci-libs`). New `libs/ui` components should ship with a `*.stories.tsx` next to the component.
 - **Husky**: pre-commit → lint-staged (Biome/Ruff on staged files); pre-push → `nx affected -t lint typecheck test build`.
 - Python projects integrate with Nx through `project.json` run-commands (no third-party Nx plugins), so caching and `affected` cover them too.
 

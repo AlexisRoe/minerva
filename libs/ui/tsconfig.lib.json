@@ -12,6 +12,9 @@
   "exclude": [
     "out-tsc",
     "dist",
+    ".storybook",
+    "**/*.stories.ts",
+    "**/*.stories.tsx",
     "**/*.spec.ts",
     "**/*.test.ts",
     "**/*.spec.tsx",

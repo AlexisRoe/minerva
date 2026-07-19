@@ -73,6 +73,11 @@
     "lint": {
       "cache": true,
       "inputs": ["default"]
+    },
+    "build-storybook": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "outputs": ["{projectRoot}/storybook-static"]
     }
   },
   "analytics": false,
