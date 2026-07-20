@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
-    "@babel/preset-react": "7.29.7",
+    "@babel/preset-react": "8.0.1",
     "@biomejs/biome": "2.5.4",
     "@nestjs/schematics": "11.1.0",
     "@nestjs/testing": "11.1.28",
