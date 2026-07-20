@@ -39,7 +39,7 @@
     "@babel/core": "7.29.7",
     "@babel/preset-react": "7.29.7",
     "@biomejs/biome": "2.5.4",
-    "@nestjs/schematics": "11.0.0",
+    "@nestjs/schematics": "11.1.0",
     "@nestjs/testing": "11.1.28",
     "@nx/js": "23.1.0",
     "@nx/nest": "23.1.0",
@@ -63,6 +63,7 @@
     "@vitejs/plugin-react": "6.0.3",
     "@vitest/coverage-v8": "4.1.10",
     "@vitest/ui": "4.1.10",
+    "better-npm-audit": "3.11.0",
     "husky": "9.1.7",
     "jiti": "2.7.0",
     "jsdom": "27.1.0",
@@ -76,7 +77,7 @@
     "vitest": "4.1.10",
     "webpack": "5.108.4",
     "webpack-cli": "7.2.1",
-    "webpack-dev-server": "6.0.0"
+    "webpack-dev-server": "5.2.6"
   },
   "nx": {
     "includedScripts": []

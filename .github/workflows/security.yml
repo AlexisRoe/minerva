@@ -22,7 +22,18 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
-      - run: npm audit --audit-level=high
+      - run: npm ci
+      # GHSA-92pp-h63x-v22m (@hono/node-server, moderate): only reachable via prisma's
+      # `prisma dev` local-Postgres CLI tooling (@prisma/dev), not at runtime. Prisma has
+      # already fixed this in @prisma/dev@0.24.10+, but no stable `prisma` release pins it
+      # yet (only 7.9.0-dev prereleases). Drop this exclusion once prisma bumps past 7.8.0.
+      #
+      # GHSA-w5hq-g745-h8pq (uuid, moderate): pulled in by webpack-dev-server -> sockjs,
+      # dev-server-only tooling not exposed at runtime. sockjs@0.3.24 (latest) still hard-pins
+      # uuid@^8.3.2 with no fixed release, and the only npm-suggested fix is downgrading
+      # @nx/webpack to a much older major version. Drop this exclusion once sockjs (or
+      # webpack-dev-server dropping it) ships a fix, or once Nx supports webpack-dev-server@6.
+      - run: npx better-npm-audit audit --level moderate --exclude 1116281,1119441
 
   gitleaks:
     runs-on: ubuntu-latest
