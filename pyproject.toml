@@ -12,10 +12,10 @@ members = ["apps/email-parser", "apps/email-screenshot", "libs/worker-core"]
 
 [dependency-groups]
 dev = [
-    "pytest>=9.0.0",
-    "pytest-cov>=7.0.0",
-    "mypy>=1.19.0",
-    "ruff>=0.14.0",
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
+    "mypy==2.3.0",
+    "ruff==0.15.22",
 ]
 
 [tool.pytest.ini_options]

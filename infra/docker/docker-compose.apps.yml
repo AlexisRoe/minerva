@@ -69,7 +69,7 @@ services:
       - minerva
 
   nginx:
-    image: nginx:1.29-alpine
+    image: nginx:1.31.3-alpine3.24
     restart: unless-stopped
     ports:
       - '127.0.0.1:3000:3000'
