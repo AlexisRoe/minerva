@@ -1,0 +1,89 @@
+name: minerva
+
+services:
+  postgres:
+    image: postgres:18.4-alpine3.24
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?missing POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?missing POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:?missing POSTGRES_DB}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
+      MINERVA_RW_PASSWORD: ${MINERVA_RW_PASSWORD:?missing MINERVA_RW_PASSWORD}
+      MINERVA_RO_PASSWORD: ${MINERVA_RO_PASSWORD:?missing MINERVA_RO_PASSWORD}
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks:
+      - minerva
+
+  valkey:
+    image: valkey/valkey:9.1.0-alpine3.23
+    restart: unless-stopped
+    command:
+      - valkey-server
+      - --requirepass
+      - ${VALKEY_PASSWORD:?missing VALKEY_PASSWORD}
+      - --appendonly
+      - 'yes'
+    environment:
+      VALKEY_PASSWORD: ${VALKEY_PASSWORD}
+    ports:
+      - '127.0.0.1:6379:6379'
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'valkey-cli --no-auth-warning -a $${VALKEY_PASSWORD} ping | grep -q PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks:
+      - minerva
+
+  localstack:
+    image: localstack/localstack:4.14.0
+    restart: unless-stopped
+    environment:
+      SERVICES: s3
+      AWS_DEFAULT_REGION: ${AWS_REGION:-eu-central-1}
+      S3_BUCKET: ${S3_BUCKET:?missing S3_BUCKET}
+    ports:
+      - '127.0.0.1:4566:4566'
+    volumes:
+      - ./localstack-init:/etc/localstack/init/ready.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -sf http://localhost:4566/_localstack/health']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - minerva
+
+  camo:
+    image: ghcr.io/cactus/go-camo:v2.7.5
+    restart: unless-stopped
+    environment:
+      GOCAMO_HMAC: ${CAMO_HMAC_KEY:?missing CAMO_HMAC_KEY}
+    command:
+      - --listen=0.0.0.0:8080
+      - --max-size=5120
+      - --timeout=10s
+    ports:
+      - '127.0.0.1:8443:8080'
+    networks:
+      - minerva
+
+volumes:
+  postgres-data:
+  valkey-data:
+
+networks:
+  minerva:
+    name: minerva

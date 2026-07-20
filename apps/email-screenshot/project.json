@@ -1,0 +1,41 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "email-screenshot",
+  "projectType": "application",
+  "sourceRoot": "apps/email-screenshot/src",
+  "tags": ["lang:python"],
+  "implicitDependencies": ["worker-core"],
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "continuous": true,
+      "options": {
+        "command": "uv run --package email-screenshot python -m email_screenshot"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/uv.lock", "{workspaceRoot}/pyproject.toml", "^default"],
+      "options": {
+        "command": "uv run pytest apps/email-screenshot"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/ruff.toml"],
+      "options": {
+        "command": "uv run ruff check apps/email-screenshot && uv run ruff format --check apps/email-screenshot"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/uv.lock", "{workspaceRoot}/pyproject.toml", "^default"],
+      "options": {
+        "command": "uv run mypy apps/email-screenshot/src"
+      }
+    }
+  }
+}
