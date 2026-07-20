@@ -27,13 +27,14 @@
     "stack:down": "docker compose -f infra/docker/docker-compose.yml -f infra/docker/docker-compose.apps.yml --env-file .env down",
     "stack:logs": "docker compose -f infra/docker/docker-compose.yml -f infra/docker/docker-compose.apps.yml --env-file .env logs -f",
     "dev": "nx run-many -t dev serve --parallel 10",
-    "storybook": "nx run @minerva/ui:storybook",
+    "start:storybook": "nx run @minerva/ui:storybook",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "typecheck": "nx run-many -t typecheck",
     "test": "nx run-many -t test",
-    "build": "nx run-many -t build"
+    "build": "nx run-many -t build",
+    "reset": "npx nx reset"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
