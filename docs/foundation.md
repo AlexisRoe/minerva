@@ -22,6 +22,9 @@ Two compose modes, both driven from `.env`:
 
 - **Infra only** (`npm run infra:up|down|logs`): postgres, valkey, localstack, go-camo — for host-based `npm run dev`. HTTP services are plain http on `127.0.0.1` (camo `8443`, localstack `4566`).
 - **Full stack** (`npm run stack:up|down|logs`): everything above plus the API, both Python workers, and an nginx reverse proxy (`infra/docker/docker-compose.apps.yml` overlaid on the base file). nginx terminates TLS with the mkcert certs (`infra/docker/nginx/nginx.conf`) and serves per-port (the certificate only covers `localhost`): API `https://localhost:3000`, go-camo `https://localhost:8443`, localstack `https://localhost:4566`. The overlay unpublishes camo/localstack's plain-http host ports (`!override`) so nginx owns them, and rewires the app containers to the in-network service hostnames. `stack:up` builds the images (`--build`) and waits for healthchecks (`--wait`).
+- **Caddy was considered and rejected** as the TLS terminator (a reference implementation used it). It would need the same per-port server-block structure as nginx here, since the mkcert cert only covers `localhost` rather than a wildcard hostname — no complexity win — and switching would undo the deliberate move away from the API terminating its own TLS, for no functional gain.
+
+LocalStack's data is intentionally ephemeral: community LocalStack only persists to disk when `PERSISTENCE=1` is set, which it isn't here, so no volume is mounted for it. `infra/docker/localstack-init/01-create-bucket.sh` idempotently recreates the bucket and its public-access-block policy on every start instead.
 
 ## Security decisions
 

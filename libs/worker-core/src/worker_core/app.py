@@ -21,7 +21,13 @@ class WorkerApp:
         self.logger = configure_logging(name)
         # redis-py 8 defaults socket_timeout to 5s; it must exceed the XREADGROUP block
         # window or every idle blocking read raises TimeoutError and kills the worker.
-        self._client = Redis.from_url(self.settings.valkey_url, socket_timeout=self.settings.block_ms / 1000 + 5)
+        # protocol=2 (RESP2) is required too: redis-py 8 defaults to RESP3, which
+        # auto-enables an Enterprise-only "maintenance notifications" handshake that
+        # Valkey doesn't implement and that leaves the connection's effective read
+        # timeout at redis-py's own 5s default instead of the value configured here.
+        self._client = Redis.from_url(
+            self.settings.valkey_url, socket_timeout=self.settings.block_ms / 1000 + 5, protocol=2
+        )
         self._consumer = StreamConsumer(
             self._client,
             stream=self.settings.event_stream,

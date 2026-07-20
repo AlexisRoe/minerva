@@ -57,7 +57,6 @@ services:
     ports:
       - '127.0.0.1:4566:4566'
     volumes:
-      - localstack-data:/var/lib/localstack
       - ./localstack-init:/etc/localstack/init/ready.d:ro
     healthcheck:
       test: ['CMD-SHELL', 'curl -sf http://localhost:4566/_localstack/health']
@@ -84,7 +83,6 @@ services:
 volumes:
   postgres-data:
   valkey-data:
-  localstack-data:
 
 networks:
   minerva:
