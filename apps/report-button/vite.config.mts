@@ -1,4 +1,6 @@
 /// <reference types='vitest' />
+
+import { resolve } from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -50,6 +52,12 @@ export default defineConfig(() => ({
     reportCompressedSize: true,
     commonjsOptions: {
       transformMixedEsModules: true,
+    },
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        authDialog: resolve(__dirname, 'auth-dialog.html'),
+      },
     },
   },
   test: {
