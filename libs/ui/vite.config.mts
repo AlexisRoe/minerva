@@ -1,10 +1,11 @@
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 export default defineConfig(() => ({
   root: __dirname,
   cacheDir: '../../node_modules/.vite/libs/ui',
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   test: {
     name: '@minerva/ui',
     watch: false,

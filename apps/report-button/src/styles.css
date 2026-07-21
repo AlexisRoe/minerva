@@ -1,3 +1,5 @@
+@import "@minerva/ui/styles.css";
+
 @font-face {
   font-family: "Inter";
   src: url("/fonts/Inter-VariableFont.ttf") format("truetype");
