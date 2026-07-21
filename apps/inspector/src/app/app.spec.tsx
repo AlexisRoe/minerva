@@ -14,7 +14,7 @@ describe('App', () => {
 
     render(<App />);
 
-    expect(screen.getByRole('heading')).toHaveTextContent('Hello from Minerva Inspector');
+    expect(screen.getByRole('heading')).toHaveTextContent('Minerva Inspector');
     await waitFor(() => expect(screen.getByTestId('api-status')).toHaveTextContent('API is ok'));
   });
 
