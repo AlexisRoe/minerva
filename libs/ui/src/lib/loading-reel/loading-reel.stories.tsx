@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { LoadingReel } from './loading-reel';
 
 const meta = {
-  title: 'Components/LoadingReel',
+  title: 'Reporting Button/Components/LoadingReel',
   component: LoadingReel,
   tags: ['autodocs'],
   parameters: {
