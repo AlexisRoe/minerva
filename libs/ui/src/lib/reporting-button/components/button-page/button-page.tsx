@@ -82,7 +82,7 @@ function ButtonPageContent({ children, centered = false, className, ...props }: 
         )}
         {...props}
       >
-        <div className={cn(fullscreen && '-translate-y-[45px]')}>{children}</div>
+        <div className={cn(!isCentered && 'flex h-full flex-col', fullscreen && '-translate-y-[45px]')}>{children}</div>
       </Card>
     </div>
   );
