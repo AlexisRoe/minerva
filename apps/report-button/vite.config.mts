@@ -35,6 +35,7 @@ export default defineConfig(() => ({
       input: {
         main: resolve(__dirname, 'index.html'),
         authDialog: resolve(__dirname, 'auth-dialog.html'),
+        support: resolve(__dirname, 'support.html'),
       },
     },
   },

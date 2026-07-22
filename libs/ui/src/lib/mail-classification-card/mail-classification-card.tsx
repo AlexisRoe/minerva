@@ -3,7 +3,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { Card, CardDescription, CardTitle } from '../card/card';
 import { cn } from '../utils/cn';
 
-const variantIcons = {
+export const variantIcons = {
   suspicious: IconMailExclamation,
   spam: IconMailFast,
 } as const;
