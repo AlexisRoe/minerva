@@ -51,3 +51,8 @@ export function CardFooter({ className, ...props }: ComponentProps<'div'>) {
     <div data-slot="card-footer" className={cn('flex items-center px-6 [.border-t]:pt-6', className)} {...props} />
   );
 }
+
+/** Stacks `Card`s vertically with a consistent gap, stretching each to the group's full width. */
+export function CardGroup({ className, ...props }: ComponentProps<'div'>) {
+  return <div data-slot="card-group" className={cn('flex w-full flex-col gap-4 [&>*]:w-full', className)} {...props} />;
+}

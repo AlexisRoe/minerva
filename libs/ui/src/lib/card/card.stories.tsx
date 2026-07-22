@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button } from '../button/button';
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card';
+import { MailClassificationCard } from '../mail-classification-card/mail-classification-card';
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardGroup, CardHeader, CardTitle } from './card';
 
 const meta = {
   title: 'General/Components/Card',
@@ -33,5 +34,19 @@ export const Default: Story = {
         <Button className="w-full">View full report</Button>
       </CardFooter>
     </Card>
+  ),
+};
+
+/** `CardGroup` stacks cards vertically with a consistent gap, stretching each to the group's full width. */
+export const Group: Story = {
+  render: () => (
+    <CardGroup className="w-96">
+      <MailClassificationCard
+        variant="suspicious"
+        title="Suspicious"
+        description="Phishing attempt, impersonation, malicious link or attachment"
+      />
+      <MailClassificationCard variant="spam" title="Spam" description="Unwanted marketing or junk mail" />
+    </CardGroup>
   ),
 };
