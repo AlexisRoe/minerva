@@ -1,9 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactNode } from 'react';
-import { ErrorView } from '../error-view/error-view';
-import { LoadingReel } from '../loading-reel/loading-reel';
-import { NotOutlookEnvironment } from '../not-outlook-environment/not-outlook-environment';
-import { ReportConfirmationView } from '../report-confirmation-view/report-confirmation-view';
 import { ButtonPage } from './button-page';
 
 /**
@@ -63,74 +59,6 @@ export const Explained: Story = {
           <p>This is ButtonPage.Content. It fills the remaining space below ButtonPage.Header.</p>
           <p>Toggle `fullscreen` on ButtonPage to see it center and shift up by 45px.</p>
         </div>
-      </ButtonPage.Content>
-    </ButtonPage>
-  ),
-};
-
-/** ButtonPage rendered fullscreen, with ButtonPage.Content centered around a LoadingReel — a typical loading screen. */
-export const LoadingView: Story = {
-  render: () => (
-    <ButtonPage fullscreen>
-      <ButtonPage.Header />
-      <ButtonPage.Content>
-        <LoadingReel />
-      </ButtonPage.Content>
-    </ButtonPage>
-  ),
-};
-
-/** ButtonPage rendered fullscreen, with ButtonPage.Content centered around a NotOutlookEnvironment message — shown when the add-in is opened outside of Outlook. */
-export const NotOutlookEnvironmentView: Story = {
-  render: () => (
-    <ButtonPage fullscreen>
-      <ButtonPage.Header />
-      <ButtonPage.Content>
-        <NotOutlookEnvironment
-          title="Not running in Outlook"
-          description="Open this add-in from within Outlook to submit a report."
-        />
-      </ButtonPage.Content>
-    </ButtonPage>
-  ),
-};
-
-/** ButtonPage rendered fullscreen, with ButtonPage.Content centered around an ErrorView — shown when an unrecoverable error occurs. */
-export const ErrorState: Story = {
-  render: () => (
-    <ButtonPage fullscreen>
-      <ButtonPage.Header />
-      <ButtonPage.Content>
-        <ErrorView
-          title="Something went wrong"
-          description="We couldn't submit your report. Please try again."
-          id="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-          errorCode="ERR_500"
-          buttonText="Try again"
-          onButtonClick={() => console.log('Try again clicked')}
-        />
-      </ButtonPage.Content>
-    </ButtonPage>
-  ),
-};
-
-/** ButtonPage rendered fullscreen, with ButtonPage.Content centered around a ReportConfirmationView — shown after a report has been submitted. */
-export const ReportConfirmationState: Story = {
-  render: () => (
-    <ButtonPage>
-      <ButtonPage.Header />
-      <ButtonPage.Content>
-        <ReportConfirmationView
-          title="This was a simulation"
-          description="This message was a phishing simulation sent by your security team to test awareness. Thanks for reporting it — no further action is needed."
-          statusMessage="This email has been moved to your Spam folder."
-          howToHeading="What to do now"
-          howToItems={[
-            "Don't click any links or open attachments from this sender.",
-            "Don't reply to or forward the message to others.",
-            'If you already interacted with it, contact the Security Team right away.',
-          ]}
-        />
       </ButtonPage.Content>
     </ButtonPage>
   ),
