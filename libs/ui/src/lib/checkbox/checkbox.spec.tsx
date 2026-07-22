@@ -8,7 +8,7 @@ describe('Checkbox', () => {
     render(<Checkbox aria-label="Accept terms" />);
 
     expect(screen.getByRole('checkbox')).toHaveAttribute('aria-checked', 'false');
-    expect(screen.queryByRole('checkbox').querySelector('svg')).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox').querySelector('svg')).not.toBeInTheDocument();
   });
 
   it('calls onCheckedChange with true when ticked', async () => {

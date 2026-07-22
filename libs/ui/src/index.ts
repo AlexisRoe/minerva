@@ -11,6 +11,7 @@ export * from './lib/loading-reel/loading-reel';
 export * from './lib/mail-classification-card/mail-classification-card';
 export * from './lib/not-outlook-environment/not-outlook-environment';
 export * from './lib/report-reason-list/report-reason-list';
+export * from './lib/reporting-feedback-drawer/reporting-feedback-drawer';
 export * from './lib/reporting-header/reporting-header';
 export * from './lib/section-header/section-header';
 export * from './lib/textarea/textarea';
