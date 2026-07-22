@@ -3,7 +3,7 @@ import { STEP_TRANSLATIONS } from './loading-reel.constants';
 import styles from './loading-reel.module.css';
 import { sortStepsWithMixingLanguages } from './loading-reel.util';
 
-const ITEM_HEIGHT_PX = 44;
+const ITEM_HEIGHT_PX = 52;
 const VISIBLE_ITEMS = 3;
 const TRANSITION_MS = 500;
 const DEFAULT_INTERNAL_IN_MS = 1800;
@@ -89,7 +89,7 @@ export function LoadingReel({
               className={index === current ? styles.itemActive : styles.item}
               style={{ height: ITEM_HEIGHT_PX }}
             >
-              {step}
+              <span className={styles.itemText}>{step}</span>
             </div>
           ))}
         </div>

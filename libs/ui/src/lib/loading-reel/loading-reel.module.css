@@ -29,11 +29,21 @@
   justify-content: center;
   text-align: center;
   font-size: 17px;
-  white-space: nowrap;
   transition:
     color 0.4s ease,
     font-weight 0.4s ease,
     opacity 0.4s ease;
+}
+
+.itemText {
+  max-width: 75%;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  line-height: 1.1;
+  word-break: break-word;
 }
 
 .item {
