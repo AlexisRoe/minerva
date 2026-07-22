@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactNode } from 'react';
+import { ErrorView } from '../error-view/error-view';
 import { LoadingReel } from '../loading-reel/loading-reel';
 import { NotOutlookEnvironment } from '../not-outlook-environment/not-outlook-environment';
 import { ButtonPage } from './button-page';
@@ -87,6 +88,25 @@ export const NotOutlookEnvironmentView: Story = {
         <NotOutlookEnvironment
           title="Not running in Outlook"
           description="Open this add-in from within Outlook to submit a report."
+        />
+      </ButtonPage.Content>
+    </ButtonPage>
+  ),
+};
+
+/** ButtonPage rendered fullscreen, with ButtonPage.Content centered around an ErrorView — shown when an unrecoverable error occurs. */
+export const ErrorState: Story = {
+  render: () => (
+    <ButtonPage fullscreen>
+      <ButtonPage.Header />
+      <ButtonPage.Content>
+        <ErrorView
+          title="Something went wrong"
+          description="We couldn't submit your report. Please try again."
+          id="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          errorCode="ERR_500"
+          buttonText="Try again"
+          onButtonClick={() => console.log('Try again clicked')}
         />
       </ButtonPage.Content>
     </ButtonPage>
