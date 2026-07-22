@@ -1,0 +1,112 @@
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { ReactNode } from 'react';
+import { ButtonPage } from '../components/button-page/button-page';
+import { MailClassificationCard } from '../components/mail-classification-card/mail-classification-card';
+import type { ReportReason } from '../components/report-reason-list/report-reason-list';
+import { ReportingFeedbackDrawer } from '../components/reporting-feedback-drawer/reporting-feedback-drawer';
+import { SectionHeader } from '../components/section-header/section-header';
+
+/**
+ * Storybook-only wrapper that frames `ButtonPage` the way it actually appears
+ * in production: a fixed-size widget (380x820) with a white background,
+ * centered on a light grey page. `ButtonPage` itself renders `fixed inset-0`,
+ * so `contain: layout` on the frame is required to make it the containing
+ * block for `ButtonPage`'s fixed positioning instead of the browser viewport.
+ */
+function WidgetFrame({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-neutral-200">
+      <div className="relative h-[820px] w-[380px] overflow-hidden bg-white [contain:layout]">{children}</div>
+    </div>
+  );
+}
+
+const suspiciousReasons: ReportReason[] = [
+  { id: 'suspicious-link', label: 'Suspicious link or website' },
+  { id: 'unusual-attachment', label: 'Unexpected or unusual attachment' },
+  { id: 'impersonation', label: 'Impersonates a person or company' },
+  { id: 'credentials-request', label: 'Asks for credentials, payment or personal info' },
+  { id: 'urgency', label: 'Creates urgency or pressure to act fast' },
+  { id: 'other', label: 'Something else feels wrong' },
+];
+
+const spamReasons: ReportReason[] = [
+  { id: 'unsolicited', label: 'Unsolicited advertising or promotion' },
+  { id: 'repeated', label: 'Sent repeatedly from the same sender' },
+  { id: 'irrelevant', label: 'Not relevant to me or my role' },
+];
+
+const meta = {
+  title: 'Reporting Button/Views/ReportPage',
+  component: ButtonPage,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+  },
+  decorators: [
+    (Story) => (
+      <WidgetFrame>
+        <Story />
+      </WidgetFrame>
+    ),
+  ],
+} satisfies Meta<typeof ButtonPage>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+/**
+ * ButtonPage rendered fullscreen, with ButtonPage.Content showing the report-selection
+ * screen — a SectionHeader above two MailClassificationCards. Each card's action opens a
+ * ReportingFeedbackDrawer (Suspicious or Spam) to collect a reason before submitting; submit
+ * just logs the collected values to the console.
+ */
+export const ReportPage: Story = {
+  render: () => (
+    <ButtonPage>
+      <ButtonPage.Header />
+      <ButtonPage.Content>
+        <div className="flex flex-col gap-6 p-6 pt-8">
+          <SectionHeader
+            title="Report this email"
+            description="Help keep your organization safe. Choose the option that best matches this message — we'll take it from there."
+          />
+          <div className="flex flex-col gap-4">
+            <MailClassificationCard
+              variant="suspicious"
+              title="Suspicious"
+              description="Phishing attempt, impersonation, malicious link or attachment"
+              action={
+                <ReportingFeedbackDrawer
+                  type="suspicious"
+                  title="What makes this suspicious?"
+                  reasons={suspiciousReasons}
+                  textareaPlaceholder="Add any details that might help (optional)"
+                  primaryButtonText="Report as Suspicious"
+                  outlineButtonText="Cancel"
+                  onPrimaryAction={(values) => console.log('Report submitted', values)}
+                />
+              }
+            />
+            <MailClassificationCard
+              variant="spam"
+              title="Spam"
+              description="Unwanted marketing or junk mail"
+              action={
+                <ReportingFeedbackDrawer
+                  type="spam"
+                  title="What makes this spam?"
+                  reasons={spamReasons}
+                  textareaPlaceholder="Add any details that might help (optional)"
+                  primaryButtonText="Report as Spam"
+                  outlineButtonText="Cancel"
+                  onPrimaryAction={(values) => console.log('Report submitted', values)}
+                />
+              }
+            />
+          </div>
+        </div>
+      </ButtonPage.Content>
+    </ButtonPage>
+  ),
+};
