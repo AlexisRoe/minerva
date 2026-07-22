@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactNode } from 'react';
+import { CardGroup } from '../../base/components/card/card';
 import { ButtonPage } from '../components/button-page/button-page';
 import { MailClassificationCard } from '../components/mail-classification-card/mail-classification-card';
 import type { ReportReason } from '../components/report-reason-list/report-reason-list';
@@ -66,16 +67,17 @@ export const ReportPage: Story = {
     <ButtonPage>
       <ButtonPage.Header />
       <ButtonPage.Content>
-        <div className="flex flex-col gap-6 p-6 pt-8">
+        <div className="flex h-full flex-col gap-6 p-6 pt-8">
           <SectionHeader
             title="Report this email"
             description="Help keep your organization safe. Choose the option that best matches this message — we'll take it from there."
           />
-          <div className="flex flex-col gap-4">
+          <CardGroup className="flex-1">
             <MailClassificationCard
               variant="suspicious"
               title="Suspicious"
               description="Phishing attempt, impersonation, malicious link or attachment"
+              className="flex-1"
               action={
                 <ReportingFeedbackDrawer
                   type="suspicious"
@@ -92,6 +94,7 @@ export const ReportPage: Story = {
               variant="spam"
               title="Spam"
               description="Unwanted marketing or junk mail"
+              className="flex-1"
               action={
                 <ReportingFeedbackDrawer
                   type="spam"
@@ -104,7 +107,7 @@ export const ReportPage: Story = {
                 />
               }
             />
-          </div>
+          </CardGroup>
         </div>
       </ButtonPage.Content>
     </ButtonPage>

@@ -32,7 +32,7 @@ export function MailClassificationCard({
 
   return (
     <Card data-slot="mail-classification-card" className={cn('flex-row items-center gap-4 p-4', className)} {...props}>
-      <Icon className="size-24 shrink-0" stroke={1.5} />
+      <Icon className="size-18 shrink-0" stroke={1.5} />
       <div className="flex flex-1 flex-col gap-1">
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
