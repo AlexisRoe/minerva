@@ -8,10 +8,15 @@ Run `nx test @minerva/ui` to execute the unit tests via [Vitest](https://vitest.
 
 ## Adding a shadcn component
 
-Components under `src/lib/*` (button, card, empty, drawer, ...) are adapted from
-[shadcn](https://ui.shadcn.com/) rather than written from scratch. This repo has no
+Components under `src/lib/base/components/*` (button, card, empty, drawer, ...) are adapted
+from [shadcn](https://ui.shadcn.com/) rather than written from scratch. This repo has no
 `components.json`/path aliases of its own, so the shadcn CLI can't target it directly —
 pull components into a throwaway Vite project first, then relocate the files here.
+
+Components are grouped into two top-level categories under `src/lib/`:
+- `base/components/<name>/` — generic, shadcn-style primitives (Button, Card, Drawer, ...)
+- `reporting-button/components/<name>/` — components specific to the reporting-button
+  add-in flow (ReportingFeedbackDrawer, MailClassificationCard, ...)
 
 1. Scaffold a scratch project somewhere outside the repo (e.g. in a temp/scratchpad dir):
 
@@ -46,8 +51,8 @@ pull components into a throwaway Vite project first, then relocate the files her
    `@` folder if `baseUrl` isn't picked up — check both `src/components/ui` and `./@/components/ui`).
 
 5. Relocate each component into this repo's per-component folder convention
-   (`src/lib/<name>/<name>.tsx` + `<name>.stories.tsx`), adapting as you copy:
-   - `import { cn } from "@/lib/utils"` → `import { cn } from '../utils/cn';`
+   (`src/lib/base/components/<name>/<name>.tsx` + `<name>.stories.tsx`), adapting as you copy:
+   - `import { cn } from "@/lib/utils"` → `import { cn } from '../../../utils/cn';`
    - Prefer named function declarations (`export function X(...)`) over the CLI's
      `function X(...) { ... }\nexport { X }` split, to match existing components.
    - Swap double quotes for single quotes, add semicolons (Biome enforces this — run
@@ -65,7 +70,9 @@ pull components into a throwaway Vite project first, then relocate the files her
    project's `package.json` diff — e.g. `vaul` for Drawer, `@radix-ui/react-*` packages)
    into the **root** `package.json`, not `libs/ui/package.json`.
 
-8. Export the new component(s) from `src/index.ts`, then verify:
+8. Export the new component(s) from `src/index.ts` as explicit named exports
+   (`export { X } from '...'`, plus `export type { XProps } from '...'` for types) —
+   never `export * from '...'`. Then verify:
 
    ```bash
    npx tsc --noEmit -p libs/ui/tsconfig.json
