@@ -5,4 +5,5 @@ export * from './lib/card/card';
 export * from './lib/drawer/drawer';
 export * from './lib/empty/empty';
 export * from './lib/loading-reel/loading-reel';
+export * from './lib/not-outlook-environment/not-outlook-environment';
 export * from './lib/utils/cn';

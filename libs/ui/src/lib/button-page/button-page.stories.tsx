@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactNode } from 'react';
 import { LoadingReel } from '../loading-reel/loading-reel';
+import { NotOutlookEnvironment } from '../not-outlook-environment/not-outlook-environment';
 import { ButtonPage } from './button-page';
 
 /**
@@ -72,6 +73,21 @@ export const LoadingView: Story = {
       <ButtonPage.Header />
       <ButtonPage.Content>
         <LoadingReel />
+      </ButtonPage.Content>
+    </ButtonPage>
+  ),
+};
+
+/** ButtonPage rendered fullscreen, with ButtonPage.Content centered around a NotOutlookEnvironment message — shown when the add-in is opened outside of Outlook. */
+export const NotOutlookEnvironmentView: Story = {
+  render: () => (
+    <ButtonPage fullscreen>
+      <ButtonPage.Header />
+      <ButtonPage.Content>
+        <NotOutlookEnvironment
+          title="Not running in Outlook"
+          description="Open this add-in from within Outlook to submit a report."
+        />
       </ButtonPage.Content>
     </ButtonPage>
   ),
