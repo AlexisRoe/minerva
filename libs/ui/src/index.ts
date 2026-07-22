@@ -7,4 +7,5 @@ export * from './lib/empty/empty';
 export * from './lib/error-view/error-view';
 export * from './lib/loading-reel/loading-reel';
 export * from './lib/not-outlook-environment/not-outlook-environment';
+export * from './lib/section-header/section-header';
 export * from './lib/utils/cn';
