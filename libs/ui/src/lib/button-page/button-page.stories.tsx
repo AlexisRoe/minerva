@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { ErrorView } from '../error-view/error-view';
 import { LoadingReel } from '../loading-reel/loading-reel';
 import { NotOutlookEnvironment } from '../not-outlook-environment/not-outlook-environment';
+import { ReportConfirmationView } from '../report-confirmation-view/report-confirmation-view';
 import { ButtonPage } from './button-page';
 
 /**
@@ -107,6 +108,28 @@ export const ErrorState: Story = {
           errorCode="ERR_500"
           buttonText="Try again"
           onButtonClick={() => console.log('Try again clicked')}
+        />
+      </ButtonPage.Content>
+    </ButtonPage>
+  ),
+};
+
+/** ButtonPage rendered fullscreen, with ButtonPage.Content centered around a ReportConfirmationView — shown after a report has been submitted. */
+export const ReportConfirmationState: Story = {
+  render: () => (
+    <ButtonPage>
+      <ButtonPage.Header />
+      <ButtonPage.Content>
+        <ReportConfirmationView
+          title="This was a simulation"
+          description="This message was a phishing simulation sent by your security team to test awareness. Thanks for reporting it — no further action is needed."
+          statusMessage="This email has been moved to your Spam folder."
+          howToHeading="What to do now"
+          howToItems={[
+            "Don't click any links or open attachments from this sender.",
+            "Don't reply to or forward the message to others.",
+            'If you already interacted with it, contact the Security Team right away.',
+          ]}
         />
       </ButtonPage.Content>
     </ButtonPage>
