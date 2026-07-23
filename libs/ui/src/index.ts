@@ -47,6 +47,10 @@ export type { ErrorViewProps } from './lib/reporting-button/components/error-vie
 export { ErrorView } from './lib/reporting-button/components/error-view/error-view';
 export type { HowToListProps } from './lib/reporting-button/components/how-to-list/how-to-list';
 export { HowToList } from './lib/reporting-button/components/how-to-list/how-to-list';
+export type { InformationItemProps } from './lib/reporting-button/components/information-item/information-item';
+export { InformationItem } from './lib/reporting-button/components/information-item/information-item';
+export type { InformationSectionProps } from './lib/reporting-button/components/information-section/information-section';
+export { InformationSection } from './lib/reporting-button/components/information-section/information-section';
 export type { LoadingReelProps } from './lib/reporting-button/components/loading-reel/loading-reel';
 export { LoadingReel } from './lib/reporting-button/components/loading-reel/loading-reel';
 export type { MailClassificationCardProps } from './lib/reporting-button/components/mail-classification-card/mail-classification-card';
@@ -72,6 +76,8 @@ export type {
 export { ReportingFeedbackDrawer } from './lib/reporting-button/components/reporting-feedback-drawer/reporting-feedback-drawer';
 export type { ReportingHeaderProps } from './lib/reporting-button/components/reporting-header/reporting-header';
 export { ReportingHeader } from './lib/reporting-button/components/reporting-header/reporting-header';
+export type { SatelliteDrawerProps } from './lib/reporting-button/components/satellite-drawer/satellite-drawer';
+export { SatelliteDrawer } from './lib/reporting-button/components/satellite-drawer/satellite-drawer';
 export type { SectionHeaderProps } from './lib/reporting-button/components/section-header/section-header';
 export { SectionHeader } from './lib/reporting-button/components/section-header/section-header';
 

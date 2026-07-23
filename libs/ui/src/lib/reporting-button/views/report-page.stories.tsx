@@ -5,6 +5,7 @@ import { ButtonPage } from '../components/button-page/button-page';
 import { MailClassificationCard } from '../components/mail-classification-card/mail-classification-card';
 import type { ReportReason } from '../components/report-reason-list/report-reason-list';
 import { ReportingFeedbackDrawer } from '../components/reporting-feedback-drawer/reporting-feedback-drawer';
+import { SatelliteDrawer } from '../components/satellite-drawer/satellite-drawer';
 import { SectionHeader } from '../components/section-header/section-header';
 
 /**
@@ -65,7 +66,13 @@ type Story = StoryObj<typeof meta>;
 export const ReportPage: Story = {
   render: () => (
     <ButtonPage>
-      <ButtonPage.Header />
+      <ButtonPage.Header
+        right={
+          <SatelliteDrawer triggerLabel="Close" primaryButtonText="Close">
+            <p>Test</p>
+          </SatelliteDrawer>
+        }
+      />
       <ButtonPage.Content>
         <SectionHeader
           title="Report this email"
