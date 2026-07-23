@@ -23,17 +23,23 @@ jobs:
         with:
           node-version-file: .nvmrc
       - run: npm ci
-      # GHSA-92pp-h63x-v22m (@hono/node-server, moderate): only reachable via prisma's
-      # `prisma dev` local-Postgres CLI tooling (@prisma/dev), not at runtime. Prisma has
-      # already fixed this in @prisma/dev@0.24.10+, but no stable `prisma` release pins it
-      # yet (only 7.9.0-dev prereleases). Drop this exclusion once prisma bumps past 7.8.0.
-      #
       # GHSA-w5hq-g745-h8pq (uuid, moderate): pulled in by webpack-dev-server -> sockjs,
       # dev-server-only tooling not exposed at runtime. sockjs@0.3.24 (latest) still hard-pins
       # uuid@^8.3.2 with no fixed release, and the only npm-suggested fix is downgrading
       # @nx/webpack to a much older major version. Drop this exclusion once sockjs (or
       # webpack-dev-server dropping it) ships a fix, or once Nx supports webpack-dev-server@6.
-      - run: npx better-npm-audit audit --level moderate --exclude 1116281,1119441
+      #
+      # axios (moderate/high, GHSA-42h9-826w-cgv3 and 9 related advisories): nx@23.1.0 pins
+      # its own axios dependency to the exact vulnerable version 1.16.1 (fix is 1.18.0+).
+      # nx is already on its latest release (23.1.0); `npm audit fix --force` can only offer
+      # a downgrade to @nx/node@22.6.5, not an update. Drop this exclusion once Nx ships a
+      # release that bumps its pinned axios.
+      #
+      # GHSA-3jxr-9vmj-r5cp (brace-expansion, high): same story as axios above -- nx@23.1.0
+      # and several @nx/* packages pin brace-expansion to the exact vulnerable version 5.0.6
+      # (fix is 5.0.7+). No newer Nx release exists to bump to. Drop this exclusion once Nx
+      # ships a release that bumps its pinned brace-expansion.
+      - run: npx better-npm-audit audit --level moderate --exclude 1119441,1123882,1123884,1123885,1123957,1123959,1123961,1123967,1123969,1123971,1123973,1123898
 
   gitleaks:
     runs-on: ubuntu-latest
