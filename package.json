@@ -37,7 +37,7 @@
     "reset": "npx nx reset"
   },
   "devDependencies": {
-    "@babel/core": "7.29.7",
+    "@babel/core": "8.0.1",
     "@babel/preset-react": "7.29.7",
     "@biomejs/biome": "2.5.4",
     "@nestjs/schematics": "11.1.0",
