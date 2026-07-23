@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactNode } from 'react';
 import { CardGroup } from '../../base/components/card/card';
 import { ButtonPage } from '../components/button-page/button-page';
+import { InformationItem } from '../components/information-item/information-item';
+import { InformationSection } from '../components/information-section/information-section';
 import { MailClassificationCard } from '../components/mail-classification-card/mail-classification-card';
 import type { ReportReason } from '../components/report-reason-list/report-reason-list';
 import { ReportingFeedbackDrawer } from '../components/reporting-feedback-drawer/reporting-feedback-drawer';
@@ -69,7 +71,28 @@ export const ReportPage: Story = {
       <ButtonPage.Header
         right={
           <SatelliteDrawer triggerLabel="Close" primaryButtonText="Close">
-            <p>Test</p>
+            <InformationSection title="User">
+              <InformationItem label="Name" value="Jamie Keller" />
+              <InformationItem label="Email" value="jamie.keller@contoso.com" />
+              <InformationItem label="Internal ID" value="3f9a1c2e-7b4d-4e8a-9c1f-0a2b6d5e8c31" />
+            </InformationSection>
+            <InformationSection title="Email">
+              <InformationItem label="Exchange ID" value="AAMkAGI2...TAAA=" />
+              <InformationItem label="Subject" value="Urgent: Verify your account" />
+              <InformationItem label="From" value="it-support@contoso-security.net" />
+              <InformationItem label="To" value="jamie.keller@contoso.com" />
+              <InformationItem label="Received" value="Jul 23, 2026, 09:14" />
+            </InformationSection>
+            <InformationSection title="Environment">
+              <InformationItem label="Host" value="Outlook" />
+              <InformationItem label="Platform" value="OfficeOnline" />
+              <InformationItem label="Client mode" value="ReadOnly" />
+              <InformationItem label="Outlook build" value="16.0.17726.20000" />
+              <InformationItem label="Office.js version" value="1.1.104119.0" />
+              <InformationItem label="Browser / UA" value="Chrome 126 · Windows 10" />
+              <InformationItem label="Add-in version" value="Minerva 2.4.1" />
+              <InformationItem label="Locale / Timezone" value="en-US · UTC+1" />
+            </InformationSection>
           </SatelliteDrawer>
         }
       />
