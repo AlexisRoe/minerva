@@ -41,11 +41,10 @@ type Story = StoryObj<typeof meta>;
 
 /**
  * `ButtonPage` is a composite component: compose it from `ButtonPage.Header`
- * (always visible, sticky, with a built-in logo + title plus a right slot)
- * and `ButtonPage.Content` (fills the remaining space with a grey background,
- * behind a white, rounded-corner content card, optionally `centered` on both
- * axes). Toggle `fullscreen` on the root `ButtonPage` to see
- * `ButtonPage.Content` always center itself and shift 45px towards the top.
+ * (always visible, sticky, with a built-in logo + title, a divider, and a
+ * right slot) and `ButtonPage.Content` (fills the remaining space, optionally
+ * `centered` on both axes). Toggle `fullscreen` on the root `ButtonPage` to
+ * see `ButtonPage.Content` always center itself and shift 45px towards the top.
  */
 export const Explained: Story = {
   args: {

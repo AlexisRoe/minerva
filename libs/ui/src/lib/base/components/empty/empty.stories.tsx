@@ -17,7 +17,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <Empty className="w-96 border">
+    <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <IconInbox />

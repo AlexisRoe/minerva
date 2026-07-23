@@ -67,48 +67,47 @@ export const ReportPage: Story = {
     <ButtonPage>
       <ButtonPage.Header />
       <ButtonPage.Content>
-        <div className="flex h-full flex-col gap-6 p-6 pt-8">
-          <SectionHeader
-            title="Report this email"
-            description="Help keep your organization safe. Choose the option that best matches this message — we'll take it from there."
+        <SectionHeader
+          title="Report this email"
+          description="Help keep your organization safe. Choose the option that best matches this message — we'll take it from there."
+          className="mb-8"
+        />
+        <CardGroup className="flex-1">
+          <MailClassificationCard
+            variant="suspicious"
+            title="Suspicious"
+            description="Phishing attempt, impersonation, malicious link or attachment"
+            className="flex-1"
+            action={
+              <ReportingFeedbackDrawer
+                type="suspicious"
+                title="What makes this suspicious?"
+                reasons={suspiciousReasons}
+                textareaPlaceholder="Add any details that might help (optional)"
+                primaryButtonText="Report as Suspicious"
+                outlineButtonText="Cancel"
+                onPrimaryAction={(values) => console.log('Report submitted', values)}
+              />
+            }
           />
-          <CardGroup className="flex-1">
-            <MailClassificationCard
-              variant="suspicious"
-              title="Suspicious"
-              description="Phishing attempt, impersonation, malicious link or attachment"
-              className="flex-1"
-              action={
-                <ReportingFeedbackDrawer
-                  type="suspicious"
-                  title="What makes this suspicious?"
-                  reasons={suspiciousReasons}
-                  textareaPlaceholder="Add any details that might help (optional)"
-                  primaryButtonText="Report as Suspicious"
-                  outlineButtonText="Cancel"
-                  onPrimaryAction={(values) => console.log('Report submitted', values)}
-                />
-              }
-            />
-            <MailClassificationCard
-              variant="spam"
-              title="Spam"
-              description="Unwanted marketing or junk mail"
-              className="flex-1"
-              action={
-                <ReportingFeedbackDrawer
-                  type="spam"
-                  title="What makes this spam?"
-                  reasons={spamReasons}
-                  textareaPlaceholder="Add any details that might help (optional)"
-                  primaryButtonText="Report as Spam"
-                  outlineButtonText="Cancel"
-                  onPrimaryAction={(values) => console.log('Report submitted', values)}
-                />
-              }
-            />
-          </CardGroup>
-        </div>
+          <MailClassificationCard
+            variant="spam"
+            title="Spam"
+            description="Unwanted marketing or junk mail"
+            className="flex-1"
+            action={
+              <ReportingFeedbackDrawer
+                type="spam"
+                title="What makes this spam?"
+                reasons={spamReasons}
+                textareaPlaceholder="Add any details that might help (optional)"
+                primaryButtonText="Report as Spam"
+                outlineButtonText="Cancel"
+                onPrimaryAction={(values) => console.log('Report submitted', values)}
+              />
+            }
+          />
+        </CardGroup>
       </ButtonPage.Content>
     </ButtonPage>
   ),
