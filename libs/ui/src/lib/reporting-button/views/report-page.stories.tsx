@@ -58,9 +58,9 @@ type Story = StoryObj<typeof meta>;
 
 /**
  * ButtonPage rendered fullscreen, with ButtonPage.Content showing the report-selection
- * screen — a SectionHeader above two MailClassificationCards. Each card's action opens a
- * ReportingFeedbackDrawer (Suspicious or Spam) to collect a reason before submitting; submit
- * just logs the collected values to the console.
+ * screen — a SectionHeader above two MailClassificationCards. Each whole card is the trigger
+ * for a ReportingFeedbackDrawer (Suspicious or Spam) that collects a reason before submitting;
+ * submit just logs the collected values to the console.
  */
 export const ReportPage: Story = {
   render: () => (
@@ -73,37 +73,37 @@ export const ReportPage: Story = {
           className="mb-8"
         />
         <CardGroup className="flex-1">
-          <MailClassificationCard
-            variant="suspicious"
-            title="Suspicious"
-            description="Phishing attempt, impersonation, malicious link or attachment"
-            className="flex-1"
-            action={
-              <ReportingFeedbackDrawer
-                type="suspicious"
-                title="What makes this suspicious?"
-                reasons={suspiciousReasons}
-                textareaPlaceholder="Add any details that might help (optional)"
-                primaryButtonText="Report as Suspicious"
-                outlineButtonText="Cancel"
-                onPrimaryAction={(values) => console.log('Report submitted', values)}
+          <ReportingFeedbackDrawer
+            type="suspicious"
+            title="What makes this suspicious?"
+            reasons={suspiciousReasons}
+            textareaPlaceholder="Add any details that might help (optional)"
+            primaryButtonText="Report as Suspicious"
+            outlineButtonText="Cancel"
+            onPrimaryAction={(values) => console.log('Report submitted', values)}
+            trigger={
+              <MailClassificationCard
+                variant="suspicious"
+                title="Suspicious"
+                description="Phishing attempt, impersonation, malicious link or attachment"
+                className="flex-1 cursor-pointer"
               />
             }
           />
-          <MailClassificationCard
-            variant="spam"
-            title="Spam"
-            description="Unwanted marketing or junk mail"
-            className="flex-1"
-            action={
-              <ReportingFeedbackDrawer
-                type="spam"
-                title="What makes this spam?"
-                reasons={spamReasons}
-                textareaPlaceholder="Add any details that might help (optional)"
-                primaryButtonText="Report as Spam"
-                outlineButtonText="Cancel"
-                onPrimaryAction={(values) => console.log('Report submitted', values)}
+          <ReportingFeedbackDrawer
+            type="spam"
+            title="What makes this spam?"
+            reasons={spamReasons}
+            textareaPlaceholder="Add any details that might help (optional)"
+            primaryButtonText="Report as Spam"
+            outlineButtonText="Cancel"
+            onPrimaryAction={(values) => console.log('Report submitted', values)}
+            trigger={
+              <MailClassificationCard
+                variant="spam"
+                title="Spam"
+                description="Unwanted marketing or junk mail"
+                className="flex-1 cursor-pointer"
               />
             }
           />
