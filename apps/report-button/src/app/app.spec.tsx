@@ -5,7 +5,7 @@ import App from './app';
 describe('App', () => {
   it('renders the app name', () => {
     render(<App />);
-    expect(screen.getByRole('heading')).toHaveTextContent('Hello from Minerva Report Button');
+    expect(screen.getByRole('heading')).toHaveTextContent('Minerva Report Button');
   });
 
   it('publishes a hello event on click', async () => {

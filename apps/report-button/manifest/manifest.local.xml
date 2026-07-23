@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp
+    xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+    xsi:type="MailApp">
+
+  <Id>7AFD60CC-E876-49CF-BB4E-6ED97E6C699E</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Minerva</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+
+
+  <DisplayName DefaultValue="Minerva" />
+  <Description DefaultValue="Report suspicios or spam emails for further investigation and help increasing security in your company" />
+
+  <IconUrl DefaultValue="https://localhost:5174/assets/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://localhost:5174/assets/icon-64.png" />
+  <SupportUrl DefaultValue="https://localhost:5174/support.html" />
+
+  <AppDomains>
+    <AppDomain>https://login.microsoftonline.com</AppDomain>
+    <AppDomain>https://login.live.com</AppDomain>
+  </AppDomains>
+
+  <Hosts>
+    <Host Name="Mailbox" />
+  </Hosts>
+
+  <Requirements>
+    <Sets DefaultMinVersion="1.3">
+      <Set Name="Mailbox" MinVersion="1.3" />
+    </Sets>
+  </Requirements>
+
+  <FormSettings>
+    <Form xsi:type="ItemRead">
+      <DesktopSettings>
+        <SourceLocation DefaultValue="https://localhost:5174" />
+        <RequestedHeight>450</RequestedHeight>
+      </DesktopSettings>
+    </Form>
+  </FormSettings>
+
+  <Permissions>ReadWriteMailbox</Permissions>
+
+  <Rule xsi:type="RuleCollection" Mode="Or">
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read" />
+  </Rule>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
+
+    <Description resid="App.Description" />
+
+    <Requirements>
+      <Sets DefaultMinVersion="1.3">
+        <Set Name="Mailbox" MinVersion="1.3" />
+      </Sets>
+    </Requirements>
+
+    <Hosts>
+      <Host xsi:type="MailHost">
+        <DesktopFormFactor>
+          <FunctionFile resid="Function.Url" />
+
+          <ExtensionPoint xsi:type="MessageReadCommandSurface">
+            <OfficeTab id="TabDefault">
+              <Group id="msgReadGroup">
+                <Label resid="Group.Label" />
+                <Icon>
+                  <bt:Image size="16" resid="icon16" />
+                  <bt:Image size="32" resid="icon32" />
+                  <bt:Image size="80" resid="icon80" />
+                </Icon>
+                <Control xsi:type="Button" id="msgReadOpenPaneButton">
+                  <Label resid="TaskpaneButton.Label" />
+                  <Supertip>
+                    <Title resid="Taskpane.Tooltip" />
+                    <Description resid="Taskpane.Description" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="icon16" />
+                    <bt:Image size="32" resid="icon32" />
+                    <bt:Image size="80" resid="icon80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>msgReadTaskpane</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url" />
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+
+          <SupportsSharedFolders>true</SupportsSharedFolders>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+
+    <Resources>
+      <bt:Images>
+        <bt:Image id="icon16" DefaultValue="https://localhost:5174/assets/icon-16.png" />
+        <bt:Image id="icon32" DefaultValue="https://localhost:5174/assets/icon-32.png" />
+        <bt:Image id="icon80" DefaultValue="https://localhost:5174/assets/icon-80.png" />
+        <bt:Image id="icon25" DefaultValue="https://localhost:5174/assets/icon-25.png" />
+        <bt:Image id="icon48" DefaultValue="https://localhost:5174/assets/icon-48.png" />
+      </bt:Images>
+
+      <bt:Urls>
+        <bt:Url id="Function.Url" DefaultValue="https://localhost:5174" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:5174" />
+      </bt:Urls>
+
+      <bt:ShortStrings>
+        <bt:String id="Group.Label" DefaultValue="Minerva" />
+
+        <bt:String id="TaskpaneButton.Label" DefaultValue="Open Reporting Button">
+          <bt:Override Locale="de-DE" Value="Meldeschaltfläche öffnen" />
+          <bt:Override Locale="fr-FR" Value="Ouvrir le bouton de signalement" />
+          <bt:Override Locale="nl-NL" Value="Meldknop openen" />
+          <bt:Override Locale="es-ES" Value="Abrir botón de informes" />
+          <bt:Override Locale="pt-PT" Value="Abrir botão de denúncia" />
+          <bt:Override Locale="pt-BR" Value="Abrir botão de denúncia" />
+        </bt:String>
+
+        <bt:String id="Taskpane.Tooltip" DefaultValue="Open Reporting Button">
+          <bt:Override Locale="de-DE" Value="Meldeschaltfläche öffnen" />
+          <bt:Override Locale="fr-FR" Value="Ouvrir le bouton de signalement" />
+          <bt:Override Locale="nl-NL" Value="Meldknop openen" />
+          <bt:Override Locale="es-ES" Value="Abrir botón de informes" />
+          <bt:Override Locale="pt-PT" Value="Abrir botão de denúncia" />
+          <bt:Override Locale="pt-BR" Value="Abrir botão de denúncia" />
+        </bt:String>
+      </bt:ShortStrings>
+
+      <bt:LongStrings>
+        <bt:String id="App.Description" DefaultValue="Report suspicious or spam emails to your security department for further investigation. Help to increase security of your company.">
+          <bt:Override Locale="de-DE" Value="Melden Sie verdächtige E-Mails oder Spam an Ihre Sicherheitsabteilung zur weiteren Untersuchung. Tragen Sie dazu bei, die Sicherheit Ihres Unternehmens zu erhöhen." />
+          <bt:Override Locale="fr-FR" Value="Signalez les e-mails suspects ou indésirables à votre service de sécurité pour une enquête plus approfondie. Contribuez à renforcer la sécurité de votre entreprise." />
+          <bt:Override Locale="nl-NL" Value="Meld verdachte of spam-e-mails aan uw beveiligingsafdeling voor verder onderzoek. Help de veiligheid van uw bedrijf te vergroten." />
+          <bt:Override Locale="es-ES" Value="Informe de correos electrónicos sospechosos o no deseados a su departamento de seguridad para su posterior investigación. Ayude a aumentar la seguridad de su empresa." />
+          <bt:Override Locale="pt-PT" Value="Reporte e-mails suspeitos ou de spam ao seu departamento de segurança para investigação adicional. Ajude a aumentar a segurança da sua empresa." />
+          <bt:Override Locale="pt-BR" Value="Relate e-mails suspeitos ou spam ao seu departamento de segurança para investigação adicional. Ajude a aumentar a segurança da sua empresa." />
+        </bt:String>
+
+        <bt:String id="Taskpane.Description" DefaultValue="Report suspicious or spam emails to your security department for further investigation. Help to increase security of your company.">
+          <bt:Override Locale="de-DE" Value="Melden Sie verdächtige E-Mails oder Spam an Ihre Sicherheitsabteilung zur weiteren Untersuchung. Tragen Sie dazu bei, die Sicherheit Ihres Unternehmens zu erhöhen." />
+          <bt:Override Locale="fr-FR" Value="Signalez les e-mails suspects ou indésirables à votre service de sécurité pour une enquête plus approfondie. Contribuez à renforcer la sécurité de votre entreprise." />
+          <bt:Override Locale="nl-NL" Value="Meld verdachte of spam-e-mails aan uw beveiligingsafdeling voor verder onderzoek. Help de veiligheid van uw bedrijf te vergroten." />
+          <bt:Override Locale="es-ES" Value="Informe de correos electrónicos sospechosos o no deseados a su departamento de seguridad para su posterior investigación. Ayude a aumentar la seguridad de su empresa." />
+          <bt:Override Locale="pt-PT" Value="Reporte e-mails suspeitos ou de spam ao seu departamento de segurança para investigação adicional. Ajude a aumentar a segurança da sua empresa." />
+          <bt:Override Locale="pt-BR" Value="Relate e-mails suspeitos ou spam ao seu departamento de segurança para investigação adicional. Ajude a aumentar a segurança da sua empresa." />
+        </bt:String>
+      </bt:LongStrings>
+    </Resources>
+
+    <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.1" xsi:type="VersionOverridesV1_1">
+
+      <Requirements>
+        <Sets DefaultMinVersion="1.13">
+          <Set Name="Mailbox" MinVersion="1.13" />
+        </Sets>
+      </Requirements>
+
+      <Hosts>
+        <Host xsi:type="MailHost">
+
+          <DesktopFormFactor>
+            <FunctionFile resid="Function.Url" />
+
+            <ExtensionPoint xsi:type="MessageReadCommandSurface">
+              <OfficeTab id="TabDefault">
+                <Group id="msgReadGroup11">
+                  <Label resid="Group.Label" />
+                  <Icon>
+                    <bt:Image size="16" resid="icon16" />
+                    <bt:Image size="32" resid="icon32" />
+                    <bt:Image size="80" resid="icon80" />
+                  </Icon>
+                  <Control xsi:type="Button" id="msgReadOpenPaneButton11">
+                    <Label resid="TaskpaneButton.Label" />
+                    <Supertip>
+                      <Title resid="Taskpane.Tooltip" />
+                      <Description resid="Taskpane.Description" />
+                    </Supertip>
+                    <Icon>
+                      <bt:Image size="16" resid="icon16" />
+                      <bt:Image size="32" resid="icon32" />
+                      <bt:Image size="80" resid="icon80" />
+                    </Icon>
+                    <Action xsi:type="ShowTaskpane">
+                      <TaskpaneId>msgReadTaskpane</TaskpaneId>
+                      <SourceLocation resid="Taskpane.Url" />
+                    </Action>
+                  </Control>
+                </Group>
+              </OfficeTab>
+            </ExtensionPoint>
+
+            <SupportsSharedFolders>true</SupportsSharedFolders>
+          </DesktopFormFactor>
+
+          <MobileFormFactor>
+            <FunctionFile resid="Function.Url" />
+            <ExtensionPoint xsi:type="MobileMessageReadCommandSurface">
+              <Group id="mobileMsgReadGroup">
+                <Label resid="Group.Label" />
+                <Control xsi:type="MobileButton" id="mobileOpenPaneButton">
+                  <Label resid="TaskpaneButton.Label" />
+                  <Icon xsi:type="bt:MobileIconList">
+                    <bt:Image size="25" scale="1" resid="icon25" />
+                    <bt:Image size="25" scale="2" resid="icon25" />
+                    <bt:Image size="25" scale="3" resid="icon25" />
+                    <bt:Image size="32" scale="1" resid="icon32" />
+                    <bt:Image size="32" scale="2" resid="icon32" />
+                    <bt:Image size="32" scale="3" resid="icon32" />
+                    <bt:Image size="48" scale="1" resid="icon48" />
+                    <bt:Image size="48" scale="2" resid="icon48" />
+                    <bt:Image size="48" scale="3" resid="icon48" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <SourceLocation resid="Taskpane.Url" />
+                  </Action>
+                </Control>
+              </Group>
+            </ExtensionPoint>
+          </MobileFormFactor>
+
+        </Host>
+      </Hosts>
+
+    </VersionOverrides>
+
+    <WebApplicationInfo>
+      <Id>E81D4C4B-767E-4F5B-865F-87F816C0C953</Id>
+      <Resource>api://localhost:5174/E81D4C4B-767E-4F5B-865F-87F816C0C953</Resource>
+      <Scopes>
+        <Scope>openid</Scope>
+        <Scope>profile</Scope>
+        <Scope>offline_access</Scope>
+        <Scope>User.Read</Scope>
+        <Scope>Mail.Read</Scope>
+        <Scope>Mail.ReadWrite</Scope>
+        <Scope>Mail.Send</Scope>
+        <Scope>Mail.Read.Shared</Scope>
+        <Scope>Mail.ReadWrite.Shared</Scope>
+        <Scope>Mail.Send.Shared</Scope>
+      </Scopes>
+    </WebApplicationInfo>
+
+  </VersionOverrides>
+
+</OfficeApp>

@@ -1,5 +1,4 @@
 import { API_ROUTES, APP_NAME, type HelloEventResponse } from '@minerva/shared';
-import { HelloWorld } from '@minerva/ui';
 import { useState } from 'react';
 
 const apiUrl: string = import.meta.env.VITE_API_URL ?? 'https://localhost:3000';
@@ -26,7 +25,8 @@ export function App() {
   };
 
   return (
-    <HelloWorld appName={`${APP_NAME} Report Button`}>
+    <section>
+      <h1>{APP_NAME} Report Button</h1>
       <p>
         Version {__APP_VERSION__} ({__BUILD_COMMIT_HASH__})
       </p>
@@ -35,7 +35,7 @@ export function App() {
       </button>
       {lastEventId && <p data-testid="event-id">Event published: {lastEventId}</p>}
       {error && <p data-testid="api-error">Failed to publish: {error}</p>}
-    </HelloWorld>
+    </section>
   );
 }
 

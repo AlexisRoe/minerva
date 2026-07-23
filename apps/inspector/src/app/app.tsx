@@ -1,5 +1,4 @@
 import { API_ROUTES, APP_NAME, type HealthResponse } from '@minerva/shared';
-import { HelloWorld } from '@minerva/ui';
 import { useEffect, useState } from 'react';
 
 const apiUrl: string = import.meta.env.VITE_API_URL ?? 'https://localhost:3000';
@@ -27,7 +26,8 @@ export function App() {
   }, []);
 
   return (
-    <HelloWorld appName={`${APP_NAME} Inspector`}>
+    <section>
+      <h1>{APP_NAME} Inspector</h1>
       <p>
         Version {__APP_VERSION__} ({__BUILD_COMMIT_HASH__})
       </p>
@@ -39,7 +39,7 @@ export function App() {
       )}
       {error && <p data-testid="api-error">API unreachable: {error}</p>}
       {!health && !error && <p>Checking API…</p>}
-    </HelloWorld>
+    </section>
   );
 }
 

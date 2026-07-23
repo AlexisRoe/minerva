@@ -9,6 +9,7 @@ interface ImportMetaEnv {
   readonly VITE_SENTRY_DSN?: string;
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: vite uses that in a different way
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
