@@ -79,7 +79,9 @@ function ButtonPageContent({ children, centered = false, className, ...props }: 
   );
   return (
     <div data-slot="page-content" data-testid="page-content" className={contentClassName} {...props}>
-      <div className={cn(!isCentered && 'flex h-full flex-col', fullscreen && '-translate-y-[45px]')}>{children}</div>
+      <div className={cn('w-full', !isCentered && 'flex h-full flex-col', fullscreen && '-translate-y-[45px]')}>
+        {children}
+      </div>
     </div>
   );
 }

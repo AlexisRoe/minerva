@@ -9,6 +9,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '../../../base/components/empty/empty';
+import { cn } from '../../../utils/cn';
 
 export interface ErrorViewProps extends ComponentProps<typeof Empty> {
   /** Heading shown above the description, e.g. "Something went wrong". */
@@ -26,9 +27,18 @@ export interface ErrorViewProps extends ComponentProps<typeof Empty> {
 }
 
 /** Empty-state shown when an unrecoverable error occurs, with support reference details and a retry action. */
-export function ErrorView({ title, description, id, errorCode, buttonText, onButtonClick, ...props }: ErrorViewProps) {
+export function ErrorView({
+  title,
+  description,
+  id,
+  errorCode,
+  buttonText,
+  onButtonClick,
+  className,
+  ...props
+}: ErrorViewProps) {
   return (
-    <Empty {...props}>
+    <Empty className={cn('w-full max-w-none border-none p-0', className)} {...props}>
       <EmptyHeader className="w-full max-w-none">
         <EmptyMedia variant="default">
           <IconSkull className="size-24" stroke={1.5} />
