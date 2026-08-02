@@ -1,0 +1,42 @@
+meta {
+  name: Create job - invalid kind (400)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/jobs
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "kind": "transcribe",
+    "messageId": "AAMkAGI2-minerva-local-fixture-0003"
+  }
+}
+
+assert {
+  res.status: eq 400
+}
+
+tests {
+  test("explains the accepted shape", function () {
+    expect(res.getBody().message).to.contain("parse");
+    expect(res.getBody().message).to.contain("screenshot");
+  });
+}
+
+docs {
+  Negative case: `transcribe` is not in `EMAIL_JOB_KINDS`, so the controller's guard
+  throws `BadRequestException`. Sending a body without `messageId`, or with a
+  non-string one, fails the same way.
+
+  A `400` here is the success condition. If this returns `201`, validation has been
+  bypassed — worth knowing before an invalid job reaches the queue-coordinator.
+}

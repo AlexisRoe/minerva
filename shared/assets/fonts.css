@@ -1,0 +1,49 @@
+/*
+ * The one declaration of Minerva's typefaces, imported by both frontends and
+ * by Storybook.
+ *
+ * The files themselves live in ./fonts and are not part of any package: each
+ * project copies them into its own output under /assets/fonts -- the apps via
+ * the `sharedFonts()` plugin in vite.fonts.ts, Storybook via `staticDirs` in
+ * .storybook/main.ts. That is why the URLs below are absolute: the same path
+ * resolves in every project, and it matches the preload links in the apps'
+ * index.html.
+ *
+ * The families are named by the theme in @minerva/ui-lib ("DM Sans" for body
+ * text, "Inter" for headings); the library never ships the files.
+ *
+ * These are variable fonts, so one file covers the whole weight range and
+ * `font-weight` is a range rather than a single value.
+ */
+
+@font-face {
+  font-family: "DM Sans";
+  src: url("/assets/fonts/DMSans-VariableFont.ttf") format("truetype-variations");
+  font-weight: 100 1000;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "DM Sans";
+  src: url("/assets/fonts/DMSans-Italic-VariableFont.ttf") format("truetype-variations");
+  font-weight: 100 1000;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/assets/fonts/Inter-VariableFont.ttf") format("truetype-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/assets/fonts/Inter-Italic-VariableFont.ttf") format("truetype-variations");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}

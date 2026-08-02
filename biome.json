@@ -1,69 +1,82 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
-  "root": true,
+  "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": true,
-    "includes": [
-      "**",
-      "!**/dist",
-      "!**/coverage",
-      "!**/dev-dist",
-      "!**/.nx",
-      "!**/node_modules",
-      "!**/*.gen.ts",
-      "!**/src/generated",
-      "!**/package-lock.json",
-      "!**/uv.lock"
-    ]
+    "ignoreUnknown": false,
+    "includes": ["**", "!**/dist", "!**/storybook-static", "!**/public", "!**/*.tsbuildinfo"]
   },
   "formatter": {
     "enabled": true,
-    "indentStyle": "space",
-    "indentWidth": 2,
+    "useEditorconfig": true,
     "lineWidth": 120
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "jsxQuoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all",
+      "arrowParentheses": "always",
+      "bracketSpacing": true
+    }
+  },
+  "json": {
+    "formatter": {
+      "enabled": true
+    }
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended"
+      "preset": "recommended",
+      "correctness": {
+        "noUnusedImports": "error"
+      }
     }
   },
   "assist": {
+    "enabled": true,
     "actions": {
       "source": {
         "organizeImports": "on"
       }
     }
   },
-  "javascript": {
-    "parser": {
-      "unsafeParameterDecoratorsEnabled": true
-    },
-    "formatter": {
-      "quoteStyle": "single",
-      "semicolons": "always"
-    }
-  },
-  "css": {
-    "parser": {
-      "tailwindDirectives": true
-    }
-  },
   "overrides": [
     {
-      "includes": ["apps/api/**"],
+      "includes": ["apps/backend/**", "shared/typescript-lib/**"],
+      "javascript": {
+        "parser": {
+          "unsafeParameterDecoratorsEnabled": true
+        }
+      },
       "linter": {
+        "domains": {
+          "test": "recommended"
+        },
+        "rules": {
+          "a11y": "off",
+          "style": {
+            "useImportType": "off",
+            "noParameterProperties": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/frontend/**", "shared/ui-lib/**"],
+      "linter": {
+        "domains": {
+          "react": "recommended",
+          "test": "recommended"
+        },
         "rules": {
           "style": {
-            "useImportType": "off"
-          },
-          "correctness": {
-            "noUnusedFunctionParameters": "off"
+            "useImportType": "error"
           }
         }
       }

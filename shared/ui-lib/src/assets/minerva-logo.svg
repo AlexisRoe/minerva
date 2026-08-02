@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Minerva</title>
+  <circle cx="256" cy="256" r="255.5" fill="#1a1a1a" stroke="#ffffff" stroke-width="1" vector-effect="non-scaling-stroke" />
+  <text x="256" y="372" font-family="system-ui, sans-serif" font-size="320" font-weight="700" fill="#ffffff" text-anchor="middle">M</text>
+</svg>

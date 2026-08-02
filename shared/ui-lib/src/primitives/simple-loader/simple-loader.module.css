@@ -1,0 +1,116 @@
+/*
+  The CSS-only loader from the Mantine docs, in the theme's colours: two balls
+  chasing each other round a box, drawn from nothing but a span and its two
+  pseudo elements.
+
+  Every measure and every colour is a variable, so a caller re-sizes or
+  re-colours it from the outside without this file being touched:
+
+    <SimpleLoader style={{ '--loader-unit': '2px' }} />
+*/
+/*
+  The defaults sit on the wrapper rather than on the loader itself: a custom
+  property declared on an element beats one it would have inherited, so putting
+  them here is what leaves a caller's `style` — which lands on the wrapper —
+  free to override them.
+*/
+.root {
+  /* The step every measure below is a multiple of, so the whole thing scales
+     off the one value. At 1px the box is 50px, the size the docs draw it. */
+  --loader-unit: 1px;
+
+  /* How long one turn of the pair takes. Slower than the demo's 1s: at that
+     speed it reads as something going wrong rather than as something running. */
+  --loader-duration: 1.8s;
+
+  /* The ball that leads, in the dark grey the demo drew in orange. */
+  --loader-color-lead: var(--mantine-color-gray-7);
+  /* The one behind it, kept light so the two read apart at a glance. */
+  --loader-color-trail: var(--mantine-color-gray-3);
+}
+
+/* Dark grey on a dark panel is not there at all, so the pair moves up the
+   scale rather than down it. The scheme is read off this attribute, the same
+   way the Mantine overrides in style.css read it. */
+[data-mantine-color-scheme="dark"] .root {
+  --loader-color-lead: var(--mantine-color-gray-3);
+  --loader-color-trail: var(--mantine-color-gray-6);
+}
+
+.loader {
+  animation: rotate var(--loader-duration) infinite;
+  height: calc(50 * var(--loader-unit));
+  width: calc(50 * var(--loader-unit));
+}
+
+.loader::before,
+.loader::after {
+  border-radius: 50%;
+  content: "";
+  display: block;
+  height: calc(20 * var(--loader-unit));
+  width: calc(20 * var(--loader-unit));
+}
+
+.loader::before {
+  animation: ball1 var(--loader-duration) infinite;
+  background-color: var(--loader-color-trail);
+  box-shadow: calc(30 * var(--loader-unit)) 0 0 var(--loader-color-lead);
+  margin-bottom: calc(10 * var(--loader-unit));
+}
+
+.loader::after {
+  animation: ball2 var(--loader-duration) infinite;
+  background-color: var(--loader-color-lead);
+  box-shadow: calc(30 * var(--loader-unit)) 0 0 var(--loader-color-trail);
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg) scale(0.8);
+  }
+  50% {
+    transform: rotate(360deg) scale(1.2);
+  }
+  100% {
+    transform: rotate(720deg) scale(0.8);
+  }
+}
+
+@keyframes ball1 {
+  0% {
+    box-shadow: calc(30 * var(--loader-unit)) 0 0 var(--loader-color-lead);
+  }
+  50% {
+    box-shadow: 0 0 0 var(--loader-color-lead);
+    margin-bottom: 0;
+    transform: translate(calc(15 * var(--loader-unit)), calc(15 * var(--loader-unit)));
+  }
+  100% {
+    box-shadow: calc(30 * var(--loader-unit)) 0 0 var(--loader-color-lead);
+    margin-bottom: calc(10 * var(--loader-unit));
+  }
+}
+
+@keyframes ball2 {
+  0% {
+    box-shadow: calc(30 * var(--loader-unit)) 0 0 var(--loader-color-trail);
+  }
+  50% {
+    box-shadow: 0 0 0 var(--loader-color-trail);
+    margin-top: calc(-20 * var(--loader-unit));
+    transform: translate(calc(15 * var(--loader-unit)), calc(15 * var(--loader-unit)));
+  }
+  100% {
+    box-shadow: calc(30 * var(--loader-unit)) 0 0 var(--loader-color-trail);
+    margin-top: 0;
+  }
+}
+
+/* A reader who has asked for less motion is still told what is going on by the
+   label, so the spin is slowed further rather than stopped. */
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    --loader-duration: 4s;
+  }
+}

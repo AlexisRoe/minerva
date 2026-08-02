@@ -1,0 +1,76 @@
+#!/bin/sh
+# Pre-push gate: format, lint, typecheck, test, build — the whole repo, every time.
+#
+# Formatting is applied rather than reported: `make format` runs first and any file
+# it rewrites that was otherwise clean is committed on its own. Git already resolved
+# the ref being pushed before this hook ran, so that new commit cannot join the
+# current push — the hook finishes the remaining checks and then asks you to push
+# again, with the fix already in place.
+
+set -e
+
+cd "$(git rev-parse --show-toplevel)"
+
+BOLD=$(printf '\033[1m')
+RESET=$(printf '\033[0m')
+step() { echo "${BOLD}pre-push: $1${RESET}"; }
+
+FORMAT_COMMITTED=0
+
+# --- 1. format ---------------------------------------------------------------
+step "formatting (make format)"
+
+# Files already carrying uncommitted work. Anything formatting touches here is
+# entangled with work in progress, so it is left in the working tree untouched.
+DIRTY_BEFORE=$(mktemp)
+trap 'rm -f "$DIRTY_BEFORE"' EXIT
+{
+  git diff --name-only
+  git diff --cached --name-only
+} | sort -u > "$DIRTY_BEFORE"
+
+make format
+
+# Files dirty now but not before — i.e. rewritten by the formatter alone.
+FORMATTED=$(git diff --name-only | sort -u | grep -Fxv -f "$DIRTY_BEFORE" || true)
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+if [ -n "$FORMATTED" ]; then
+  if [ "$BRANCH" = "HEAD" ]; then
+    echo "pre-push: formatting changed files but HEAD is detached — leaving them uncommitted:" >&2
+    echo "$FORMATTED" | sed 's/^/  /' >&2
+    exit 1
+  fi
+  echo "$FORMATTED" | sed 's/^/  formatted: /'
+  # Pathspec form on purpose: it commits these files only, leaving anything else
+  # already staged in the index alone.
+  echo "$FORMATTED" | tr '\n' '\0' |
+    xargs -0 git commit --no-verify -m "chore: apply biome formatting" -- >/dev/null
+  FORMAT_COMMITTED=1
+  echo "  committed as $(git rev-parse --short HEAD)"
+fi
+
+# --- 2. lint / typecheck / test ----------------------------------------------
+step "linting (make lint)"
+make lint
+
+step "typechecking (make typecheck)"
+make typecheck
+
+step "testing (make test)"
+make test
+
+# --- 3. build ----------------------------------------------------------------
+step "building (make build)"
+make build
+
+# --- 4. verdict ---------------------------------------------------------------
+if [ "$FORMAT_COMMITTED" = "1" ]; then
+  echo "" >&2
+  echo "${BOLD}pre-push: all checks passed, but formatting was committed after the push was" >&2
+  echo "resolved, so that commit is not part of it. Run your push again.${RESET}" >&2
+  exit 1
+fi
+
+step "all checks passed"

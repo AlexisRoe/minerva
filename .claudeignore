@@ -1,0 +1,60 @@
+# Distribution
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+coverage/
+*.egg-info/
+.eggs/
+
+# Documentation
+documentation/
+
+# Secrets
+.env
+.env.local
+.env.production
+*.pem
+*.key
+secrets.json
+*.env
+secrets.py
+config/secrets.yml
+
+# Logs
+*.log
+logs/
+
+# Test artifacts
+__snapshots__/
+.jest-cache/
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Database files
+*.sqlite
+*.db
+dump.sql
+
+# Large data files
+data/
+datasets/
+*.csv
+*.json.gz
+*.csv
+*.parquet
+*.pkl
+
+# Virtual environments
+venv/
+env/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Notebooks (optional — include if you want Claude editing notebooks)
+# *.ipynb

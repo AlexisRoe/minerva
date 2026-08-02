@@ -1,0 +1,29 @@
+meta {
+  name: Get health
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/health
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq ok
+  res.body.service: eq api
+}
+
+docs {
+  Liveness probe. Returns the `HealthReport` from `AppService.health()`:
+
+  ```json
+  { "status": "ok", "service": "api" }
+  ```
+
+  The `service` field is what distinguishes this from the queue-coordinator's identical
+  route, so the assertion checks it — a misconfigured `baseUrl` pointing at :3001 fails
+  here instead of passing silently.
+}
