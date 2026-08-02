@@ -1,2 +1,0 @@
-# Run lint, typecheck, tests and build for everything affected by the outgoing commits.
-npx nx affected -t lint typecheck test build --base=origin/main
