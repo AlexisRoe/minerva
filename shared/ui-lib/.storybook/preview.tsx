@@ -1,5 +1,5 @@
 import type { Preview } from '@storybook/react-vite';
-import { MinervaThemeProvider } from '../src/minerva-provider/minerva-provider.component';
+import { MinervaThemeProvider } from '../src/theme/minerva-provider.component';
 
 // The @font-face rules the apps use, so stories render in the same typefaces.
 // The files they point at are mounted under /assets/fonts by `staticDirs`.
