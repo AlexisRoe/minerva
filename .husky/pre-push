@@ -1,5 +1,10 @@
 #!/bin/sh
-# Pre-push gate: format, lint, typecheck, test, build — the whole repo, every time.
+# Pre-push gate: format, lint, typecheck, test — the whole repo, every time.
+#
+# Building is deliberately not here. `.github/workflows/ci.yml` builds every package
+# on every pull request, and a build failure that lint and typecheck both miss is
+# rare enough not to be worth paying for on each push. Everything else stays local
+# because finding it here is much cheaper than finding it in a CI log.
 #
 # Formatting is applied rather than reported: `make format` runs first and any file
 # it rewrites that was otherwise clean is committed on its own. Git already resolved
@@ -61,11 +66,7 @@ make typecheck
 step "testing (make test)"
 make test
 
-# --- 3. build ----------------------------------------------------------------
-step "building (make build)"
-make build
-
-# --- 4. verdict ---------------------------------------------------------------
+# --- 3. verdict ---------------------------------------------------------------
 if [ "$FORMAT_COMMITTED" = "1" ]; then
   echo "" >&2
   echo "${BOLD}pre-push: all checks passed, but formatting was committed after the push was" >&2

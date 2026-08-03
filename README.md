@@ -207,7 +207,9 @@ repository, not just the changed packages:
 | 2 | `make lint` | Push aborted — Biome found something `--write` cannot fix |
 | 3 | `make typecheck` | Push aborted |
 | 4 | `make test` | Push aborted |
-| 5 | `make build` | Push aborted — a package that typechecks can still fail to bundle |
+
+`make build` is deliberately absent: CI builds every package on every pull request, and a change
+that typechecks but fails to bundle is rare enough not to be worth paying for on each push.
 
 Formatting is applied rather than rejected, so a stray blank line never blocks a push. Any file
 the formatter rewrites **that had no other uncommitted changes** is committed on its own as
@@ -220,6 +222,28 @@ That commit cannot join the push that triggered it: git resolves the ref being p
 running the hook. So when formatting was committed, the hook finishes the remaining checks and
 then exits non-zero with a note to **run your push again** — the second push carries both commits
 and passes straight through.
+
+### In CI
+
+`.github/workflows/ci.yml` runs on every pull request and on pushes to `main`. It repeats the local
+gate unscoped — the whole repository — and adds the two checks the hook does not carry:
+
+| Job | Target | Not covered by the hook |
+| --- | --- | --- |
+| `lint` | `make lint` | |
+| `typecheck` | `make typecheck` | |
+| `test` | `make test` | |
+| `build` | `make build` | ✔ dropped from pre-push |
+| `i18n` | `make verify-i18n-verbose` | ✔ pre-commit only runs it when i18n files are staged |
+
+The five are independent, so they run as parallel jobs rather than the sequential chain `make
+verify` uses locally — the run takes as long as its slowest job, not the sum. A sixth job, `ci`,
+depends on all five and fails unless every one of them succeeded; **point branch protection at
+`ci`**, not at the individual jobs, so the set can be changed without touching repository settings.
+
+Shared setup lives in `.github/actions/setup`. Its `build-libs` input reflects the same rule as
+`make typecheck`: anything reading the shared libraries' gitignored `dist/` has to build them first.
+`lint` reads only source and skips it; `build` builds them itself as part of the topological build.
 
 The hook installs itself via the root `prepare` script, so `pnpm install` on a fresh clone is
 enough. To bypass it in an emergency: `git push --no-verify`.

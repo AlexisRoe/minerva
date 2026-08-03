@@ -1,0 +1,35 @@
+name: Setup
+description: >
+  Node + pnpm with a warm store, dependencies installed, and optionally the shared
+  libraries built. Every job that touches the workspace starts here.
+
+inputs:
+  build-libs:
+    description: >
+      Build shared/typescript-lib and shared/ui-lib after installing. Their dist/ is
+      gitignored and the apps resolve the libraries through it, so any job that
+      typechecks or bundles app code needs this. Jobs that only read source (lint)
+      do not.
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    # Reads the version from package.json's `packageManager` field, so CI and
+    # local checkouts can never drift apart.
+    - uses: pnpm/action-setup@v6
+
+    - uses: actions/setup-node@v7
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: Build shared libraries
+      if: inputs.build-libs == 'true'
+      shell: bash
+      run: make build-libs
