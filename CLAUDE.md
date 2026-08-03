@@ -42,8 +42,10 @@ Narrow the loop with pnpm filters: `pnpm --filter @minerva/api test <path-filter
 versions live in the `catalog:` in `pnpm-workspace.yaml` (`catalogMode: strict`, `saveExact: true`);
 depend on `catalog:` or `workspace:*`.
 
-**Git:** commit or push only when asked. The husky `pre-push` hook runs the whole gate; if it makes a
-`chore: apply biome formatting` commit it exits non-zero by design — push again.
+**Git:** commit or push only when asked. The husky `pre-push` hook runs the gate; if it makes a
+`chore: apply biome formatting` commit it exits non-zero by design — push again. `build` and
+`verify-i18n` run only in CI (`.github/workflows/ci.yml`), so a push passing locally can still fail
+there.
 
 ## Rules
 
