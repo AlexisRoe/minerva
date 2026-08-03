@@ -1,6 +1,14 @@
 /**
  * The task pane's runtime configuration adapter.
  *
+ * One object holds everything the pane runs on: the deployed document *and*
+ * what the URL it was opened with says (`retry`, `demo`, and the host, which is
+ * checked against the configured `appDomain`). They are assembled together in
+ * {@link loadConfig} because they are needed together, before React mounts --
+ * `demo` decides whether Sentry, Office.js and the API adapters start at all,
+ * so it cannot arrive from a provider further down the tree. Nothing outside
+ * this folder reads `window.location`.
+ *
  * The app's settings are not baked into the bundle. They are published as a
  * `config.json` next to it by the `runtimeConfig()` Vite plugin
  * (`vite.runtime-config.ts`, fed by this app's `config.entries.ts`) and fetched
@@ -17,8 +25,8 @@
  */
 
 export { configFixture } from './config.fixture';
-export type { RuntimeConfig } from './config.types';
-export { CONFIG_PATH, isRuntimeConfig } from './config.types';
+export type { AppConfig, RuntimeConfig } from './config.types';
+export { CONFIG_PATH, DEMO_PARAM, isRuntimeConfig, MAX_RETRY, RETRY_PARAM } from './config.types';
 export { useConfig } from './hooks/use-config.hook';
 export type { ConfigProviderProps } from './provider/config.provider';
 export { ConfigProvider } from './provider/config.provider';

@@ -106,3 +106,23 @@ export class ConfigProviderMissingError extends MinervaError {
     });
   }
 }
+
+/**
+ * The app is served from a host other than the configured `appDomain`.
+ *
+ * The task pane only ever runs on the host it was deployed to, so a mismatch
+ * means the bundle was copied somewhere else or framed by a page it should not
+ * be -- neither of which it should keep running under.
+ */
+export class ConfigDomainMismatchError extends MinervaError {
+  constructor(expected: string, actual: string, cause?: Error) {
+    super({
+      reference: 'aea2bf1d-8ce5-4958-984c-5f628beaa129',
+      code: 'ERR_006',
+      message: 'Minerva is not allowed to run here.',
+      logLevel: 'fatal',
+      payload: { expected, actual },
+      cause,
+    });
+  }
+}
