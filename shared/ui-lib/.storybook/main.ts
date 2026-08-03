@@ -5,7 +5,7 @@ const config: StorybookConfig = {
   // its own Node server, so `server.https` from a Vite config never reaches the
   // listening socket. The certificates are passed as CLI flags instead, by
   // scripts/storybook-dev.sh (the `storybook` script in package.json).
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(ts|tsx)'],
+  stories: ['../src/**/*.stories.@(ts|tsx)'],
   addons: ['@storybook/addon-docs', '@storybook/addon-a11y'],
   framework: '@storybook/react-vite',
   // The library ships no fonts. The files live once in shared/assets/fonts and

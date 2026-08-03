@@ -24,7 +24,7 @@
 
   <IconUrl DefaultValue="https://{{deployed-domain}}/assets/icon-32.png" />
   <HighResolutionIconUrl DefaultValue="https://{{deployed-domain}}/assets/icon-64.png" />
-  <SupportUrl DefaultValue="{{url-to-be-displayed-in-addon-interface}}/support.html" />
+  <SupportUrl DefaultValue="{{url-to-be-displayed-in-addon-interface}}/support" />
 
   <AppDomains>
     <!-- Needed for interactive NAA fallback (acquireTokenPopup) sign-in UX. -->

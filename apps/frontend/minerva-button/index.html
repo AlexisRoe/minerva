@@ -12,10 +12,40 @@
     <link rel="preload" as="font" type="font/ttf" href="/assets/fonts/DMSans-Italic-VariableFont.ttf" crossorigin />
 
     <title>Minerva Button</title>
+
+    <!-- Plain stylesheet, not part of the bundle: the splash below has to be
+         painted before any JavaScript runs. Class names are prefixed to keep
+         them out of Mantine's namespace. -->
+    <link rel="stylesheet" href="/boot-loader.css" />
+
+    <!-- Without scripting nothing will ever replace the splash, so the spinner
+         stops promising an app that is not coming and the message below takes
+         its place. -->
+    <noscript>
+        <style>
+            .minerva-boot__spinner {
+                display: none;
+            }
+        </style>
+    </noscript>
 </head>
 
 <body>
-    <div id="root"></div>
+    <!-- The splash sits inside #root, so React's first commit clears it even if
+         the bootstrap's explicit removal is missed. The app cannot render until
+         it has fetched /config.json, which is a network round trip.
+         English only: this is shown before i18next is loaded. -->
+    <div id="root">
+        <div id="minerva-boot" class="minerva-boot">
+            <span class="minerva-boot__spinner" role="status" aria-label="Loading Minerva"></span>
+            <p id="minerva-boot-error" class="minerva-boot__message" hidden>
+                Minerva could not start. Please reload the task pane, and contact support if this keeps happening.
+            </p>
+            <noscript>
+                <p class="minerva-boot__message">Minerva needs JavaScript to run. Please enable it and reload the task pane.</p>
+            </noscript>
+        </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
 </body>
 

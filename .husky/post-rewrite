@@ -1,0 +1,15 @@
+#!/bin/sh
+# Fires after history is rewritten — `git pull --rebase`, `git rebase`, `git commit --amend`.
+# This is the path `post-merge` misses, and it is the one a rebase-based pull workflow
+# actually takes.
+#
+# $1 is the command that triggered the rewrite. Amending a commit cannot pull anyone
+# else's work in, so only rebases are worth syncing for.
+#
+# ORIG_HEAD is the pre-rebase commit. The diff against it is not strictly the set of
+# commits that arrived (the local commits were replayed on top), but it is a superset:
+# if it shows no change under shared/ or the lockfile, nothing needs redoing.
+
+[ "$1" = "rebase" ] || exit 0
+
+bash "$(git rev-parse --show-toplevel)/scripts/sync-workspace.sh" ORIG_HEAD HEAD

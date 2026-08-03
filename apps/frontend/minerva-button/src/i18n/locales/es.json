@@ -1,0 +1,7 @@
+{
+  "title": "Minerva",
+  "intro": "Enviar el mensaje abierto a Minerva para su procesamiento.",
+  "submit": "Enviar a Minerva",
+  "queued": "En cola para su procesamiento.",
+  "error": "Algo ha salido mal."
+}

@@ -14,9 +14,9 @@
   <DisplayName DefaultValue="Minerva" />
   <Description DefaultValue="Report suspicios or spam emails for further investigation and help increasing security in your company" />
 
-  <IconUrl DefaultValue="https://localhost:5174/assets/icon-32.png" />
-  <HighResolutionIconUrl DefaultValue="https://localhost:5174/assets/icon-64.png" />
-  <SupportUrl DefaultValue="https://localhost:5174/support.html" />
+  <IconUrl DefaultValue="https://localhost:4101/assets/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://localhost:4101/assets/icon-64.png" />
+  <SupportUrl DefaultValue="https://localhost:4101/support" />
 
   <AppDomains>
     <AppDomain>https://login.microsoftonline.com</AppDomain>
@@ -36,7 +36,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://localhost:5174" />
+        <SourceLocation DefaultValue="https://localhost:4101" />
         <RequestedHeight>450</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -99,16 +99,16 @@
 
     <Resources>
       <bt:Images>
-        <bt:Image id="icon16" DefaultValue="https://localhost:5174/assets/icon-16.png" />
-        <bt:Image id="icon32" DefaultValue="https://localhost:5174/assets/icon-32.png" />
-        <bt:Image id="icon80" DefaultValue="https://localhost:5174/assets/icon-80.png" />
-        <bt:Image id="icon25" DefaultValue="https://localhost:5174/assets/icon-25.png" />
-        <bt:Image id="icon48" DefaultValue="https://localhost:5174/assets/icon-48.png" />
+        <bt:Image id="icon16" DefaultValue="https://localhost:4101/assets/icon-16.png" />
+        <bt:Image id="icon32" DefaultValue="https://localhost:4101/assets/icon-32.png" />
+        <bt:Image id="icon80" DefaultValue="https://localhost:4101/assets/icon-80.png" />
+        <bt:Image id="icon25" DefaultValue="https://localhost:4101/assets/icon-25.png" />
+        <bt:Image id="icon48" DefaultValue="https://localhost:4101/assets/icon-48.png" />
       </bt:Images>
 
       <bt:Urls>
-        <bt:Url id="Function.Url" DefaultValue="https://localhost:5174" />
-        <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:5174" />
+        <bt:Url id="Function.Url" DefaultValue="https://localhost:4101" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:4101" />
       </bt:Urls>
 
       <bt:ShortStrings>
@@ -233,7 +233,7 @@
 
     <WebApplicationInfo>
       <Id>E81D4C4B-767E-4F5B-865F-87F816C0C953</Id>
-      <Resource>api://localhost:5174/E81D4C4B-767E-4F5B-865F-87F816C0C953</Resource>
+      <Resource>api://localhost:4101/E81D4C4B-767E-4F5B-865F-87F816C0C953</Resource>
       <Scopes>
         <Scope>openid</Scope>
         <Scope>profile</Scope>

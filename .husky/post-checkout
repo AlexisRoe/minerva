@@ -1,0 +1,12 @@
+#!/bin/sh
+# Fires on `git checkout`/`git switch` — including `git checkout -- <file>`, which is
+# why the third argument matters: it is 1 for a branch switch and 0 for a file
+# checkout. Without this guard, restoring a single file would trigger a full rebuild.
+#
+# $1 and $2 are the previous and new HEAD. On a fresh clone both are the null SHA;
+# sync-workspace.sh treats an unresolvable old revision as "sync unconditionally",
+# which is the right answer there — nothing has been built yet.
+
+[ "$3" = "1" ] || exit 0
+
+bash "$(git rev-parse --show-toplevel)/scripts/sync-workspace.sh" "$1" "$2"
