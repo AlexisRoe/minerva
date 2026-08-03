@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Build from the repository root:  docker build -f apps/api/Dockerfile .
 
-FROM node:24.18.0-alpine3.24 AS deps
+FROM node:26.5.1-alpine3.24 AS deps
 WORKDIR /workspace
 COPY package.json package-lock.json .npmrc ./
 COPY apps/api/package.json apps/api/
@@ -19,7 +19,7 @@ RUN npx nx sync && npx nx build api
 FROM deps AS prod-deps
 RUN npm ci --omit=dev --ignore-scripts
 
-FROM node:24.18.0-alpine3.24 AS runtime
+FROM node:26.5.1-alpine3.24 AS runtime
 ENV NODE_ENV=production
 WORKDIR /workspace
 RUN addgroup -S minerva && adduser -S minerva -G minerva
