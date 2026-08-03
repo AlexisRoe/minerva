@@ -1,0 +1,7 @@
+#!/bin/sh
+# Fires after `git pull` (merge) and `git merge`. ORIG_HEAD is the pre-merge commit,
+# so it and HEAD bracket exactly what arrived.
+#
+# Note that `git pull --rebase` does NOT reach this hook — see .husky/post-rewrite.
+
+bash "$(git rev-parse --show-toplevel)/scripts/sync-workspace.sh" ORIG_HEAD HEAD

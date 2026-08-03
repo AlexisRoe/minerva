@@ -15,10 +15,14 @@
   "license": "MIT",
   "author": "Alexis Roehrling",
   "dependencies": {
+    "@minerva/typescript-lib": "workspace:*",
     "@minerva/ui-lib": "workspace:*",
     "@sentry/react": "catalog:",
+    "i18next": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "react-i18next": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "catalog:",

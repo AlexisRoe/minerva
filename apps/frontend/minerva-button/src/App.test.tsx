@@ -4,12 +4,17 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import { App } from './App';
+import { ConfigProvider, configFixture } from './config';
 
+// Mirrors the bootstrap in `main.tsx`: the app tree runs below a provider, so
+// anything that starts calling `useConfig()` keeps rendering here.
 function renderApp() {
   return render(
-    <MinervaThemeProvider>
-      <App />
-    </MinervaThemeProvider>,
+    <ConfigProvider config={configFixture}>
+      <MinervaThemeProvider>
+        <App />
+      </MinervaThemeProvider>
+    </ConfigProvider>,
   );
 }
 

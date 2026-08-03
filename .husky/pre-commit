@@ -1,0 +1,38 @@
+#!/bin/sh
+# Pre-commit gate: the i18n catalogues, and only when they are actually in play.
+#
+# The pre-push hook covers format, lint, typecheck, test and build, but nothing there
+# looks at the translation catalogues — a commit can leave a language missing a key and
+# only be caught by a human. This hook closes that gap cheaply: it runs `make verify-i18n`
+# (three stdlib-only Python scripts, well under a second) but only when the staged diff
+# touches i18n files, so commits elsewhere in the repo pay nothing.
+#
+# The checks read the working tree rather than the index, which is what you want here:
+# the catalogues must be coherent as they will exist after the commit.
+
+set -e
+
+cd "$(git rev-parse --show-toplevel)"
+
+# Staged paths touching any locale catalogue or i18n wiring. --diff-filter excludes
+# deletions of whole files from triggering a check against a path that no longer exists;
+# the scripts rediscover the catalogues themselves either way.
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR -- '*/src/i18n/*' '*/locales/*.json')
+
+if [ -z "$STAGED" ]; then
+  exit 0
+fi
+
+BOLD=$(printf '\033[1m')
+RESET=$(printf '\033[0m')
+
+echo "${BOLD}pre-commit: i18n files staged — verifying catalogues${RESET}"
+echo "$STAGED" | sed 's/^/  /'
+
+if ! make verify-i18n; then
+  echo "" >&2
+  echo "${BOLD}pre-commit: the translation catalogues need attention.${RESET}" >&2
+  echo "Run ${BOLD}make verify-i18n-verbose${RESET} to see every finding with its source string," >&2
+  echo "or ask Claude to ${BOLD}/translate${RESET} to fill the gaps." >&2
+  exit 1
+fi

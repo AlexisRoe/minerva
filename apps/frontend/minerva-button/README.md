@@ -52,16 +52,35 @@ There is no `.env` in this directory. [`vite.config.ts`](./vite.config.ts) sets
 `envDir` to the repository root, so this app reads the **single repo-root `.env`**
 (`make copy-env`) that the backends also use.
 
-Only `VITE_`-prefixed variables are exposed to the browser, which is what makes one shared file
-safe: `SENTRY_DSN` sits in the same `.env` and never reaches the bundle, while `VITE_SENTRY_DSN`
-does. Dropping a `.env` in *this* directory would override the root one for this app only — usually
-not what you want.
+Settings are **not** baked into the bundle. [`config.entries.ts`](./config.entries.ts) lists the
+variables the browser is allowed to see (`APP_FE_RB_SENTRY_DSN`,
+`APP_FE_RB_SENTRY_TRACES_SAMPLE_RATE`), and the `runtimeConfig()` plugin in
+[`vite.runtime-config.ts`](../../../vite.runtime-config.ts) publishes just those as `/config.json`
+next to the build. Anything not listed there stays out of the browser, which is what makes one
+shared `.env` safe — and it means the same artefact can be promoted between environments, since a
+new DSN is a new `config.json`, not a new build. Dropping a `.env` in *this* directory would
+override the root one for this app only — usually not what you want.
 
 Nothing here is required to run locally. Every variable has a working default and Sentry stays
-inert while its DSN is empty, so the dev server boots on a checkout with no `.env` at all.
+inert while its DSN is empty, so the dev server boots on a checkout with no `.env` at all. The dev
+server rebuilds `/config.json` per request, so editing the root `.env` needs a reload, not a restart.
 
 ## Notes
 
-- Sentry is initialised in [`src/instrument.ts`](./src/instrument.ts) and stays inert while
-  `VITE_SENTRY_DSN` is empty. Only `VITE_`-prefixed variables reach the browser.
+- [`src/config/`](./src/config) owns the runtime configuration: `main.tsx` fetches it with
+  `loadConfig()`, hands it to the Sentry adapter and mounts `ConfigProvider`; components read it
+  through `useConfig()`. Sentry stays inert while `sentryDsn` is `null`.
+- The fetch is a network round trip, so [`index.html`](./index.html) ships a CSS-only splash
+  (`public/boot-loader.css`, a port of the ui-lib `SimpleLoader`) that the first render replaces,
+  plus a `<noscript>` message.
+- [`src/sentry/`](./src/sentry) is the only place `@sentry/react` is imported. Use `initSentry()`,
+  `SentryErrorBoundary`, `captureError()` and `setTag()` from there — `initSentry()` also tags every
+  event with the app name, version, build time and mode from the runtime config.
+- [`src/store/`](./src/store) holds the Zustand stores. `error-log` keeps the last 25 errors in
+  `localStorage` (newest first, oldest evicted) — written by `captureError()`, read with
+  `useErrorLog()`. It is the copy that survives when Sentry is off and no console is reachable,
+  and it is what a debug page will render.
+- Errors are `MinervaError` subclasses from [`src/errors/`](./src/errors) — never bare `Error`.
+  `errors.registry.ts` lists every `ERR_xxx` code in use; take the next free one there, and
+  generate the class's fixed `reference` uuid with `uuidgen` (it identifies the throw site).
 - Linting and formatting come from the root `biome.json`; there is no package-level config.
