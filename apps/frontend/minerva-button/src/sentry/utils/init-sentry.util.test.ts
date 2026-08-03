@@ -27,6 +27,12 @@ describe('initSentry', () => {
     expect(Sentry.init).not.toHaveBeenCalled();
   });
 
+  it('stays off in demo mode, DSN or not', () => {
+    expect(initSentry({ ...configFixture, sentryDsn: dsn, demo: true })).toBe(false);
+    expect(Sentry.init).not.toHaveBeenCalled();
+    expect(Sentry.setTags).not.toHaveBeenCalled();
+  });
+
   it('tags nothing when it does not start', () => {
     initSentry(configFixture);
 

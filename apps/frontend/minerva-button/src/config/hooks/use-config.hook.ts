@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 
 import { ConfigProviderMissingError } from '../../errors';
-import type { RuntimeConfig } from '../config.types';
+import type { AppConfig } from '../config.types';
 import { ConfigContext } from '../provider/config.provider';
 
 /**
@@ -22,7 +22,7 @@ import { ConfigContext } from '../provider/config.provider';
  * const { version, mode } = useConfig();
  * ```
  */
-export function useConfig(): RuntimeConfig {
+export function useConfig(): AppConfig {
   const config = useContext(ConfigContext);
 
   if (config === null) {

@@ -1,8 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ConfigInvalidError, ConfigParseError, ConfigRequestFailedError } from '../../errors';
+import {
+  ConfigDomainMismatchError,
+  ConfigInvalidError,
+  ConfigParseError,
+  ConfigRequestFailedError,
+} from '../../errors';
 import { configFixture } from '../config.fixture';
-import { CONFIG_PATH } from '../config.types';
+import { CONFIG_PATH, MAX_RETRY } from '../config.types';
 import { loadConfig } from './load-config.util';
 
 /**
@@ -86,5 +91,116 @@ describe('loadConfig', () => {
     stubFetch(okWith(() => Promise.resolve('<!doctype html>')));
 
     await expect(loadConfig()).rejects.toBeInstanceOf(ConfigInvalidError);
+  });
+});
+
+/**
+ * The second half of the same call: the URL the pane was opened with. The
+ * document is always served with `appDomain` set here, so each case is about
+ * the host or the query string and nothing else.
+ */
+describe('loadConfig, against the current URL', () => {
+  const domain = 'button.minerva.example';
+  const href = `https://${domain}/`;
+
+  function stubDocument(appDomain: string | null = domain, allowDemo = true) {
+    stubFetch(okWith(() => Promise.resolve({ ...configFixture, appDomain, allowDemo })));
+  }
+
+  it('accepts the configured host', async () => {
+    stubDocument();
+
+    await expect(loadConfig(CONFIG_PATH, href)).resolves.toMatchObject({ host: domain, retry: 0, demo: false });
+  });
+
+  it.each([
+    ['a scheme', `https://${domain}`],
+    ['a trailing slash', `https://${domain}/`],
+    ['a port', `${domain}:443`],
+    ['upper case', domain.toUpperCase()],
+  ])('accepts the host when the domain is configured with %s', async (_label, appDomain) => {
+    stubDocument(appDomain);
+
+    await expect(loadConfig(CONFIG_PATH, href)).resolves.toMatchObject({ host: domain });
+  });
+
+  it('rejects any other host', async () => {
+    stubDocument();
+
+    await expect(loadConfig(CONFIG_PATH, 'https://evil.example/')).rejects.toBeInstanceOf(ConfigDomainMismatchError);
+  });
+
+  it('reports both hosts, so the log line says what was expected', async () => {
+    stubDocument();
+
+    await expect(loadConfig(CONFIG_PATH, 'https://evil.example/')).rejects.toMatchObject({
+      code: 'ERR_006',
+      payload: { expected: domain, actual: 'evil.example' },
+    });
+  });
+
+  it.each([null, ''])('accepts any host when the domain is not pinned (%s)', async (appDomain) => {
+    stubDocument(appDomain);
+
+    await expect(loadConfig(CONFIG_PATH, 'http://localhost:4101/')).resolves.toMatchObject({ host: 'localhost' });
+  });
+
+  it('reads a retry of 1', async () => {
+    stubDocument();
+
+    await expect(loadConfig(CONFIG_PATH, `${href}?retry=1`)).resolves.toMatchObject({ retry: 1 });
+  });
+
+  it.each(['2', '99', '1.9'])('never reports a retry above the cap (?retry=%s)', async (raw) => {
+    stubDocument();
+
+    await expect(loadConfig(CONFIG_PATH, `${href}?retry=${raw}`)).resolves.toMatchObject({ retry: MAX_RETRY });
+  });
+
+  it.each(['abc', '-1', '', 'NaN'])('falls back to 0 for an unusable retry (?retry=%s)', async (raw) => {
+    stubDocument();
+
+    await expect(loadConfig(CONFIG_PATH, `${href}?retry=${raw}`)).resolves.toMatchObject({ retry: 0 });
+  });
+
+  it('reads demo mode from ?demo=true where the deployment allows it', async () => {
+    stubDocument();
+
+    await expect(loadConfig(CONFIG_PATH, `${href}?demo=true`)).resolves.toMatchObject({ demo: true });
+  });
+
+  it('ignores ?demo=true where the deployment does not allow it', async () => {
+    stubDocument(domain, false);
+
+    await expect(loadConfig(CONFIG_PATH, `${href}?demo=true`)).resolves.toMatchObject({ demo: false });
+  });
+
+  it('does not turn demo mode on by allowing it alone', async () => {
+    stubDocument();
+
+    await expect(loadConfig(CONFIG_PATH, href)).resolves.toMatchObject({ demo: false });
+  });
+
+  it('rejects a document without the demo switch', async () => {
+    const { allowDemo: _omitted, ...incomplete } = configFixture;
+    stubFetch(okWith(() => Promise.resolve(incomplete)));
+
+    await expect(loadConfig(CONFIG_PATH, href)).rejects.toBeInstanceOf(ConfigInvalidError);
+  });
+
+  it.each(['false', '1', 'TRUE', 'yes', ''])('treats any other demo value as off (?demo=%s)', async (raw) => {
+    stubDocument();
+
+    await expect(loadConfig(CONFIG_PATH, `${href}?demo=${raw}`)).resolves.toMatchObject({ demo: false });
+  });
+
+  it('reads both parameters together', async () => {
+    stubDocument();
+
+    await expect(loadConfig(CONFIG_PATH, `${href}?retry=1&demo=true`)).resolves.toMatchObject({
+      host: domain,
+      retry: 1,
+      demo: true,
+    });
   });
 });

@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react';
 
-import type { RuntimeConfig } from '../../config';
+import type { AppConfig } from '../../config';
 import { setBuildTags } from './sentry-tags.util';
 
 /**
@@ -22,6 +22,11 @@ import { setBuildTags } from './sentry-tags.util';
  * which is what makes the ordering against the config fetch visible and this
  * function testable.
  *
+ * A demo session is the second switch. The pane is then driven by fixtures --
+ * shown inside the manager, in a story, in a sales walkthrough -- so its errors
+ * are not production signal, and letting them into the project would mean
+ * alerting on a mock. Demo mode makes no outbound calls, and Sentry is one.
+ *
  * @param config - The configuration loaded at start-up.
  * @returns Whether Sentry was initialised.
  *
@@ -35,7 +40,11 @@ import { setBuildTags } from './sentry-tags.util';
  * initSentry(await loadConfig());
  * ```
  */
-export function initSentry(config: RuntimeConfig): boolean {
+export function initSentry(config: AppConfig): boolean {
+  if (config.demo) {
+    return false;
+  }
+
   if (config.sentryDsn === null || config.sentryDsn === '') {
     return false;
   }

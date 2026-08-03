@@ -1,6 +1,7 @@
 import type { ErrorCode } from '@minerva/typescript-lib';
 
 import {
+  ConfigDomainMismatchError,
   ConfigInvalidError,
   ConfigParseError,
   ConfigProviderMissingError,
@@ -55,6 +56,10 @@ export const errorRegistry = {
   ERR_005: {
     error: ConfigProviderMissingError,
     description: 'useConfig() was called outside a ConfigProvider.',
+  },
+  ERR_006: {
+    error: ConfigDomainMismatchError,
+    description: 'The app is served from a host other than the configured appDomain.',
   },
 } as const satisfies Partial<Record<ErrorCode, ErrorRegistryEntry>>;
 

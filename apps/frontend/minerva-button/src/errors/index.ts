@@ -13,6 +13,7 @@
  */
 
 export {
+  ConfigDomainMismatchError,
   ConfigInvalidError,
   ConfigParseError,
   ConfigProviderMissingError,

@@ -1,6 +1,6 @@
 import { createContext, type ReactNode } from 'react';
 
-import type { RuntimeConfig } from '../config.types';
+import type { AppConfig } from '../config.types';
 
 /**
  * Holds the configuration the bootstrap loaded.
@@ -11,11 +11,11 @@ import type { RuntimeConfig } from '../config.types';
  * public surface is what stops a component from calling `useContext` on it and
  * quietly reintroducing the nullable type.
  */
-export const ConfigContext = createContext<RuntimeConfig | null>(null);
+export const ConfigContext = createContext<AppConfig | null>(null);
 
 export interface ConfigProviderProps {
   /** The configuration fetched at start-up. */
-  readonly config: RuntimeConfig;
+  readonly config: AppConfig;
   /** The tree that may read it. */
   readonly children: ReactNode;
 }
