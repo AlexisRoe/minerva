@@ -27,7 +27,7 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - run: make lint
 
@@ -35,7 +35,7 @@ jobs:
     name: typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
         with:
           build-libs: true
@@ -45,7 +45,7 @@ jobs:
     name: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
         with:
           build-libs: true
@@ -55,7 +55,7 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # No build-libs: `make build` builds every package in dependency order,
       # the shared libraries first.
       - uses: ./.github/actions/setup
@@ -65,7 +65,7 @@ jobs:
     name: i18n
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # The three catalogue checks are Python-stdlib-only and read the catalogues
       # straight off disk, so this job skips node and pnpm entirely.
       #
