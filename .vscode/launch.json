@@ -4,17 +4,57 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug api with Nx",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["nx", "serve", "api"],
-      "env": {
-        "NODE_OPTIONS": "--inspect=9229"
-      },
+      "name": "Debug api",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@minerva/api", "run", "start:debug"],
+      "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
+      "autoAttachChildProcesses": true,
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/apps/api/dist/**/*.(m|c|)js", "!**/node_modules/**"]
+      "outFiles": ["${workspaceFolder}/apps/backend/api/dist/**/*.js", "!**/node_modules/**"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug queue-coordinator",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@minerva/queue-coordinator", "run", "start:debug"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/apps/backend/queue-coordinator/dist/**/*.js", "!**/node_modules/**"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Vitest (current file)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["exec", "vitest", "run", "--no-file-parallelism", "${relativeFile}"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug minerva-manager (browser)",
+      "url": "https://localhost:4201",
+      "webRoot": "${workspaceFolder}/apps/frontend/minerva-manager"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug minerva-button (browser)",
+      "url": "https://localhost:4101",
+      "webRoot": "${workspaceFolder}/apps/frontend/minerva-button"
     }
   ]
 }

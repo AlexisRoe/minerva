@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2023"],
+    "types": ["node"],
+
+    /* NestJS reads constructor parameter types at runtime for dependency
+       injection, so decorator metadata has to be emitted. This is also why
+       `verbatimModuleSyntax` and `erasableSyntaxOnly` stay off here: both
+       would strip the type imports that the metadata is derived from. */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+
+    /* `outDir` / `rootDir` are set per package: relative paths in an extended
+       config resolve against this file's directory, not the extending one. */
+  }
+}

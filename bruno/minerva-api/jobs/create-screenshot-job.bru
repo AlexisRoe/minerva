@@ -1,0 +1,32 @@
+meta {
+  name: Create job - screenshot
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/jobs
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "kind": "screenshot",
+    "messageId": "AAMkAGI2-minerva-local-fixture-0002"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.kind: eq screenshot
+}
+
+docs {
+  The second half of `EMAIL_JOB_KINDS`. Same contract as the parse job — the two exist
+  separately so both branches of `isEmailJobKind()` are covered by a collection run.
+}

@@ -1,0 +1,67 @@
+{
+  "name": "@minerva/ui-lib",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "storybook": "bash ../../scripts/storybook-dev.sh",
+    "build-storybook": "storybook build",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
+  },
+  "license": "MIT",
+  "author": "Alexis Roehrling",
+  "dependencies": {
+    "@mantine/core": "catalog:",
+    "@mantine/hooks": "catalog:",
+    "@tabler/icons-react": "catalog:"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "catalog:",
+    "@storybook/addon-docs": "catalog:",
+    "@storybook/react-vite": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "jsdom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "storybook": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./primitives": {
+      "types": "./dist/export/primitives.d.ts",
+      "default": "./dist/export/primitives.js"
+    },
+    "./hooks": {
+      "types": "./dist/export/hooks.d.ts",
+      "default": "./dist/export/hooks.js"
+    },
+    "./icons": {
+      "types": "./dist/export/icons.d.ts",
+      "default": "./dist/export/icons.js"
+    }
+  },
+  "files": [
+    "dist"
+  ]
+}

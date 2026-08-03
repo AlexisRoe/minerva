@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // TypeScript 6 (TS5011) requires this to be explicit rather than inferring
+    // it from the included files.
+    "rootDir": "./src"
+  },
+  "exclude": ["node_modules", "dist", "test", "vitest.config.ts", "**/*.spec.ts"]
+}

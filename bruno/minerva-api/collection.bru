@@ -1,0 +1,21 @@
+auth {
+  mode: none
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  # @minerva/api
+
+  Every request in this collection targets `apps/backend/api` — the NestJS service that the
+  frontends call. Routes come from `apps/backend/api/src/app.controller.ts`; the `EmailJob`
+  payload comes from `@minerva/typescript-lib` (`shared/typescript-lib/src/queue.ts`).
+
+  Select the **local** environment before sending anything — `{{baseUrl}}` is defined
+  there, not here.
+
+  The service has no authentication yet, so the collection-level auth mode is `none` and
+  every request inherits it. When auth arrives, set it once here rather than per request.
+}

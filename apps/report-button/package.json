@@ -1,9 +1,0 @@
-{
-  "name": "report-button",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "lint": "biome check .",
-    "validate:manifest": "npx office-addin-manifest validate manifest/manifest.local.xml"
-  }
-}

@@ -1,0 +1,51 @@
+meta {
+  name: Create job - parse
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/jobs
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "kind": "parse",
+    "messageId": "AAMkAGI2-minerva-local-fixture-0001"
+  }
+}
+
+vars:post-response {
+  lastJobId: res.body.id
+}
+
+assert {
+  res.status: eq 201
+  res.body.kind: eq parse
+}
+
+tests {
+  test("returns a complete EmailJob", function () {
+    const job = res.getBody();
+    expect(job.id).to.be.a("string");
+    expect(job.messageId).to.equal("AAMkAGI2-minerva-local-fixture-0001");
+    expect(new Date(job.enqueuedAt).toISOString()).to.equal(job.enqueuedAt);
+  });
+}
+
+docs {
+  Enqueues a parse job for one email.
+
+  `AppService.createJob()` fills in `id` (a `randomUUID()`) and `enqueuedAt` (ISO-8601),
+  so the response is a full `EmailJob` even though the request only carries two fields.
+  Nest answers `201` on `@Post`, not `200`.
+
+  The generated id is captured into the runtime variable `lastJobId`, which the
+  queue-coordinator collection can pick up if you ever chain the two services.
+}
