@@ -4,6 +4,6 @@ export default defineConfig({
   test: {
     name: 'typescript-lib',
     environment: 'node',
-    include: ['src/**/*.spec.ts'],
+    include: ['src/**/*.test.ts'],
   },
 });

@@ -21,6 +21,6 @@ export default defineConfig({
   test: {
     name: 'queue-coordinator',
     environment: 'node',
-    include: ['src/**/*.spec.ts', 'test/**/*.e2e-spec.ts'],
+    include: ['src/**/*.test.ts', 'test/**/*.e2e-test.ts'],
   },
 });

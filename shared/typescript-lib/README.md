@@ -68,7 +68,7 @@ pnpm --filter @minerva/typescript-lib dev                # same build in watch m
 
 ## Code conventions
 
-- all code needs to be tested in a `*.spec.ts` file
+- all code needs to be tested in a `*.test.ts` file
 - all code needs an `*.example.ts` file to showcase how to use it (and use that
   for the test files)
 - types and interfaces live in an external `*.types.ts` file
@@ -93,7 +93,7 @@ pnpm --filter @minerva/typescript-lib dev                # same build in watch m
 | `*.constants.ts` | Frozen literal values and the types derived from them.                        |
 | `*.util.ts`    | Free-standing pure helper functions around the concept in the same directory.   |
 | `*.example.ts` | Runnable usage examples, consumed by the spec files. Never exported.            |
-| `*.spec.ts`    | Vitest suite for the sibling file of the same base name.                        |
+| `*.test.ts`    | Vitest suite for the sibling file of the same base name.                        |
 
 ## ADR
 
