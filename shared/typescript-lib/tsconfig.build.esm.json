@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+
+  /* The ESM half of the dual build. The frontends consume this package through
+     Vite, which serves `dist/**` straight to the browser — a CommonJS file has
+     no named exports there, so `import { DEFAULT_LANGUAGE } from ...` fails at
+     runtime. `bundler` resolution (rather than `nodenext`) is what lets the
+     extensionless relative imports in `src/` stay as they are. */
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "outDir": "./dist/esm",
+    "tsBuildInfoFile": "./dist/esm/.tsbuildinfo"
+  },
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.example.ts"]
+}

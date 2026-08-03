@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup check-deps install build-libs certs copy-env icons dev dev-manager dev-button build verify verify-i18n verify-i18n-verbose test typecheck lint format storybook
+.PHONY: help setup check-deps install build-libs certs copy-env icons dev dev-manager dev-button shutdown-fe build verify verify-i18n verify-i18n-verbose test typecheck lint format storybook
 
 # Defaults for `make icons` (override on the command line)
 OUT ?= ./icons
@@ -48,6 +48,11 @@ dev-manager: ## Run only minerva-manager on https://localhost:4201 (builds the u
 
 dev-button: ## Run only minerva-button on https://localhost:4101 (builds the ui-lib first)
 	@pnpm --filter @minerva/ui-lib build && pnpm --filter @minerva/button dev
+
+# Blunt on purpose: SIGTERM, then SIGKILL. Only processes whose command line
+# mentions `vite` are touched — see the guard in the script.
+shutdown-fe: ## DANGEROUS: force-kill the button and manager dev servers (DRY_RUN=1 to preview)
+	@bash scripts/shutdown-frontends.sh
 
 build: ## Build every workspace package in dependency order
 	@pnpm build
