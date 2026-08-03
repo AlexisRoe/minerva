@@ -2,6 +2,13 @@
   "title": "Minerva",
   "intro": "Send the open message to Minerva for processing.",
   "submit": "Send to Minerva",
-  "queued": "Queued for processing.",
-  "error": "Something went wrong."
+  "error": "Something went wrong.",
+  "loading": "Loading…",
+  "from": "From",
+  "received": "Received",
+  "no-message": "Open a message to send it to Minerva.",
+  "confirmation-title": "Sent to Minerva",
+  "confirmation-body": "Minerva is processing the message. You can close this pane.",
+  "error-title": "Minerva could not continue.",
+  "back": "Back"
 }

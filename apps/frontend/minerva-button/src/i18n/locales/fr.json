@@ -2,6 +2,13 @@
   "title": "Minerva",
   "intro": "Envoyer le message ouvert à Minerva pour traitement.",
   "submit": "Envoyer à Minerva",
-  "queued": "En file d'attente pour traitement.",
-  "error": "Une erreur s'est produite."
+  "error": "Une erreur s'est produite.",
+  "loading": "Chargement…",
+  "from": "De",
+  "received": "Reçu",
+  "no-message": "Ouvrez un message pour l'envoyer à Minerva.",
+  "confirmation-title": "Envoyé à Minerva",
+  "confirmation-body": "Minerva traite le message. Vous pouvez fermer ce volet.",
+  "error-title": "Minerva n'a pas pu continuer.",
+  "back": "Retour"
 }

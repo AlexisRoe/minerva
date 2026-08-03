@@ -2,6 +2,13 @@
   "title": "Minerva",
   "intro": "Die geöffnete Nachricht zur Verarbeitung an Minerva senden.",
   "submit": "An Minerva senden",
-  "queued": "Zur Verarbeitung eingereiht.",
-  "error": "Etwas ist schiefgelaufen."
+  "error": "Etwas ist schiefgelaufen.",
+  "loading": "Wird geladen …",
+  "from": "Von",
+  "received": "Empfangen",
+  "no-message": "Öffnen Sie eine Nachricht, um sie an Minerva zu senden.",
+  "confirmation-title": "An Minerva gesendet",
+  "confirmation-body": "Minerva verarbeitet die Nachricht. Sie können diesen Bereich schließen.",
+  "error-title": "Minerva konnte nicht fortfahren.",
+  "back": "Zurück"
 }

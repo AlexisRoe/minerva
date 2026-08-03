@@ -2,6 +2,13 @@
   "title": "Minerva",
   "intro": "Stuur het geopende bericht naar Minerva voor verwerking.",
   "submit": "Naar Minerva sturen",
-  "queued": "In de wachtrij voor verwerking.",
-  "error": "Er is iets misgegaan."
+  "error": "Er is iets misgegaan.",
+  "loading": "Laden…",
+  "from": "Van",
+  "received": "Ontvangen",
+  "no-message": "Open een bericht om het naar Minerva te sturen.",
+  "confirmation-title": "Naar Minerva gestuurd",
+  "confirmation-body": "Minerva verwerkt het bericht. U kunt dit deelvenster sluiten.",
+  "error-title": "Minerva kon niet verdergaan.",
+  "back": "Terug"
 }

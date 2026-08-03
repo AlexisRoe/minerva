@@ -2,6 +2,13 @@
   "title": "Minerva",
   "intro": "إرسال الرسالة المفتوحة إلى Minerva لمعالجتها.",
   "submit": "إرسال إلى Minerva",
-  "queued": "في قائمة الانتظار للمعالجة.",
-  "error": "حدث خطأ ما."
+  "error": "حدث خطأ ما.",
+  "loading": "جارٍ التحميل…",
+  "from": "من",
+  "received": "تاريخ الاستلام",
+  "no-message": "افتح رسالة لإرسالها إلى Minerva.",
+  "confirmation-title": "تم الإرسال إلى Minerva",
+  "confirmation-body": "يقوم Minerva بمعالجة الرسالة. يمكنك إغلاق هذا الجزء.",
+  "error-title": "تعذّر على Minerva المتابعة.",
+  "back": "رجوع"
 }

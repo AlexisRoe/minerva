@@ -2,6 +2,13 @@
   "title": "Minerva",
   "intro": "Enviar el mensaje abierto a Minerva para su procesamiento.",
   "submit": "Enviar a Minerva",
-  "queued": "En cola para su procesamiento.",
-  "error": "Algo ha salido mal."
+  "error": "Algo ha salido mal.",
+  "loading": "Cargando…",
+  "from": "De",
+  "received": "Recibido",
+  "no-message": "Abra un mensaje para enviarlo a Minerva.",
+  "confirmation-title": "Enviado a Minerva",
+  "confirmation-body": "Minerva está procesando el mensaje. Puede cerrar este panel.",
+  "error-title": "Minerva no ha podido continuar.",
+  "back": "Volver"
 }

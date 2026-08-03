@@ -1,7 +1,14 @@
 {
   "title": "Minerva",
-  "intro": "Something not translated",
+  "intro": "将打开的邮件发送给 Minerva 进行处理。",
   "submit": "发送给 Minerva",
-  "queued": "已加入处理队列。",
-  "error": "出错了。"
+  "error": "出错了。",
+  "loading": "加载中…",
+  "from": "发件人",
+  "received": "接收时间",
+  "no-message": "请打开一封邮件，然后发送给 Minerva。",
+  "confirmation-title": "已发送给 Minerva",
+  "confirmation-body": "Minerva 正在处理该邮件，您可以关闭此窗格。",
+  "error-title": "Minerva 无法继续。",
+  "back": "返回"
 }

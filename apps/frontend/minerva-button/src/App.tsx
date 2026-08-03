@@ -1,33 +1,22 @@
-import { useDisclosure } from '@minerva/ui-lib/hooks';
-import { IconMail } from '@minerva/ui-lib/icons';
-import { Button, Stack, Text, Title } from '@minerva/ui-lib/primitives';
+import { RouterProvider } from 'react-router';
 
-import { I18nProvider, useTranslations } from './i18n';
+import { I18nProvider } from './i18n';
+import { createRouter } from './routing';
 
-/** The pane's content; separate so it renders under {@link I18nProvider}. */
-function TaskPane() {
-  const [submitted, { open }] = useDisclosure(false);
-  const { t } = useTranslations();
+/** Built once, at module scope: a router rebuilt on render loses its history. */
+const router = createRouter();
 
-  return (
-    <Stack gap="sm" p="md">
-      <Title order={2}>{t('title')}</Title>
-      <Text size="sm" c="dimmed">
-        {t('intro')}
-      </Text>
-      <Button leftSection={<IconMail size={18} stroke={1.5} />} onClick={open}>
-        {t('submit')}
-      </Button>
-      {submitted ? <Text size="sm">{t('queued')}</Text> : null}
-    </Stack>
-  );
-}
-
-/** The task-pane surface hosted inside Outlook. */
+/**
+ * The task-pane surface hosted inside Outlook.
+ *
+ * Nothing but wiring: the providers the whole tree needs, and the router that
+ * decides which screen is on. The rest of the bootstrap -- configuration,
+ * Sentry, the theme -- is in `main.tsx`, above this.
+ */
 export function App() {
   return (
     <I18nProvider>
-      <TaskPane />
+      <RouterProvider router={router} />
     </I18nProvider>
   );
 }

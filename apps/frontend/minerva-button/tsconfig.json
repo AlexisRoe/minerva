@@ -1,7 +1,9 @@
 {
   "extends": "../../../tsconfig.web.json",
   "compilerOptions": {
-    "types": ["vite/client", "node"],
+    /* `office-js` is ambient: the CDN script defines the `Office` global, so the
+       types are declared globally rather than imported. */
+    "types": ["vite/client", "node", "office-js"],
     /* The translation catalogues are plain JSON, imported directly. */
     "resolveJsonModule": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo"
