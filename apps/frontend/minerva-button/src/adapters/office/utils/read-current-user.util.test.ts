@@ -1,19 +1,8 @@
 import { Languages } from '@minerva/typescript-lib';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { stubOffice } from '../../../test/office.fixture';
 import { readCurrentUser } from './read-current-user.util';
-
-/** Installs a minimal `Office` global, the way the host script would. */
-function stubOffice(options: {
-  userProfile?: Partial<Office.UserProfile> | undefined;
-  displayLanguage?: string;
-}): void {
-  const { userProfile, displayLanguage = 'en-US' } = options;
-
-  vi.stubGlobal('Office', {
-    context: { displayLanguage, mailbox: userProfile === undefined ? {} : { userProfile } },
-  });
-}
 
 describe('readCurrentUser', () => {
   afterEach(() => {
@@ -40,7 +29,7 @@ describe('readCurrentUser', () => {
   });
 
   it('keeps the full tag while reducing it to a catalogue', () => {
-    stubOffice({ userProfile: {}, displayLanguage: 'en-GB' });
+    stubOffice({ displayLanguage: 'en-GB' });
 
     // The region is what the backend picks templates by, so it must survive;
     // the catalogues are keyed by language alone.
@@ -51,7 +40,7 @@ describe('readCurrentUser', () => {
   });
 
   it('falls back to the default catalogue for a language Minerva has none of', () => {
-    stubOffice({ userProfile: {}, displayLanguage: 'ja-JP' });
+    stubOffice({ displayLanguage: 'ja-JP' });
 
     expect(readCurrentUser()).toMatchObject({
       displayLanguage: 'ja-JP',
@@ -59,8 +48,16 @@ describe('readCurrentUser', () => {
     });
   });
 
+  it('fills in for a profile the host left blank', () => {
+    stubOffice({ userProfile: {} });
+
+    // Every field is optional in the Office.js declarations; a missing name must
+    // not become the string "undefined" in the details drawer.
+    expect(readCurrentUser()).toMatchObject({ name: '', email: '', timeZone: '' });
+  });
+
   it('fails with ERR_010 when there is no mailbox to read', () => {
-    stubOffice({ userProfile: undefined });
+    stubOffice({ hasMailbox: false });
 
     // A mailbox always has an owner, so this is the gate having been skipped
     // rather than a user who does not exist.

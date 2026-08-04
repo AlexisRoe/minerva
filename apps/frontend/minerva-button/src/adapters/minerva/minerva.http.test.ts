@@ -75,6 +75,15 @@ describe('createMinervaHttpAdapter', () => {
       expect(init?.method).toBe('GET');
       expect(init?.body).toBeUndefined();
     });
+
+    it('fails with ERR_011 when the tenant has no configuration', async () => {
+      stubJson({}, 404);
+
+      await expect(createMinervaHttpAdapter().getSettings({ userLanguage: Languages.English })).rejects.toMatchObject({
+        code: 'ERR_011',
+        payload: { status: 404 },
+      });
+    });
   });
 
   describe('submitReport', () => {
@@ -115,6 +124,18 @@ describe('createMinervaHttpAdapter', () => {
       // Setting it by hand omits the multipart boundary and produces a body the
       // server cannot parse -- a failure that only shows up against a real backend.
       expect(init.headers).toBeUndefined();
+    });
+
+    it('fails with ERR_011 when the upload is rejected', async () => {
+      // The reporting action depends on this rejecting rather than resolving with
+      // a bad body: it is what stops notification mails going out for a report
+      // that was never filed.
+      stubJson({}, 413);
+
+      await expect(createMinervaHttpAdapter().submitReport(form)).rejects.toMatchObject({
+        code: 'ERR_011',
+        payload: { status: 413 },
+      });
     });
   });
 });

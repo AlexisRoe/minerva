@@ -76,6 +76,26 @@ describe('ErrorView', () => {
     expect(captureError).toHaveBeenCalledTimes(1);
   });
 
+  it('reports nothing when reached with no error to report', async () => {
+    const router = createMemoryRouter([{ path: ROUTES.error, Component: ErrorView }], {
+      initialEntries: [ROUTES.error],
+    });
+
+    render(
+      <ConfigProvider config={configFixture}>
+        <MinervaThemeProvider>
+          <RouterProvider router={router} />
+        </MinervaThemeProvider>
+      </ConfigProvider>,
+    );
+
+    await screen.findByText(/could not continue/i);
+
+    // `/error` is a real route a `navigate()` can reach. Capturing here would
+    // file a Sentry issue for a screen nobody arrived at by failing.
+    expect(captureError).not.toHaveBeenCalled();
+  });
+
   it('shows the id the report came back with', async () => {
     renderThrowing(new OfficeLoadTimeoutError(5000));
 

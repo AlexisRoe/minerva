@@ -33,4 +33,17 @@ describe('useCurrentMessage', () => {
       expect(result.current).toEqual({ message, isLoading: false });
     });
   });
+
+  it('drops a response that arrives after the pane has moved on', async () => {
+    const { result, unmount } = renderHook(() => useCurrentMessage());
+
+    unmount();
+
+    // The pane survives the user selecting another mail, and two reads can
+    // resolve out of order; writing state after unmount is a React warning at
+    // best and the previous message on screen at worst.
+    await waitFor(() => {
+      expect(result.current).toEqual({ message: null, isLoading: true });
+    });
+  });
 });

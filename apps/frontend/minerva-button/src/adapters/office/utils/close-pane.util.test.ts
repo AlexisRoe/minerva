@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { stubOffice } from '../../../test/office.fixture';
 import { closePane } from './close-pane.util';
 
 describe('closePane', () => {
@@ -8,8 +9,7 @@ describe('closePane', () => {
   });
 
   it('asks the host to close the container', () => {
-    const closeContainer = vi.fn();
-    vi.stubGlobal('Office', { context: { ui: { closeContainer } } });
+    const { closeContainer } = stubOffice();
 
     closePane();
 
@@ -21,7 +21,7 @@ describe('closePane', () => {
   });
 
   it('fails with ERR_010 when the host exposes no dialog surface', () => {
-    vi.stubGlobal('Office', { context: {} });
+    stubOffice({ hasUi: false });
 
     expect(() => closePane()).toThrow(expect.objectContaining({ code: 'ERR_010' }));
   });

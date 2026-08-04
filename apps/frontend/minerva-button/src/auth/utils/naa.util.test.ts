@@ -90,6 +90,15 @@ describe('acquireTokenViaNaa', () => {
     });
   });
 
+  it('wraps a non-Error rejection so the cause is still readable', async () => {
+    stubClient({ silent: () => Promise.reject('token endpoint said no') });
+
+    const error = await acquireTokenViaNaa('client-1', ['Mail.Read']).catch((thrown) => thrown);
+
+    expect(error.cause).toBeInstanceOf(Error);
+    expect((error.cause as Error).message).toBe('token endpoint said no');
+  });
+
   it('reports a client that cannot be built as ERR_014', async () => {
     createNestablePublicClientApplication.mockRejectedValue(new Error('not nestable'));
 

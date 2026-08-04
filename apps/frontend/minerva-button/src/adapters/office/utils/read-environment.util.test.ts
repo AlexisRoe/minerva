@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { stubOffice } from '../../../test/office.fixture';
 import type { OfficeReadyInfo } from '../office.types';
 import { MAILBOX_REQUIREMENT_SET, NAA_REQUIREMENT_SET, readEnvironment } from './read-environment.util';
 
@@ -15,28 +16,13 @@ const readyInfo: OfficeReadyInfo = {
   platform: 'OfficeOnline' as unknown as Office.PlatformType,
 };
 
-/**
- * Installs an `Office` global whose `isSetSupported` answers from `supported`,
- * so a test names the sets this client has and nothing else.
- */
-function stubOffice(options: { withMailbox?: boolean; supported?: readonly string[] }): void {
-  const { withMailbox = true, supported = ['Mailbox', 'NestedAppAuth'] } = options;
-
-  vi.stubGlobal('Office', {
-    context: {
-      ...(withMailbox ? { mailbox: {} } : {}),
-      requirements: { isSetSupported: (name: string) => supported.includes(name) },
-    },
-  });
-}
-
 describe('readEnvironment', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
   it('reports the host, the platform and that NAA is available', () => {
-    stubOffice({});
+    stubOffice();
 
     expect(readEnvironment(readyInfo)).toEqual({
       host: 'Outlook',
@@ -46,13 +32,13 @@ describe('readEnvironment', () => {
   });
 
   it('reports NAA as unavailable without failing', () => {
-    stubOffice({ supported: ['Mailbox'] });
+    stubOffice({ requirementSets: { 'Mailbox/1.13': true } });
 
     expect(readEnvironment(readyInfo)).toMatchObject({ naaSupported: false });
   });
 
   it('fails with ERR_008 when the host is not Outlook', () => {
-    stubOffice({ withMailbox: false });
+    stubOffice({ hasMailbox: false });
 
     expect(() => readEnvironment(readyInfo)).toThrow(
       expect.objectContaining({
@@ -63,7 +49,7 @@ describe('readEnvironment', () => {
   });
 
   it('fails with ERR_009 when Outlook is too old', () => {
-    stubOffice({ supported: [] });
+    stubOffice({ requirementSets: {} });
 
     expect(() => readEnvironment(readyInfo)).toThrow(
       expect.objectContaining({
@@ -79,7 +65,7 @@ describe('readEnvironment', () => {
   });
 
   it('falls back to "unknown" when the host reports neither', () => {
-    stubOffice({});
+    stubOffice();
 
     expect(readEnvironment({ host: null, platform: null })).toMatchObject({
       host: 'unknown',

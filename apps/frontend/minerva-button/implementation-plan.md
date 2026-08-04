@@ -852,7 +852,7 @@ Mutation-tested both. Making `ERR_008` retryable failed the new invariant. Rever
 throw-site reference initially failed **nothing** — `ErrorView` had no test asserting *which* id
 reached the screen — so two cases were added, and the mutation now fails both.
 
-## Step 11 — i18n
+## Step 11 — i18n ✅ done
 
 **Files:** `src/i18n/locales/*.json` (all 8)
 
@@ -864,7 +864,35 @@ skill to fill the other seven and `make verify-i18n` to check for missing/stale/
 The loading-step strings are **not** in the i18n catalogues — they live in `src/constants/` by
 design, because `mixLanguages` deliberately shows a different language per step.
 
-## Step 12 — Tests
+### Outcome
+
+Done incrementally rather than as a step of its own. Deferring it would have left `verify-i18n` — a
+CI gate — red between every step, so each step's keys were translated as they landed, through the
+`translate` skill's check-fill-recheck loop.
+
+`en.json` went from 13 keys to **61**, and all eight catalogues carry identical key sets. The
+loading-step strings stayed in `src/constants/` as planned.
+
+Two things worth recording rather than the key count:
+
+1. **The catalogues were rewritten, not only extended.** Six keys went stale when `TaskPaneView` was
+   deleted, and `no-message` changed *meaning* rather than wording ("Open a message to send it" →
+   "No message open"). No script catches a key whose meaning drifts while its name holds, so its
+   seven translations were rewritten by hand.
+
+2. **Every remaining dynamic lookup is safe by construction.** `verify-i18n` flags five `t(variable)`
+   calls it cannot check statically. One is `translate()` itself. The other four read keys that are
+   typed `TranslationKey` — the confirmation screen's `DISPOSITION` and `IDENTIFIED_KEYS`, and the
+   error registry's `message` — so the compiler checks them, and the registry test additionally
+   asserts every `message` exists in `en.json`. Nothing is checked only by eye.
+
+### Verified
+
+`make verify-i18n` green: 8 valid catalogues, 7 complete languages, every literal key present. Key
+sets confirmed identical across all eight files, and the two interpolated strings confirmed to keep
+their `{{address}}` and `{{id}}` placeholders in every language.
+
+## Step 12 — Tests ✅ done
 
 Every method gets a sibling `*.test.ts(x)`. Follow the established patterns:
 
@@ -882,6 +910,69 @@ Every method gets a sibling `*.test.ts(x)`. Follow the established patterns:
 Cover at minimum: the 5s Office timeout, each environment-gate rejection, NAA silent → popup
 fallback, NAA-unsupported → dialog fallback, `reportLoader` happy path and each redirect, the report
 action's partial `sendMail` failure, and the boundary's Minerva-vs-plain branching.
+
+### Outcome
+
+**836 tests across 106 files. Coverage: 99.47% statements, 94.22% branches, 100% functions.**
+
+Every case on the minimum list was already covered by the step that introduced it; this step added
+the fixture the plan asked for, and filled the gaps a coverage run exposed rather than the gaps
+memory suggested.
+
+`src/test/office.fixture.ts` now builds the `Office` global, and the four reader tests
+(`read-environment`, `read-current-message`, `read-current-user`, `close-pane`) use it. Two
+Office-shaped tests deliberately keep their own fakes and say so: `wait-for-office` needs control
+over *when* `onReady` settles, and `dialog.util` needs to drive the dialog's event handlers — a
+builder general enough for both would be harder to read than what it replaced.
+
+### Gaps the coverage run found
+
+Six, none of which were obvious from reading the tests:
+
+1. **`createPaneAdapters` had no direct test at all.** It is the seam between config, auth and the
+   adapters, and every other test mocked it away. It now has its own file, including that the token
+   provider is *not* called eagerly — a pane that acquired a token on construction would prompt a
+   user who was only being shown a demo.
+2. **`getSettings` and `submitReport` had no failure test** — only `authorize` did. The upload one
+   matters most: the reporting action depends on it rejecting rather than resolving, because that is
+   what stops notification mails going out for a report that was never filed.
+3. **`encodeAttachment` never had its error path exercised.** A `FileReader` that fails would
+   otherwise leave the reporting action stuck mid-flow — report filed, no mail sent, nothing shown.
+4. **The stale-response guard in `useCurrentMessage`** was uncovered, so nothing checked that a read
+   resolving after unmount is dropped.
+5. **Two `??` fallbacks in the dialog flow** — Office does not always populate `error` on a failed
+   `displayDialogAsync`, nor `error` on a dialog event, and both would have produced a Sentry issue
+   whose reason read `undefined`.
+6. **`/error` reached directly** reported to Sentry. It is a real route a `navigate()` can hit, so
+   that filed an issue for a screen nobody arrived at by failing.
+
+### What is deliberately not covered
+
+Three defensive early-returns: `sendReport` with no drawer open, `dispose` before the stores are
+filled, and the boundary's own guard. Each is unreachable through the UI and guards a wiring fault
+rather than a behaviour; a test for one would assert that a `return` returns. The rest of the
+uncovered branches are default-parameter values in the i18n hooks.
+
+### Verified
+
+- `make build-libs`, `make build`, `make verify`, `make verify-i18n` — all green.
+- The built `dist/index.html` carries the Office.js CDN tag **before** the module script, which is
+  what the whole `defer`-ordering argument in Step 1 depends on; `dist/auth-dialog/index.html` carries
+  it too.
+- `dist/config.json` emits `entraClientId`, so the Step 4 configuration reaches a real deployment.
+
+The build warns that the main chunk is over 500 kB (1.08 MB raw, 332 kB gzipped). MSAL is already
+split into its own chunk. Not addressed here — it is a build-configuration question rather than part
+of this plan — but worth a look before this ships.
+
+### Still outstanding (not code)
+
+The three end-to-end passes in the Verification section below cannot be completed from here:
+
+- **Demo mode in a browser** needs `APP_FE_RB_ALLOW_DEMO=true` in the root `.env`.
+- **Real Outlook** needs the sideloaded manifest, the trusted local cert, the Entra SPA redirect
+  `brk-multihub://localhost:4101`, and `APP_FE_RB_ENTRA_CLIENT_ID` set.
+- The three backend endpoints do not exist yet, so only demo mode runs end to end.
 
 ---
 

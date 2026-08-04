@@ -11,8 +11,10 @@ type Handler = (event: unknown) => void;
  * The returned `fire` is what stands in for the user: nothing happens in this
  * flow until either a message or a dialog event arrives.
  */
-function stubOffice(options: { opens?: boolean } = {}) {
-  const { opens = true } = options;
+function stubOffice(options: { opens?: boolean; openError?: { message: string } | null } = {}) {
+  // `null` means Office reported a failure but attached no error object, which is
+  // distinct from the option simply not being set.
+  const { opens = true, openError = { message: 'popups blocked' } } = options;
   const handlers = new Map<string, Handler>();
   const close = vi.fn();
   const displayed: string[] = [];
@@ -39,7 +41,7 @@ function stubOffice(options: { opens?: boolean } = {}) {
                     },
                   },
                 }
-              : { status: 'failed', error: { message: 'popups blocked' } },
+              : { status: 'failed', error: openError ?? undefined },
           );
         },
       },
@@ -115,6 +117,17 @@ describe('acquireTokenViaDialog', () => {
     });
   });
 
+  it('names a reason even when the dialog event carries no code', async () => {
+    const office = stubOffice();
+    const pending = acquireTokenViaDialog('client-1');
+
+    office.event(undefined as unknown as number);
+
+    // Office does not always populate `error`; a reason of `undefined` would tell
+    // whoever reads the Sentry issue nothing at all.
+    await expect(pending).rejects.toMatchObject({ payload: { reason: 'dialog-event-0' } });
+  });
+
   it('survives an unreadable payload on the relay', async () => {
     const office = stubOffice();
     const pending = acquireTokenViaDialog('client-1');
@@ -141,6 +154,14 @@ describe('acquireTokenViaDialog when the dialog cannot open', () => {
     await expect(acquireTokenViaDialog('client-1')).rejects.toMatchObject({
       code: 'ERR_015',
       payload: { reason: 'popups blocked' },
+    });
+  });
+
+  it('still names a reason when Office gives none', async () => {
+    stubOffice({ opens: false, openError: null });
+
+    await expect(acquireTokenViaDialog('client-1')).rejects.toMatchObject({
+      payload: { reason: 'could-not-open' },
     });
   });
 });
