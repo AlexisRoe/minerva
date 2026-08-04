@@ -1,5 +1,5 @@
-import { OfficeNotReadyError } from '../../../errors';
-import type { OutlookMessage } from '../office.types';
+import type { OutlookMessage } from '@/adapters/office/office.types';
+import { OfficeNotReadyError } from '@/domain/errors/office.errors';
 
 /**
  * Reads the message the task pane was opened on.

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import type { OutlookMessage } from '../office.types';
-import { readCurrentMessage } from '../utils/read-current-message.util';
-import { waitForOffice } from '../utils/wait-for-office.util';
+import type { OutlookMessage } from '@/adapters/office/office.types';
+import { readCurrentMessage } from '@/adapters/office/utils/read-current-message.util';
+import { waitForOffice } from '@/adapters/office/utils/wait-for-office.util';
 
 /** What {@link useCurrentMessage} hands a view. */
 export interface CurrentMessageState {

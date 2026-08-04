@@ -6,9 +6,8 @@ import type {
   ReportingFormData,
   ReportingResponse,
 } from '@minerva/typescript-lib';
-
-import { MinervaRequestFailedError } from '../../errors';
-import { request } from '../utils/request.util';
+import { request } from '@/adapters/utils/request.util';
+import { MinervaRequestFailedError } from '@/domain/errors/request.errors';
 import { MINERVA_ENDPOINTS, type MinervaAdapter } from './minerva.types';
 
 /** Builds the multipart body for {@link MinervaAdapter.submitReport}. */

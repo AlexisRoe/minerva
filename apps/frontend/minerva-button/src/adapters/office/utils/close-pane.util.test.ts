@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { stubOffice } from '../../../test/office.fixture';
+import { stubOffice } from '@/fixtures/office.fixture';
 import { closePane } from './close-pane.util';
 
 describe('closePane', () => {

@@ -1,5 +1,5 @@
-import { OfficeHostUnsupportedError, OfficeRequirementSetError } from '../../../errors';
-import type { OfficeEnvironment, OfficeReadyInfo } from '../office.types';
+import type { OfficeEnvironment, OfficeReadyInfo } from '@/adapters/office/office.types';
+import { OfficeHostUnsupportedError, OfficeRequirementSetError } from '@/domain/errors/office.errors';
 
 /**
  * The Outlook API surface the pane is written against.

@@ -2,10 +2,10 @@ import { mixLanguages } from '@minerva/ui-lib';
 import type React from 'react';
 import { useMemo } from 'react';
 import { Outlet, useNavigation } from 'react-router';
-import { InitialLoadingData } from '../../constants/initial-loading.constants';
-import { ReportingLoadingData } from '../../constants/reporting-loading.constants';
-import { ROUTES } from '../../constants/routes.constants';
-import { LoadingView } from '../../views/loading/loading.view';
+import { InitialLoadingData } from '@/constants/initial-loading.constants';
+import { ReportingLoadingData } from '@/constants/reporting-loading.constants';
+import { ROUTES } from '@/constants/routes.constants';
+import { LoadingView } from '@/views/loading/loading.view';
 
 /**
  * The frame every screen renders inside, and the pane's loading indicator.

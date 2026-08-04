@@ -9,7 +9,7 @@ import { mixLanguages } from './loading-indicator.util';
  * The reel centres itself in what it is put in, so every story is given a frame
  * with a height. A story that is about the width sets `frameWidth` to narrow it.
  */
-const inFrame: Decorator = (Story, { parameters }) => (
+const inFrame: Decorator = (Story, { parameters }): React.ReactElement => (
   <Box w={parameters.frameWidth ?? '100%'} h={360} bd="1px dashed var(--mantine-color-default-border)" bdrs="md">
     <Story />
   </Box>

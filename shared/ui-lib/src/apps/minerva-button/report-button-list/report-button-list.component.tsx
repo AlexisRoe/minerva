@@ -18,7 +18,7 @@ export interface ReportButtonListProps extends StackProps, ElementProps<'div'> {
  * </ReportButtonList>
  * ```
  */
-export function ReportButtonList({ children, ...rest }: ReportButtonListProps) {
+export function ReportButtonList({ children, ...rest }: ReportButtonListProps): React.ReactElement {
   return (
     <Stack gap="md" w="100%" h="100%" {...rest}>
       {children}

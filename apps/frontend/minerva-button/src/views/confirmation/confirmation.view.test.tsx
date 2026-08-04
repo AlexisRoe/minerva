@@ -1,14 +1,17 @@
 import type { EmailType } from '@minerva/typescript-lib';
 import { MinervaThemeProvider } from '@minerva/ui-lib';
-import { render, screen, waitFor } from '@testing-library/react';
+import { type RenderResult, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, Form, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { ConfigProvider, configFixture } from '../../config';
-import { demoEnvironment, demoMessage, demoSettings, demoUser } from '../../demo';
-import type { ReportResult } from '../../reporting';
-import { type ReportVariant, useOfficeStore, useSettingsStore } from '../../store';
+import type { ReportResult } from '@/domain/reporting/reporting.types';
+import { configFixture } from '@/fixtures/config.fixture';
+import { demoSettings } from '@/fixtures/demo/minerva.fixture';
+import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
+import { ConfigProvider } from '@/platform/config/provider/config.provider';
+import { useOfficeStore } from '@/stores/office/office.store';
+import { useSettingsStore } from '@/stores/settings/settings.store';
+import type { ReportVariant } from '@/stores/settings/settings.types';
 import { ConfirmationView } from './confirmation.view';
 
 const { moveMessage, closePane, captureError } = vi.hoisted(() => ({
@@ -17,13 +20,13 @@ const { moveMessage, closePane, captureError } = vi.hoisted(() => ({
   captureError: vi.fn(),
 }));
 
-vi.mock('../../routing', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../../routing')>()),
+vi.mock('@/routing/loaders/report.loader', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/routing/loaders/report.loader')>()),
   createPaneAdapters: () => ({ graph: { moveMessage }, minerva: {} }),
 }));
 
-vi.mock('../../adapters/office', () => ({ closePane }));
-vi.mock('../../sentry', () => ({ captureError }));
+vi.mock('@/adapters/office/utils/close-pane.util', () => ({ closePane }));
+vi.mock('@/platform/sentry/utils/capture-error.util', () => ({ captureError }));
 
 /** A completed report, with both methods delivered unless a case says otherwise. */
 function result(overrides: Partial<ReportResult> = {}): ReportResult {
@@ -48,7 +51,7 @@ function result(overrides: Partial<ReportResult> = {}): ReportResult {
  * The screen reads `useActionData()`, so it has to be reached by submitting to
  * its own route -- which is exactly how the report drawer reaches it.
  */
-function renderView(data: ReportResult | undefined) {
+function renderView(data: ReportResult | undefined): RenderResult {
   const router = createMemoryRouter([
     {
       path: '/confirmation',

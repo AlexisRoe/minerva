@@ -1,13 +1,15 @@
 import type { ReportingMethod, ReportingReasons } from '@minerva/typescript-lib';
 
-import type { GraphAdapter } from '../../adapters/graph';
-import type { AppConfig } from '../../config';
-import { ReportNotificationFailedError } from '../../errors';
-import { buildNotificationMail } from '../../reporting/email-template';
-import type { MethodOutcome, ReportResult } from '../../reporting/reporting.types';
-import { captureError } from '../../sentry';
-import { type ReportVariant, useOfficeStore, useSettingsStore } from '../../store';
-import { createPaneAdapters } from '../loaders/report.loader';
+import type { GraphAdapter } from '@/adapters/graph/graph.types';
+import { ReportNotificationFailedError } from '@/domain/errors/reporting.errors';
+import { buildNotificationMail } from '@/domain/reporting/email-template';
+import type { MethodOutcome, ReportResult } from '@/domain/reporting/reporting.types';
+import type { AppConfig } from '@/platform/config/config.types';
+import { captureError } from '@/platform/sentry/utils/capture-error.util';
+import { createPaneAdapters } from '@/routing/loaders/report.loader';
+import { useOfficeStore } from '@/stores/office/office.store';
+import { useSettingsStore } from '@/stores/settings/settings.store';
+import type { ReportVariant } from '@/stores/settings/settings.types';
 
 /** What the report drawer collected, once the form data has been read back. */
 export interface ReportIntent {
@@ -125,7 +127,7 @@ async function notify(
  * { path: ROUTES.confirmation, Component: ConfirmationView, action: createReportAction(config) }
  * ```
  */
-export function createReportAction(config: AppConfig) {
+export function createReportAction(config: AppConfig): ({ request }: { request: Request }) => Promise<ReportResult> {
   return async function reportAction({ request }: { request: Request }): Promise<ReportResult> {
     const intent = readReportIntent(await request.formData());
 

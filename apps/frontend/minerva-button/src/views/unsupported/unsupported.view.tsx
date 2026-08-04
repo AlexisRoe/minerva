@@ -1,9 +1,10 @@
 import { BrandLogo, NoContentView, ReportButtonPage } from '@minerva/ui-lib';
 import { useSearchParams } from 'react-router';
-import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
-import { ErrorScreenKind, lookupErrorPolicy } from '../../errors';
-import { useTranslations } from '../../i18n';
-import { REASON_PARAM } from '../../routing';
+import { LOGO_SIZE } from '@/constants/icon-sizes.constants';
+import { REASON_PARAM } from '@/constants/routes.constants';
+import { lookupErrorPolicy } from '@/domain/errors/errors.registry';
+import { ErrorScreenKind } from '@/domain/errors/errors.types';
+import { useTranslations } from '@/platform/i18n/hooks/use-translations.hook';
 
 /**
  * The screen for a pane that cannot run where it has been opened.

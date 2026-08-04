@@ -19,7 +19,7 @@ export type Invoice = { id: string; amount: number };
 export class LoadInvoice implements UseCase<{ invoiceId: string }, Invoice, InvoiceNotFoundError> {
   constructor(private readonly invoices: Map<string, Invoice>) {}
 
-  async execute({ invoiceId }: { invoiceId: string }) {
+  async execute({ invoiceId }: { invoiceId: string }): Promise<Result<Invoice, InvoiceNotFoundError>> {
     const invoice = this.invoices.get(invoiceId);
 
     return invoice
@@ -31,9 +31,10 @@ export class LoadInvoice implements UseCase<{ invoiceId: string }, Invoice, Invo
 export class CountInvoices implements UseCase<void, number> {
   constructor(private readonly invoices: Map<string, Invoice>) {}
 
-  execute() {
+  execute(): Result<number, MinervaError> {
     return Result.withSuccess<number>(this.invoices.size);
   }
 }
 
-export const makeInvoices = () => new Map<string, Invoice>([['inv_1', { id: 'inv_1', amount: 100 }]]);
+export const makeInvoices = (): Map<string, Invoice> =>
+  new Map<string, Invoice>([['inv_1', { id: 'inv_1', amount: 100 }]]);

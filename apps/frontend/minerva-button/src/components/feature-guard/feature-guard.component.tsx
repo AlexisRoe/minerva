@@ -48,5 +48,6 @@ export interface FeatureGuardProps {
  * ```
  */
 export function FeatureGuard(props: FeatureGuardProps): JSX.Element | null {
+  // biome-ignore lint/complexity/noUselessFragments: I had some edge cases where that is needed
   return props.feature === false ? null : <>{props.children}</>;
 }

@@ -1,10 +1,16 @@
 import { Languages } from '@minerva/typescript-lib';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { configFixture } from '../../config/config.fixture';
-import { demoAuthorization, demoEnvironment, demoMessage, demoSettings, demoUser } from '../../demo';
-import { OfficeHostUnsupportedError, OfficeLoadTimeoutError, OfficeRequirementSetError } from '../../errors';
-import { useOfficeStore, useSessionStore, useSettingsStore } from '../../store';
+import {
+  OfficeHostUnsupportedError,
+  OfficeLoadTimeoutError,
+  OfficeRequirementSetError,
+} from '@/domain/errors/office.errors';
+import { configFixture } from '@/fixtures/config.fixture';
+import { demoAuthorization, demoSettings } from '@/fixtures/demo/minerva.fixture';
+import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
+import { useOfficeStore } from '@/stores/office/office.store';
+import { useSessionStore } from '@/stores/session/session.store';
+import { useSettingsStore } from '@/stores/settings/settings.store';
 import { createReportLoader } from './report.loader';
 
 const { waitForOffice, readEnvironment, readCurrentMessage, readCurrentUser, acquireToken } = vi.hoisted(() => ({
@@ -15,27 +21,25 @@ const { waitForOffice, readEnvironment, readCurrentMessage, readCurrentUser, acq
   acquireToken: vi.fn(() => Promise.resolve({ accessToken: 'graph-token', flow: 'naa' })),
 }));
 
-vi.mock('../../adapters/office', () => ({
-  waitForOffice,
-  readEnvironment,
-  readCurrentMessage,
-  readCurrentUser,
-}));
+vi.mock('@/adapters/office/utils/wait-for-office.util', () => ({ waitForOffice }));
+vi.mock('@/adapters/office/utils/read-environment.util', () => ({ readEnvironment }));
+vi.mock('@/adapters/office/utils/read-current-message.util', () => ({ readCurrentMessage }));
+vi.mock('@/adapters/office/utils/read-current-user.util', () => ({ readCurrentUser }));
 
-vi.mock('../../auth', () => ({ acquireToken }));
+vi.mock('@/auth-dialog/utils/acquire-token.util', () => ({ acquireToken }));
 
 const { authorize, getSettings } = vi.hoisted(() => ({
   authorize: vi.fn(() => Promise.resolve(demoAuthorization)),
   getSettings: vi.fn(() => Promise.resolve(demoSettings)),
 }));
 
-vi.mock('../../adapters', () => ({
+vi.mock('@/adapters/create-adapters.util', () => ({
   createAdapters: () => ({ minerva: { authorize, getSettings }, graph: {} }),
 }));
 
 const { captureError } = vi.hoisted(() => ({ captureError: vi.fn((_error: unknown) => 'event-1') }));
 
-vi.mock('../../sentry', () => ({ captureError }));
+vi.mock('@/platform/sentry/utils/capture-error.util', () => ({ captureError }));
 
 /** The live (non-demo) configuration these cases boot with. */
 const config = { ...configFixture, entraClientId: 'client-1' };

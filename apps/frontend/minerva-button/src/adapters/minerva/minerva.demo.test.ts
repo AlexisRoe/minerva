@@ -1,7 +1,7 @@
 import { Languages } from '@minerva/typescript-lib';
 import { describe, expect, it } from 'vitest';
 
-import { demoAuthorization, demoReportingResponse, demoSettings } from '../../demo';
+import { demoAuthorization, demoReportingResponse, demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { createMinervaDemoAdapter } from './minerva.demo';
 
 describe('createMinervaDemoAdapter', () => {

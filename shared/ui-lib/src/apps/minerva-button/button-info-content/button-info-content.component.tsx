@@ -65,7 +65,7 @@ export interface ButtonInfoContentProps extends StackProps, ElementProps<'div'> 
  * />
  * ```
  */
-export function ButtonInfoContent({ sections, ...rest }: ButtonInfoContentProps) {
+export function ButtonInfoContent({ sections, ...rest }: ButtonInfoContentProps): React.ReactElement {
   const amount = sections.length;
   const isLast = (index: number): boolean => index === amount - 1;
 

@@ -41,7 +41,7 @@ export interface LoadingPageProps {
  * <LoadingPage />
  * ```
  */
-export function LoadingPage({ steps, intervalMs }: LoadingPageProps) {
+export function LoadingPage({ steps, intervalMs }: LoadingPageProps): React.ReactElement {
   const mixed = useMemo(() => mixLanguages(STEP_TRANSLATIONS), []);
 
   return (

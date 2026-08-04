@@ -1,15 +1,15 @@
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { MinervaThemeProvider } from '../../../theme/minerva-provider.component';
 import { ButtonDrawer } from './button-drawer.component';
 
-function renderDrawer(ui: ReactElement) {
+function renderDrawer(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 
 /** The element the drawer sets its own variables on, which is not the panel. */
-function drawerRoot() {
+function drawerRoot(): HTMLElement | null {
   return document.querySelector<HTMLElement>('.mantine-Drawer-root');
 }
 

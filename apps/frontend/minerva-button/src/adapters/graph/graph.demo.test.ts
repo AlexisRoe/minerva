@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEMO_MIME_CONTENT } from '../../demo';
+import { DEMO_MIME_CONTENT } from '@/fixtures/demo/mime.fixture';
 import { createGraphDemoAdapter } from './graph.demo';
 
 describe('createGraphDemoAdapter', () => {

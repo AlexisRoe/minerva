@@ -25,7 +25,7 @@ export interface NoContentViewProps extends Omit<EmptyStateProps, 'icon' | 'acti
  * />
  * ```
  */
-export function NoContentView({ title, ...rest }: NoContentViewProps) {
+export function NoContentView({ title, ...rest }: NoContentViewProps): React.ReactElement {
   return <EmptyState icon={IconWorldOff} title={title} {...rest} />;
 }
 

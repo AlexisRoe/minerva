@@ -1,11 +1,13 @@
 import { MinervaThemeProvider } from '@minerva/ui-lib';
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
+import { configFixture } from '@/fixtures/config.fixture';
+import { demoSettings } from '@/fixtures/demo/minerva.fixture';
+import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
+import { ConfigProvider } from '@/platform/config/provider/config.provider';
+import { useOfficeStore } from '@/stores/office/office.store';
+import { useSettingsStore } from '@/stores/settings/settings.store';
 import { App } from './App';
-import { ConfigProvider, configFixture } from './config';
-import { demoEnvironment, demoMessage, demoSettings, demoUser } from './demo';
-import { useOfficeStore, useSettingsStore } from './store';
 
 // The index route runs the whole start-up sequence before it renders, which
 // wants a host, a token and a backend. What is under test here is the wiring
@@ -19,7 +21,7 @@ vi.mock('./routing/loaders/report.loader', () => ({
 
 // Mirrors the bootstrap in `main.tsx`: the app tree runs below a provider, so
 // anything that starts calling `useConfig()` keeps rendering here.
-function renderApp() {
+function renderApp(): RenderResult {
   useOfficeStore.getState().setOffice({
     environment: demoEnvironment,
     message: demoMessage,

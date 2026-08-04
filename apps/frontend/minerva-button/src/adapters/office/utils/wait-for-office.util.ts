@@ -1,5 +1,5 @@
-import { OfficeLoadTimeoutError } from '../../../errors';
-import type { OfficeReadyInfo } from '../office.types';
+import type { OfficeReadyInfo } from '@/adapters/office/office.types';
+import { OfficeLoadTimeoutError } from '@/domain/errors/office.errors';
 
 /**
  * How long the pane waits for Office.js before giving up, in milliseconds.

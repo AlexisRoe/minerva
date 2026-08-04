@@ -1,18 +1,18 @@
 import { MinervaThemeProvider } from '@minerva/ui-lib';
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { ConfigProvider, configFixture } from '../../config';
-import { OfficeLoadTimeoutError } from '../../errors';
-import { ROUTES } from '../../routing';
+import { ROUTES } from '@/constants/routes.constants';
+import { OfficeLoadTimeoutError } from '@/domain/errors/office.errors';
+import { configFixture } from '@/fixtures/config.fixture';
+import { ConfigProvider } from '@/platform/config/provider/config.provider';
 import { ErrorView } from './error.view';
 
 const { captureError } = vi.hoisted(() => ({
   captureError: vi.fn(() => 'a1b2c3d4e5f60718293a4b5c6d7e8f90'),
 }));
 
-vi.mock('../../sentry', () => ({ captureError }));
+vi.mock('@/platform/sentry/utils/capture-error.util', () => ({ captureError }));
 
 /**
  * Mounts a route that throws, so the view is reached the way the router reaches it.
@@ -20,7 +20,7 @@ vi.mock('../../sentry', () => ({ captureError }));
  * A loader rejection is the case that matters: React Router catches those before
  * they can reach a React boundary, which is why this view has to report at all.
  */
-function renderThrowing(error: unknown) {
+function renderThrowing(error: unknown): RenderResult {
   const router = createMemoryRouter([
     {
       path: ROUTES.taskPane,

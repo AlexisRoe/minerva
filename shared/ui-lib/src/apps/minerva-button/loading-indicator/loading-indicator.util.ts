@@ -45,7 +45,7 @@ export function mixLanguages(translations: StepTranslations): string[] {
 
   if (!first) return [];
 
-  const drawLanguage = () => languages[Math.floor(Math.random() * languages.length)];
+  const drawLanguage = (): StepTranslation | undefined => languages[Math.floor(Math.random() * languages.length)];
 
   return first.steps.map((_, index) => drawLanguage()?.steps[index] ?? '').filter((step) => step.trim().length > 0);
 }

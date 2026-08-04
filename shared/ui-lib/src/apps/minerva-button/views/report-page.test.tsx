@@ -1,16 +1,16 @@
-import { fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import { fireEvent, type RenderResult, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { OutlookWindow } from '../../../primitives/outlook-window/outlook-window.component';
 import { MinervaThemeProvider } from '../../../theme/minerva-provider.component';
 import { ReportPage } from './report-page.example';
 
-function renderView(ui: ReactElement) {
+function renderView(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 
 /** The report buttons carry their description in their name, so they are matched loosely. */
-function reportButton(title: RegExp) {
+function reportButton(title: RegExp): HTMLElement {
   return screen.getByRole('button', { name: title });
 }
 

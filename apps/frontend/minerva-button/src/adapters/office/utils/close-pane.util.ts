@@ -1,4 +1,4 @@
-import { OfficeNotReadyError } from '../../../errors';
+import { OfficeNotReadyError } from '@/domain/errors/office.errors';
 
 /**
  * Closes the task pane.

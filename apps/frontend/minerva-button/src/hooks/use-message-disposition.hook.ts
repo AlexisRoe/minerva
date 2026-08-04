@@ -1,12 +1,13 @@
 import { useState } from 'react';
 
-import type { WellKnownFolder } from '../adapters/graph';
-import { closePane } from '../adapters/office';
-import { useConfig } from '../config';
-import type { TranslationKey } from '../i18n';
-import { createPaneAdapters } from '../routing';
-import { captureError } from '../sentry';
-import { type ReportVariant, useOffice } from '../store';
+import type { WellKnownFolder } from '@/adapters/graph/graph.types';
+import { closePane } from '@/adapters/office/utils/close-pane.util';
+import { useConfig } from '@/platform/config/hooks/use-config.hook';
+import type { TranslationKey } from '@/platform/i18n/utils/translate.util';
+import { captureError } from '@/platform/sentry/utils/capture-error.util';
+import { createPaneAdapters } from '@/routing/loaders/report.loader';
+import { useOffice } from '@/stores/office/hooks/use-office.hook';
+import type { ReportVariant } from '@/stores/settings/settings.types';
 
 /**
  * Where each report sends the mail, and what the button offering it says.

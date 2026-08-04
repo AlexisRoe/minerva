@@ -1,6 +1,6 @@
 import type { AuthorizationResult, MinervaButtonSettings, ReportingResponse } from '@minerva/typescript-lib';
 
-import { demoAuthorization, demoReportingResponse, demoSettings } from '../../demo';
+import { demoAuthorization, demoReportingResponse, demoSettings } from '@/fixtures/demo/minerva.fixture';
 import type { MinervaAdapter } from './minerva.types';
 
 /**

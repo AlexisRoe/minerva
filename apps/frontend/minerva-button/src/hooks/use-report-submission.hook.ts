@@ -2,8 +2,8 @@ import type { ReportButtonVariant, UserFeedbackValue } from '@minerva/ui-lib';
 import { useState } from 'react';
 import { useSubmit } from 'react-router';
 
-import { ROUTES } from '../routing';
-import { useSettings } from '../store';
+import { ROUTES } from '@/constants/routes.constants';
+import { useSettings } from '@/stores/settings/hooks/use-settings.hook';
 
 /** One tickable reason, as the feedback block wants it. */
 export interface ReportReasonOption {

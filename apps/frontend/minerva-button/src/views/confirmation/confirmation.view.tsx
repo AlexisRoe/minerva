@@ -1,13 +1,15 @@
 import type { EmailType } from '@minerva/typescript-lib';
 import { BrandLogo, ConfirmationView as ConfirmationPanel, ReportButtonPage } from '@minerva/ui-lib';
 import { Anchor, Button, Stack, Text, Title } from '@minerva/ui-lib/primitives';
+import type { ReactElement } from 'react';
 import { useActionData } from 'react-router';
-import { FeatureGuard } from '../../components';
-import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
-import { useMessageDisposition } from '../../hooks';
-import { type TranslationKey, useTranslations } from '../../i18n';
-import type { ReportResult } from '../../reporting';
-import { useSettings } from '../../store';
+import { FeatureGuard } from '@/components/feature-guard/feature-guard.component';
+import { LOGO_SIZE } from '@/constants/icon-sizes.constants';
+import type { ReportResult } from '@/domain/reporting/reporting.types';
+import { useMessageDisposition } from '@/hooks/use-message-disposition.hook';
+import { useTranslations } from '@/platform/i18n/hooks/use-translations.hook';
+import type { TranslationKey } from '@/platform/i18n/utils/translate.util';
+import { useSettings } from '@/stores/settings/hooks/use-settings.hook';
 
 /** What is said about an email the backend recognised. */
 const IDENTIFIED_KEYS = {
@@ -40,7 +42,7 @@ const IDENTIFIED_KEYS = {
  * { path: ROUTES.confirmation, Component: ConfirmationView, action: createReportAction(config) }
  * ```
  */
-export function ConfirmationView() {
+export function ConfirmationView(): ReactElement {
   const { t } = useTranslations();
   // `undefined` when the route was reached without an action having run, `null`
   // when one ran and returned nothing. Neither is a report, so they collapse.

@@ -1,12 +1,15 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, type Mock, vi } from 'vitest';
 
 import { createGraphHttpAdapter, MAX_CUSTOM_HEADERS } from './graph.http';
 import { GRAPH_BASE_URL, type NotificationMail } from './graph.types';
 
-const getToken = () => Promise.resolve('graph-token');
+const getToken = (): Promise<string> => Promise.resolve('graph-token');
 
 /** Stubs `fetch` with one answer and hands back the spy. */
-function stubFetch(body: BodyInit, status = 200) {
+function stubFetch(
+  body: BodyInit,
+  status = 200,
+): Mock<(_input: RequestInfo | URL, _init?: RequestInit) => Promise<Response>> {
   const fetchMock = vi.fn((_input: RequestInfo | URL, _init?: RequestInit) =>
     Promise.resolve(new Response(body, { status })),
   );

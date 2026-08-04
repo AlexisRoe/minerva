@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { MinervaRequestFailedError } from '../../errors';
+import { MinervaRequestFailedError } from '@/domain/errors/request.errors';
 import { NO_RESPONSE_STATUS, request } from './request.util';
 
-const failure = (path: string, status: number, cause?: Error) => new MinervaRequestFailedError(path, status, cause);
+const failure = (path: string, status: number, cause?: Error): MinervaRequestFailedError =>
+  new MinervaRequestFailedError(path, status, cause);
 
 describe('request', () => {
   afterEach(() => {

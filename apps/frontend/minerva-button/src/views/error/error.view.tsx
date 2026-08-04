@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { type ReactElement, useEffect, useState } from 'react';
 import { useRouteError } from 'react-router';
 
-import { captureError } from '../../sentry';
+import { captureError } from '@/platform/sentry/utils/capture-error.util';
 import { ErrorScreen } from './error-screen.component';
 
 /**
@@ -27,7 +27,7 @@ import { ErrorScreen } from './error-screen.component';
  * { path: ROUTES.taskPane, Component: PaneLayout, errorElement: <ErrorView /> }
  * ```
  */
-export function ErrorView() {
+export function ErrorView(): ReactElement {
   const error = useRouteError();
   const [errorId, setErrorId] = useState<string | undefined>(undefined);
 

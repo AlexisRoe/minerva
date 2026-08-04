@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { MinervaThemeProvider } from '../../../theme/minerva-provider.component';
@@ -6,7 +6,7 @@ import { ErrorView } from './error-view.component';
 
 const errorId = '3f9a1c2e-7b4d-4e8a-9c1f-0a2b6d5e8c31';
 
-function renderView(ui: ReactElement) {
+function renderView(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 

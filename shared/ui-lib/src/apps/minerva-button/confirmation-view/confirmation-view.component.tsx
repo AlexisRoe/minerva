@@ -63,7 +63,7 @@ export function ConfirmationView({
   details,
   style,
   ...rest
-}: ConfirmationViewProps) {
+}: ConfirmationViewProps): React.ReactElement {
   const hasDetails = Boolean(details?.length);
 
   return (

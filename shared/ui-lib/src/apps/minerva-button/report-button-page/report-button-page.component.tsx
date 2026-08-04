@@ -43,7 +43,7 @@ export interface ReportButtonPageFooterProps extends GroupProps {}
  * rest of the height, and a footer, in the order they are given. It fills whatever
  * it is mounted into, so that ancestor needs a height of its own.
  */
-function ReportButtonPageRoot(props: ReportButtonPageProps) {
+function ReportButtonPageRoot(props: ReportButtonPageProps): React.ReactElement {
   return <Flex direction="column" h="100%" w="100%" {...props} />;
 }
 
@@ -55,7 +55,7 @@ ReportButtonPageRoot.displayName = 'ReportButtonPage';
  * mark at one end and an action at the other — and a single child simply opens it,
  * which is the header of a page with nothing on the right to balance the mark.
  */
-function ReportButtonPageHeader({ style, ...rest }: ReportButtonPageHeaderProps) {
+function ReportButtonPageHeader({ style, ...rest }: ReportButtonPageHeaderProps): React.ReactElement {
   return (
     <Group
       component="header"
@@ -77,7 +77,7 @@ ReportButtonPageHeader.displayName = 'ReportButtonPage.Header';
  * @description Everything between the two bands, and the only part of the page
  * that scrolls — which is what pins the header and the footer where they are.
  */
-function ReportButtonPageContent({ style, ...rest }: ReportButtonPageContentProps) {
+function ReportButtonPageContent({ style, ...rest }: ReportButtonPageContentProps): React.ReactElement {
   return <Box component="article" p={pagePadding} flex="1 1 auto" style={[contentStyle, style]} {...rest} />;
 }
 
@@ -91,7 +91,7 @@ ReportButtonPageContent.displayName = 'ReportButtonPage.Content';
  * Its children are set apart across the row, the way the header's are, so the way
  * on from here takes the end of the row it is read towards.
  */
-function ReportButtonPageFooter({ children, style, ...rest }: ReportButtonPageFooterProps) {
+function ReportButtonPageFooter({ children, style, ...rest }: ReportButtonPageFooterProps): React.ReactElement | null {
   if (Children.toArray(children).length === 0) return null;
 
   return (

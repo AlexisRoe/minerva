@@ -1,6 +1,6 @@
-import { AUTH_DIALOG_PATH, DIALOG_SIZE } from '../../constants/authentication.constants';
-import { AuthDialogFailedError } from '../../errors';
-import type { DialogMessage } from '../types/auth.types';
+import type { DialogMessage } from '@/auth-dialog/types/auth.types';
+import { AUTH_DIALOG_PATH, DIALOG_SIZE } from '@/constants/authentication.constants';
+import { AuthDialogFailedError } from '@/domain/errors/auth.errors';
 
 /**
  * Acquires a Graph token through the Office dialog.

@@ -1,10 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { MinervaThemeProvider } from '../../../theme/minerva-provider.component';
 import { type ReportingReason, UserFeedback } from './user-feedback.component';
 
-function renderFeedback(ui: ReactElement) {
+function renderFeedback(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 
@@ -15,7 +15,7 @@ const reasons: ReportingReason[] = [
 ];
 
 /** The value of the last call, which is the one the parent is acting on. */
-function lastValue(onChange: ReturnType<typeof vi.fn>) {
+function lastValue(onChange: ReturnType<typeof vi.fn>): any {
   return onChange.mock.lastCall?.[0];
 }
 

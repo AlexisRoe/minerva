@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { configFixture } from '../config';
+import { configFixture } from '@/fixtures/config.fixture';
 import { createRouter } from './router';
 
 describe('createRouter', () => {

@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => {
       }),
     ],
     envDir: repoRoot,
+    resolve: { alias: { '@': resolve(import.meta.dirname, 'src') } },
     server: { port: serverPort, https: localHttps() },
     preview: { port: serverPort, https: localHttps() },
     build: { outDir: 'dist', sourcemap: true },

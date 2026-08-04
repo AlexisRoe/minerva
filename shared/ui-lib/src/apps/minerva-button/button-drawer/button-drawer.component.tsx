@@ -82,7 +82,7 @@ export type ButtonDrawerFooterProps = StackProps;
  * single button across the row is what makes it read as the way on from here rather
  * than something left over at the end of the panel.
  */
-function ButtonDrawerFooter({ children, ...rest }: ButtonDrawerFooterProps) {
+function ButtonDrawerFooter({ children, ...rest }: ButtonDrawerFooterProps): React.ReactElement | null {
   const buttons = Children.toArray(children);
 
   if (buttons.length === 0) return null;
@@ -116,7 +116,12 @@ export interface ButtonDrawerHeaderProps extends DrawerHeaderProps {
  * where the header is the one carrying it. With neither to put in it the header is
  * left out, and the content starts at the top of the panel.
  */
-function ButtonDrawerHeader({ children, withCloseButton = false, closeButtonProps, ...rest }: ButtonDrawerHeaderProps) {
+function ButtonDrawerHeader({
+  children,
+  withCloseButton = false,
+  closeButtonProps,
+  ...rest
+}: ButtonDrawerHeaderProps): React.ReactElement | null {
   if (!children && !withCloseButton) return null;
 
   return (
@@ -141,7 +146,7 @@ export type ButtonDrawerBodyProps = DrawerBodyProps;
  * and the padding around it is the same on all four sides. Pass `pt` to say
  * otherwise.
  */
-function ButtonDrawerBody({ children, ...rest }: ButtonDrawerBodyProps) {
+function ButtonDrawerBody({ children, ...rest }: ButtonDrawerBodyProps): React.ReactElement {
   return (
     <Drawer.Body flex="1 1 auto" pt={panelPadding} style={bodyStyle} {...rest}>
       {children}
@@ -172,7 +177,7 @@ export interface ButtonDrawerRootProps
  * side it comes in from, the width it takes, the overlay, and where it is rendered.
  * Its children are the panel's own bands, in the order they are drawn.
  */
-function ButtonDrawerRoot(props: ButtonDrawerRootProps) {
+function ButtonDrawerRoot(props: ButtonDrawerRootProps): React.ReactElement {
   const { container, withOverlay, overlayProps, children, ...rest } = useProps('Drawer', defaultProps, props);
 
   return (
@@ -254,7 +259,7 @@ export interface ButtonDrawerProps
  * </ButtonDrawer.Root>
  * ```
  */
-export function ButtonDrawer(props: ButtonDrawerProps) {
+export function ButtonDrawer(props: ButtonDrawerProps): React.ReactElement {
   const { title, footer, closeButtonProps, children, ...rest } = props;
 
   const buttons = Children.toArray(footer);

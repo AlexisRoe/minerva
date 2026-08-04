@@ -100,10 +100,17 @@ export interface ReportButtonProps extends Omit<ButtonProps, 'variant'>, Element
  * />
  * ```
  */
-export function ReportButton({ variant, title, description, onReport, onClick, ...rest }: ReportButtonProps) {
+export function ReportButton({
+  variant,
+  title,
+  description,
+  onReport,
+  onClick,
+  ...rest
+}: ReportButtonProps): React.ReactElement {
   const VariantIcon = variantIcons[variant];
 
-  function handleClick(event: MouseEvent<HTMLButtonElement>) {
+  function handleClick(event: MouseEvent<HTMLButtonElement>): void {
     onClick?.(event);
     onReport?.(variant);
   }

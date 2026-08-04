@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { OfficeEnvironment } from '../../adapters/office';
-import { demoEnvironment } from '../../demo';
-import { GRAPH_SCOPES, SHARED_GRAPH_SCOPES } from '../types/auth.types';
+import type { OfficeEnvironment } from '@/adapters/office/office.types';
+import { GRAPH_SCOPES, SHARED_GRAPH_SCOPES } from '@/constants/authentication.constants';
+import { demoEnvironment } from '@/fixtures/demo/office.fixture';
 import { acquireToken } from './acquire-token.util';
 
 const { acquireTokenViaNaa, acquireTokenViaDialog } = vi.hoisted(() => ({

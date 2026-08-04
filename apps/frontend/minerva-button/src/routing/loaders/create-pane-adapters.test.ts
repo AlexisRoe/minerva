@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { configFixture } from '../../config/config.fixture';
-import { demoEnvironment } from '../../demo';
+import { configFixture } from '@/fixtures/config.fixture';
+import { demoEnvironment } from '@/fixtures/demo/office.fixture';
 import { createPaneAdapters } from './report.loader';
 
 // The parameters are declared even though the body ignores them: without them
@@ -16,8 +16,8 @@ const { acquireToken, createAdapters } = vi.hoisted(() => ({
   })),
 }));
 
-vi.mock('../../auth', () => ({ acquireToken }));
-vi.mock('../../adapters', () => ({ createAdapters }));
+vi.mock('@/auth-dialog/utils/acquire-token.util', () => ({ acquireToken }));
+vi.mock('@/adapters/create-adapters.util', () => ({ createAdapters }));
 
 /** Runs the token provider `createPaneAdapters` handed to the Graph adapter. */
 async function resolveToken(config = configFixture): Promise<string> {

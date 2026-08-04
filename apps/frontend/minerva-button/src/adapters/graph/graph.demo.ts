@@ -1,5 +1,5 @@
-import { createDemoMime } from '../../demo';
-import { DEMO_LATENCY_MS } from '../minerva/minerva.demo';
+import { DEMO_LATENCY_MS } from '@/adapters/minerva/minerva.demo';
+import { createDemoMime } from '@/fixtures/demo/mime.fixture';
 import type { GraphAdapter, NotificationMail, WellKnownFolder } from './graph.types';
 
 /** Resolves after {@link DEMO_LATENCY_MS}, so the loading screens are legible. */

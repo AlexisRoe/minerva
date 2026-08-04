@@ -1,7 +1,7 @@
-import type { OfficeEnvironment } from '../../adapters/office';
-import { GRAPH_SCOPES, SHARED_GRAPH_SCOPES } from '../../constants/authentication.constants';
-import { AuthClientIdMissingError } from '../../errors';
-import type { AuthResult } from '../types/auth.types';
+import type { OfficeEnvironment } from '@/adapters/office/office.types';
+import type { AuthResult } from '@/auth-dialog/types/auth.types';
+import { GRAPH_SCOPES, SHARED_GRAPH_SCOPES } from '@/constants/authentication.constants';
+import { AuthClientIdMissingError } from '@/domain/errors/auth.errors';
 import { acquireTokenViaDialog } from './dialog.util';
 import { acquireTokenViaNaa } from './naa.util';
 

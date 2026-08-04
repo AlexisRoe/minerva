@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
-import { stubOffice } from '../../../test/office.fixture';
-import type { OfficeReadyInfo } from '../office.types';
+import type { OfficeReadyInfo } from '@/adapters/office/office.types';
+import { stubOffice } from '@/fixtures/office.fixture';
 import { MAILBOX_REQUIREMENT_SET, NAA_REQUIREMENT_SET, readEnvironment } from './read-environment.util';
 
 /**

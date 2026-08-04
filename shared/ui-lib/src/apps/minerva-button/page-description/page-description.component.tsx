@@ -22,7 +22,7 @@ export interface PageDescriptionProps extends Omit<StackProps, 'title'>, Element
  * <PageDescription title="Report" description="Everything the last run turned up." />
  * ```
  */
-export function PageDescription({ title, description, ...rest }: PageDescriptionProps) {
+export function PageDescription({ title, description, ...rest }: PageDescriptionProps): React.ReactElement {
   return (
     <Stack gap="2xs" {...rest}>
       <Title order={1} size="h3">

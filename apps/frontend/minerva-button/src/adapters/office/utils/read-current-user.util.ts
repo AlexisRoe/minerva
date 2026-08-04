@@ -1,7 +1,6 @@
 import { convertMicrosoftLanguagetoInternalLanguage } from '@minerva/typescript-lib';
-
-import { OfficeNotReadyError } from '../../../errors';
-import type { OutlookUser } from '../office.types';
+import type { OutlookUser } from '@/adapters/office/office.types';
+import { OfficeNotReadyError } from '@/domain/errors/office.errors';
 
 /**
  * Reads who has the pane open, as Outlook reports them.

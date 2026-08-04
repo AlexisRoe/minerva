@@ -1,11 +1,13 @@
 import { MinervaError } from '@minerva/typescript-lib';
 import { MinervaThemeProvider } from '@minerva/ui-lib';
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
-import { ConfigProvider, configFixture, MAX_RETRY } from '../../config';
-import { AuthClientIdMissingError, MinervaRequestFailedError, TokenAcquisitionFailedError } from '../../errors';
+import { AuthClientIdMissingError, TokenAcquisitionFailedError } from '@/domain/errors/auth.errors';
+import { MinervaRequestFailedError } from '@/domain/errors/request.errors';
+import { configFixture } from '@/fixtures/config.fixture';
+import { MAX_RETRY } from '@/platform/config/config.types';
+import { ConfigProvider } from '@/platform/config/provider/config.provider';
 import { ErrorScreen } from './error-screen.component';
 
 /** A MinervaError carrying a code the registry has never heard of. */
@@ -22,7 +24,7 @@ class UnregisteredError extends MinervaError {
 }
 
 /** Mounts the screen under a configuration with the given retry count. */
-function renderScreen(error: unknown, retry = 0, errorId?: string) {
+function renderScreen(error: unknown, retry = 0, errorId?: string): RenderResult {
   return render(
     <ConfigProvider config={{ ...configFixture, retry }}>
       <MinervaThemeProvider>

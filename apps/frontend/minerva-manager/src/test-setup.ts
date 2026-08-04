@@ -7,7 +7,7 @@ const storedItems = new Map<string, string>();
 Object.defineProperty(window, 'localStorage', {
   writable: true,
   value: {
-    get length() {
+    get length(): number {
       return storedItems.size;
     },
     key: (index: number) => [...storedItems.keys()][index] ?? null,

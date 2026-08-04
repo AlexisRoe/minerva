@@ -1,9 +1,9 @@
 import type { UserFeedbackValue } from '@minerva/ui-lib';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
-import { demoSettings } from '../demo';
-import { useSettingsStore } from '../store/settings/settings.store';
+import { demoSettings } from '@/fixtures/demo/minerva.fixture';
+import type { ReportSubmission } from '@/hooks/use-report-submission.hook';
+import { useSettingsStore } from '@/stores/settings/settings.store';
 import { useReportSubmission } from './use-report-submission.hook';
 
 const submit = vi.fn();
@@ -20,7 +20,7 @@ const validFeedback: UserFeedbackValue = {
 };
 
 /** Loads the demo settings, so `reasonsFor` has something to answer with. */
-function renderWithSettings() {
+function renderWithSettings(): { current: ReportSubmission } {
   useSettingsStore.getState().setSettings(demoSettings);
 
   return renderHook(() => useReportSubmission()).result;

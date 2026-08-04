@@ -10,7 +10,11 @@ export interface ActionButtonProps extends Omit<ButtonProps, 'leftSection' | 'ch
 }
 
 /** A Mantine button with a leading Tabler icon — the house style for primary actions. */
-export function ActionButton({ label, icon: IconComponent = IconBolt, ...props }: ActionButtonProps) {
+export function ActionButton({
+  label,
+  icon: IconComponent = IconBolt,
+  ...props
+}: ActionButtonProps): React.ReactElement {
   return (
     <Button leftSection={<IconComponent size={18} stroke={1.5} />} {...props}>
       {label}

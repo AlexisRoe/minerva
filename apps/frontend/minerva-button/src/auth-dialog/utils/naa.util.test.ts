@@ -1,7 +1,8 @@
 import { InteractionRequiredAuthError } from '@azure/msal-browser';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 
-import { AUTHORITY, acquireTokenViaNaa, resetNaaClients } from './naa.util';
+import { AUTHORITY } from '@/constants/authentication.constants';
+import { acquireTokenViaNaa, resetNaaClients } from './naa.util';
 
 const { createNestablePublicClientApplication } = vi.hoisted(() => ({
   createNestablePublicClientApplication: vi.fn(),
@@ -16,7 +17,10 @@ vi.mock('@azure/msal-browser', async (importOriginal) => ({
 function stubClient(options: {
   silent?: () => Promise<{ accessToken: string }>;
   popup?: () => Promise<{ accessToken: string }>;
-}) {
+}): {
+  acquireTokenSilent: Mock<() => Promise<{ accessToken: string }>>;
+  acquireTokenPopup: Mock<() => Promise<{ accessToken: string }>>;
+} {
   const acquireTokenSilent = vi.fn(options.silent ?? (() => Promise.resolve({ accessToken: 'silent-token' })));
   const acquireTokenPopup = vi.fn(options.popup ?? (() => Promise.resolve({ accessToken: 'popup-token' })));
 

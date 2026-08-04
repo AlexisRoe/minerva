@@ -18,7 +18,7 @@ const logoSize = 28;
  * <NoContentPage />
  * ```
  */
-export function NoContentPage() {
+export function NoContentPage(): React.ReactElement {
   return (
     <ReportButtonPage>
       <ReportButtonPage.Header>

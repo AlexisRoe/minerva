@@ -1,6 +1,10 @@
 {
   "extends": "../../../tsconfig.web.json",
   "compilerOptions": {
+    /* `@/*` resolves to `src/*`; mirrored in `vite.config.ts` and `vitest.config.ts`. */
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     "types": ["vite/client", "node"],
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo"
   },

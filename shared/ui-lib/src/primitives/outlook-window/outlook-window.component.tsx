@@ -26,7 +26,7 @@ const clip = { overflow: 'hidden' } as const;
 const scroll = { overflowY: 'auto' } as const;
 
 /** Widths of the lines in one block, kept here so every render draws the same mail. */
-function lines(...widths: string[]) {
+function lines(...widths: string[]): { id: string; width: string }[] {
   return widths.map((width, index) => ({ id: `${index}-${width}`, width }));
 }
 
@@ -43,7 +43,7 @@ const selectedMessageRow = 1;
  * A skeleton line. Every one of them is static: a shimmer would read as content
  * still loading, when what this stands for is a mail that is already there.
  */
-function Line({ w, h = 10 }: { w: number | string; h?: number }) {
+function Line({ w, h = 10 }: { w: number | string; h?: number }): React.ReactElement {
   return <Skeleton animate={false} height={h} width={w} radius="sm" />;
 }
 
@@ -74,7 +74,12 @@ export interface OutlookWindowProps extends FlexProps, ElementProps<'div'> {
  * </Box>
  * ```
  */
-export function OutlookWindow({ taskpaneLabel = 'Add-in taskpane', children, style, ...rest }: OutlookWindowProps) {
+export function OutlookWindow({
+  taskpaneLabel = 'Add-in taskpane',
+  children,
+  style,
+  ...rest
+}: OutlookWindowProps): React.ReactElement {
   return (
     <Flex
       direction="column"

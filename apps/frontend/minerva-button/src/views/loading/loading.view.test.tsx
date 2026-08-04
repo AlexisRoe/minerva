@@ -1,11 +1,11 @@
 import { MinervaThemeProvider } from '@minerva/ui-lib';
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { LoadingView } from './loading.view';
 
 /** Mounts the view on its own: it has no store, no router and no data of its own. */
-function renderView(steps: string[]) {
+function renderView(steps: string[]): RenderResult {
   return render(
     <MinervaThemeProvider>
       <LoadingView steps={steps} />

@@ -1,12 +1,15 @@
 import { Languages } from '@minerva/typescript-lib';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, type Mock, vi } from 'vitest';
 
-import { demoAuthorization, demoReportingResponse, demoSettings } from '../../demo';
+import { demoAuthorization, demoReportingResponse, demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { createMinervaHttpAdapter } from './minerva.http';
 import { MINERVA_ENDPOINTS } from './minerva.types';
 
 /** Stubs `fetch` with one JSON answer and hands back the spy. */
-function stubJson(payload: unknown, status = 200) {
+function stubJson(
+  payload: unknown,
+  status = 200,
+): Mock<(_input: RequestInfo | URL, _init?: RequestInit) => Promise<Response>> {
   const fetchMock = vi.fn((_input: RequestInfo | URL, _init?: RequestInit) =>
     Promise.resolve(new Response(JSON.stringify(payload), { status })),
   );

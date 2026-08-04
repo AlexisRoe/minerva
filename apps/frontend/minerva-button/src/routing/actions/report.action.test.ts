@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { configFixture } from '../../config/config.fixture';
-import { demoEnvironment, demoMessage, demoSettings, demoUser } from '../../demo';
-import { REPORT_ID_HEADER } from '../../reporting';
-import { useOfficeStore, useSettingsStore } from '../../store';
+import { REPORT_ID_HEADER } from '@/domain/reporting/reporting.types';
+import { configFixture } from '@/fixtures/config.fixture';
+import { demoSettings } from '@/fixtures/demo/minerva.fixture';
+import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
+import { useOfficeStore } from '@/stores/office/office.store';
+import { useSettingsStore } from '@/stores/settings/settings.store';
 import { createReportAction, readReportIntent } from './report.action';
 
 // The parameters are declared even though the bodies ignore them: without them
@@ -23,7 +24,7 @@ const demoReportingResponseStub = {
 
 const { captureError } = vi.hoisted(() => ({ captureError: vi.fn((_error: unknown) => 'event-1') }));
 
-vi.mock('../../sentry', () => ({ captureError }));
+vi.mock('@/platform/sentry/utils/capture-error.util', () => ({ captureError }));
 
 vi.mock('../loaders/report.loader', () => ({
   createPaneAdapters: () => ({

@@ -1,15 +1,15 @@
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 import { MinervaThemeProvider } from '../../../theme/minerva-provider.component';
 import { ReportButtonPage } from './report-button-page.component';
 
-function renderPage(ui: ReactElement) {
+function renderPage(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 
 /** The page as it is usually composed, with whatever the case at hand wants in its footer. */
-function renderComposedPage(footer?: ReactNode) {
+function renderComposedPage(footer?: ReactNode): RenderResult {
   return renderPage(
     <ReportButtonPage data-testid="page">
       <ReportButtonPage.Header>

@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { type ReactElement, useState } from 'react';
 import { RouterProvider } from 'react-router';
 
-import { useConfig } from './config';
-import { createRouter } from './routing';
+import { useConfig } from '@/platform/config/hooks/use-config.hook';
+import { createRouter } from '@/routing/router';
 
 /**
  * The task-pane surface hosted inside Outlook.
@@ -18,7 +18,7 @@ import { createRouter } from './routing';
  * performance hint React is allowed to discard -- rebuilding the router would
  * lose the pane's history and re-run the whole boot sequence.
  */
-export function App() {
+export function App(): ReactElement {
   const config = useConfig();
   const [router] = useState(() => createRouter(config));
 

@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { OutlookMessage } from '../office.types';
+import type { OutlookMessage } from '@/adapters/office/office.types';
 import { useCurrentMessage } from './use-current-message.hook';
 
 const message: OutlookMessage = {

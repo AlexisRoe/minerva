@@ -3,8 +3,8 @@ import {
   InteractionRequiredAuthError,
   type IPublicClientApplication,
 } from '@azure/msal-browser';
-import { AUTHORITY } from '../../constants/authentication.constants';
-import { TokenAcquisitionFailedError } from '../../errors';
+import { AUTHORITY } from '@/constants/authentication.constants';
+import { TokenAcquisitionFailedError } from '@/domain/errors/auth.errors';
 
 /**
  * Builds a nestable MSAL client, or reuses the one already built.

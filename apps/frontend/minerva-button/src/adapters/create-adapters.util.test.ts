@@ -1,11 +1,11 @@
 import { Languages } from '@minerva/typescript-lib';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { configFixture } from '../config/config.fixture';
-import { demoSettings } from '../demo';
+import { configFixture } from '@/fixtures/config.fixture';
+import { demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { createAdapters } from './create-adapters.util';
 
-const getToken = () => Promise.resolve('graph-token');
+const getToken = (): Promise<string> => Promise.resolve('graph-token');
 
 describe('createAdapters', () => {
   afterEach(() => {

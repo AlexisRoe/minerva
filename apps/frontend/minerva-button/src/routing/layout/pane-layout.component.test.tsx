@@ -1,12 +1,12 @@
 import { MinervaThemeProvider } from '@minerva/ui-lib';
-import { render, screen, waitFor } from '@testing-library/react';
+import { type RenderResult, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, Link, RouterProvider } from 'react-router';
 import { describe, expect, it } from 'vitest';
 
-import { InitialLoadingData } from '../../constants/initial-loading.constants';
-import { ReportingLoadingData } from '../../constants/reporting-loading.constants';
-import { ROUTES } from '../../constants/routes.constants';
+import { InitialLoadingData } from '@/constants/initial-loading.constants';
+import { ReportingLoadingData } from '@/constants/reporting-loading.constants';
+import { ROUTES } from '@/constants/routes.constants';
 import { PaneLayout } from './pane-layout.component';
 
 /** Every string either reel can show, so a test can ask which one is on. */
@@ -20,8 +20,8 @@ function stepsOf(data: typeof InitialLoadingData): string[] {
  * The loading state is only observable mid-transition, so the target route's
  * loader is a promise the test resolves when it is ready.
  */
-function renderLayout() {
-  let release: () => void = () => undefined;
+function renderLayout(): RenderResult & { release: () => void } {
+  let release: () => void = (): undefined => undefined;
   const held = new Promise<null>((resolve) => {
     release = () => resolve(null);
   });

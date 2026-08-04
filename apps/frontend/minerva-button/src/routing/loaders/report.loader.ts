@@ -1,21 +1,21 @@
 import { MinervaError } from '@minerva/typescript-lib';
 import { redirect } from 'react-router';
-
-import { type Adapters, createAdapters } from '../../adapters';
-import {
-  type OfficeEnvironment,
-  readCurrentMessage,
-  readCurrentUser,
-  readEnvironment,
-  waitForOffice,
-} from '../../adapters/office';
-import { acquireToken } from '../../auth';
-import type { AppConfig } from '../../config';
-import { REASON_PARAM, ROUTES } from '../../constants/routes.constants';
-import { demoEnvironment, demoMessage, demoUser } from '../../demo';
-import { ErrorScreenKind, lookupErrorPolicy } from '../../errors';
-import { captureError } from '../../sentry';
-import { useOfficeStore, useSessionStore, useSettingsStore } from '../../store';
+import { type Adapters, createAdapters } from '@/adapters/create-adapters.util';
+import type { OfficeEnvironment, OutlookMessage, OutlookUser } from '@/adapters/office/office.types';
+import { readCurrentMessage } from '@/adapters/office/utils/read-current-message.util';
+import { readCurrentUser } from '@/adapters/office/utils/read-current-user.util';
+import { readEnvironment } from '@/adapters/office/utils/read-environment.util';
+import { waitForOffice } from '@/adapters/office/utils/wait-for-office.util';
+import { acquireToken } from '@/auth-dialog/utils/acquire-token.util';
+import { REASON_PARAM, ROUTES } from '@/constants/routes.constants';
+import { lookupErrorPolicy } from '@/domain/errors/errors.registry';
+import { ErrorScreenKind } from '@/domain/errors/errors.types';
+import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
+import type { AppConfig } from '@/platform/config/config.types';
+import { captureError } from '@/platform/sentry/utils/capture-error.util';
+import { useOfficeStore } from '@/stores/office/office.store';
+import { useSessionStore } from '@/stores/session/session.store';
+import { useSettingsStore } from '@/stores/settings/settings.store';
 
 /**
  * Whether a failure means "this pane cannot run here" rather than "something broke".
@@ -88,7 +88,7 @@ export function createPaneAdapters(config: AppConfig, environment: OfficeEnviron
  * { index: true, Component: ReportView, loader: createReportLoader(config) }
  * ```
  */
-export function createReportLoader(config: AppConfig) {
+export function createReportLoader(config: AppConfig): () => Promise<Response | null> {
   return async function reportLoader(): Promise<Response | null> {
     try {
       const { environment, message, user } = config.demo
@@ -114,12 +114,6 @@ export function createReportLoader(config: AppConfig) {
       return null;
     } catch (error) {
       if (isUnsupported(error)) {
-        // Reported like everything else, and at its own volume: the three
-        // environment errors declare `logLevel: 'warn'`, so this is a warning in
-        // Sentry and in the console rather than an error. Redirecting without
-        // reporting was the one path out of this loader that left no trace at
-        // all -- and "how many panes cannot run here" is exactly the number
-        // worth having.
         captureError(error);
 
         return redirect(`${ROUTES.unsupported}?${REASON_PARAM}=${(error as MinervaError).code}`);
@@ -131,7 +125,11 @@ export function createReportLoader(config: AppConfig) {
 }
 
 /** Reads everything the host can tell the pane, once Office.js is ready. */
-async function readHost() {
+async function readHost(): Promise<{
+  environment: OfficeEnvironment;
+  message: OutlookMessage | null;
+  user: OutlookUser;
+}> {
   const info = await waitForOffice();
   const environment = readEnvironment(info);
 

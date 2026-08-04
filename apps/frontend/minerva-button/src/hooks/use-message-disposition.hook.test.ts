@@ -1,8 +1,8 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { demoEnvironment, demoMessage, demoUser } from '../demo';
-import { useOfficeStore } from '../store';
+import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
+import { useOfficeStore } from '@/stores/office/office.store';
 import { useMessageDisposition } from './use-message-disposition.hook';
 
 const { moveMessage, closePane, captureError } = vi.hoisted(() => ({
@@ -11,14 +11,14 @@ const { moveMessage, closePane, captureError } = vi.hoisted(() => ({
   captureError: vi.fn(),
 }));
 
-vi.mock('../routing', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../routing')>()),
+vi.mock('@/routing/loaders/report.loader', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/routing/loaders/report.loader')>()),
   createPaneAdapters: () => ({ graph: { moveMessage }, minerva: {} }),
 }));
 
-vi.mock('../adapters/office', () => ({ closePane }));
-vi.mock('../sentry', () => ({ captureError }));
-vi.mock('../config', () => ({ useConfig: () => ({ demo: true }) }));
+vi.mock('@/adapters/office/utils/close-pane.util', () => ({ closePane }));
+vi.mock('@/platform/sentry/utils/capture-error.util', () => ({ captureError }));
+vi.mock('@/platform/config/hooks/use-config.hook', () => ({ useConfig: () => ({ demo: true }) }));
 
 describe('useMessageDisposition', () => {
   beforeEach(() => {

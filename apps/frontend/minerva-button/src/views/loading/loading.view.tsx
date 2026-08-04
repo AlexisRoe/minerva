@@ -1,6 +1,6 @@
 import { BrandLogo, LoadingIndicator, ReportButtonPage } from '@minerva/ui-lib';
 import type React from 'react';
-import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
+import { LOGO_SIZE } from '@/constants/icon-sizes.constants';
 
 /** What the loading screen needs to say while the pane is not ready yet. */
 interface LoadingViewProps {

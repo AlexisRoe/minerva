@@ -1,13 +1,14 @@
 import type { MinervaButtonSettings } from '@minerva/typescript-lib';
 import { MinervaThemeProvider } from '@minerva/ui-lib';
-import { render, screen, waitFor } from '@testing-library/react';
+import { type RenderResult, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
-
-import { demoEnvironment, demoMessage, demoSettings, demoUser } from '../../demo';
-import { ROUTES } from '../../routing';
-import { useOfficeStore, useSettingsStore } from '../../store';
+import { ROUTES } from '@/constants/routes.constants';
+import { demoSettings } from '@/fixtures/demo/minerva.fixture';
+import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
+import { useOfficeStore } from '@/stores/office/office.store';
+import { useSettingsStore } from '@/stores/settings/settings.store';
 import { ReportView } from './report.view';
 
 /** Records what the drawer submitted, so a test can assert on the report. */
@@ -19,7 +20,7 @@ const submitted: FormData[] = [];
  * The action stands in for the reporting flow: what matters here is *what* the
  * drawer submits, not what is done with it.
  */
-function renderView(settings: MinervaButtonSettings | null = demoSettings, message = demoMessage) {
+function renderView(settings: MinervaButtonSettings | null = demoSettings, message = demoMessage): RenderResult {
   useOfficeStore.getState().setOffice({
     environment: demoEnvironment,
     message,
@@ -51,7 +52,7 @@ function renderView(settings: MinervaButtonSettings | null = demoSettings, messa
 }
 
 /** Opens the suspicious drawer and ticks the first reason. */
-async function openSuspiciousDrawer() {
+async function openSuspiciousDrawer(): Promise<void> {
   await userEvent.click(await screen.findByRole('button', { name: /suspicious/i }));
 
   const [firstReason] = demoSettings.userFeedback.reportingReasons;

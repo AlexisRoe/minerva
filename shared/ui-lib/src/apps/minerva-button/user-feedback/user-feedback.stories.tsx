@@ -39,13 +39,13 @@ interface UserFeedbackDemoProps extends UserFeedbackProps {
  * story — the drawer holds one value, gets it from `onChange`, and hangs the
  * report button on the `isValid` that comes with it.
  */
-function UserFeedbackDemo({ width = windowWidth, onReport, ...props }: UserFeedbackDemoProps) {
+function UserFeedbackDemo({ width = windowWidth, onReport, ...props }: UserFeedbackDemoProps): React.ReactElement {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [opened, { open, close }] = useDisclosure(false);
   const [feedback, setFeedback] = useState<UserFeedbackValue | null>(null);
   const [reported, setReported] = useState<UserFeedbackValue | null>(null);
 
-  function handleReport() {
+  function handleReport(): void {
     if (!feedback) return;
 
     setReported(feedback);

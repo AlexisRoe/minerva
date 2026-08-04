@@ -53,7 +53,7 @@ export interface ConfirmationPageProps {
  * <ConfirmationPage reportedAs="spam" />
  * ```
  */
-export function ConfirmationPage({ reportedAs = 'suspicious' }: ConfirmationPageProps) {
+export function ConfirmationPage({ reportedAs = 'suspicious' }: ConfirmationPageProps): React.ReactElement {
   const confirmation = confirmations[reportedAs];
 
   return (

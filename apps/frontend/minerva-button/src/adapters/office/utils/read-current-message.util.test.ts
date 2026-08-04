@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { stubOffice } from '../../../test/office.fixture';
+import { stubOffice } from '@/fixtures/office.fixture';
 import { readCurrentMessage } from './read-current-message.util';
 
 /** The open item, as Office.js reports one. */

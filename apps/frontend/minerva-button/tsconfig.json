@@ -1,6 +1,9 @@
 {
   "extends": "../../../tsconfig.web.json",
   "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     /* `office-js` is ambient: the CDN script defines the `Office` global, so the
        types are declared globally rather than imported. */
     "types": ["vite/client", "node", "office-js"],

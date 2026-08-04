@@ -1,12 +1,15 @@
 import { createHashRouter, type RouteObject } from 'react-router';
 
-import { restoreHistoryApi } from '../adapters/office';
-import type { AppConfig } from '../config';
-import { ROUTES } from '../constants/routes.constants';
-import { ConfirmationView, ErrorView, ReportView, UnsupportedView } from '../views';
-import { createReportAction } from './actions/report.action';
-import { PaneLayout } from './layout/pane-layout.component';
-import { createReportLoader } from './loaders/report.loader';
+import { restoreHistoryApi } from '@/adapters/office/utils/restore-history-api.util';
+import { ROUTES } from '@/constants/routes.constants';
+import type { AppConfig } from '@/platform/config/config.types';
+import { createReportAction } from '@/routing/actions/report.action';
+import { PaneLayout } from '@/routing/layout/pane-layout.component';
+import { createReportLoader } from '@/routing/loaders/report.loader';
+import { ConfirmationView } from '@/views/confirmation/confirmation.view';
+import { ErrorView } from '@/views/error/error.view';
+import { ReportView } from '@/views/report/report.view';
+import { UnsupportedView } from '@/views/unsupported/unsupported.view';
 
 /**
  * Builds the pane's screens as one tree under {@link PaneLayout}.
@@ -67,7 +70,7 @@ export function createRoutes(config: AppConfig): RouteObject[] {
  * <RouterProvider router={createRouter(config)} />
  * ```
  */
-export function createRouter(config: AppConfig) {
+export function createRouter(config: AppConfig): ReturnType<typeof createHashRouter> {
   restoreHistoryApi();
   const routes = createRoutes(config);
 

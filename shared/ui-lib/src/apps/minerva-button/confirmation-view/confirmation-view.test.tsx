@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { MinervaThemeProvider } from '../../../theme/minerva-provider.component';
@@ -8,7 +8,7 @@ const title = 'Thanks for reporting';
 const statusMessage = 'It has been moved out of your inbox.';
 const details = ['The security team looks at the mail.', 'You hear back only if they need something.'];
 
-function renderView(ui: ReactElement) {
+function renderView(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 

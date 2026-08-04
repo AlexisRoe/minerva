@@ -1,5 +1,6 @@
-import { GraphRequestFailedError } from '../../errors';
-import { request } from '../utils/request.util';
+import { encodeAttachment } from '@/adapters/graph/utils/encode-attachment.util';
+import { request } from '@/adapters/utils/request.util';
+import { GraphRequestFailedError } from '@/domain/errors/request.errors';
 import {
   type AccessTokenProvider,
   GRAPH_BASE_URL,
@@ -7,13 +8,12 @@ import {
   type NotificationMail,
   type WellKnownFolder,
 } from './graph.types';
-import { encodeAttachment } from './utils/encode-attachment.util';
 
 /** The most `internetMessageHeaders` Graph will accept on one message. */
 export const MAX_CUSTOM_HEADERS = 5;
 
 /** Builds the error every call in this adapter raises. */
-function failure(path: string, status: number, cause?: Error) {
+function failure(path: string, status: number, cause?: Error): GraphRequestFailedError {
   return new GraphRequestFailedError(path, status, cause);
 }
 

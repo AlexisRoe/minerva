@@ -22,7 +22,7 @@ export interface TextAreaProps extends TextareaProps {}
  * <TextArea label="Why are you reporting this mail?" placeholder="Anything that would help" />
  * ```
  */
-export function TextArea({ size = 'sm', ...props }: TextAreaProps) {
+export function TextArea({ size = 'sm', ...props }: TextAreaProps): React.ReactElement {
   return <Textarea size={size} autosize minRows={minRows} maxRows={maxRows} {...props} />;
 }
 

@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { DialogMessage } from '../types/auth.types';
-import { AUTH_DIALOG_PATH, acquireTokenViaDialog } from './dialog.util';
+import type { DialogMessage } from '@/auth-dialog/types/auth.types';
+import { AUTH_DIALOG_PATH } from '@/constants/authentication.constants';
+import { acquireTokenViaDialog } from './dialog.util';
 
 type Handler = (event: unknown) => void;
 
@@ -11,7 +12,12 @@ type Handler = (event: unknown) => void;
  * The returned `fire` is what stands in for the user: nothing happens in this
  * flow until either a message or a dialog event arrives.
  */
-function stubOffice(options: { opens?: boolean; openError?: { message: string } | null } = {}) {
+function stubOffice(options: { opens?: boolean; openError?: { message: string } | null } = {}): {
+  close: ReturnType<typeof vi.fn>;
+  displayed: string[];
+  message: (payload: string) => void | undefined;
+  event: (error: number) => void | undefined;
+} {
   // `null` means Office reported a failure but attached no error object, which is
   // distinct from the option simply not being set.
   const { opens = true, openError = { message: 'popups blocked' } } = options;

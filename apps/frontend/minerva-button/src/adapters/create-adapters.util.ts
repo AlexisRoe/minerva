@@ -1,10 +1,10 @@
-import type { AppConfig } from '../config';
-import { createGraphDemoAdapter } from './graph/graph.demo';
-import { createGraphHttpAdapter } from './graph/graph.http';
-import type { AccessTokenProvider, GraphAdapter } from './graph/graph.types';
-import { createMinervaDemoAdapter } from './minerva/minerva.demo';
-import { createMinervaHttpAdapter } from './minerva/minerva.http';
-import type { MinervaAdapter } from './minerva/minerva.types';
+import { createGraphDemoAdapter } from '@/adapters/graph/graph.demo';
+import { createGraphHttpAdapter } from '@/adapters/graph/graph.http';
+import type { AccessTokenProvider, GraphAdapter } from '@/adapters/graph/graph.types';
+import { createMinervaDemoAdapter } from '@/adapters/minerva/minerva.demo';
+import { createMinervaHttpAdapter } from '@/adapters/minerva/minerva.http';
+import type { MinervaAdapter } from '@/adapters/minerva/minerva.types';
+import type { AppConfig } from '@/platform/config/config.types';
 
 /** Everything outside the browser the task pane talks to. */
 export interface Adapters {

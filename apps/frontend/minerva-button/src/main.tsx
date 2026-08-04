@@ -1,13 +1,18 @@
 import { MinervaThemeProvider } from '@minerva/ui-lib';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { MissingRootElementError } from '@/domain/errors/config.errors';
+import { hideBootSplash } from '@/platform/boot/hide-boot-splash.util';
+import { showBootError } from '@/platform/boot/show-boot-error.util';
+import { ConfigProvider } from '@/platform/config/provider/config.provider';
+import { loadConfig } from '@/platform/config/utils/load-config.util';
+import { I18nProvider } from '@/platform/i18n/provider/i18n.provider';
+import { MinervaErrorBoundary } from '@/platform/sentry/components/minerva-error-boundary.component';
+import { RootErrorBoundary } from '@/platform/sentry/components/root-error-boundary.component';
+import { captureError } from '@/platform/sentry/utils/capture-error.util';
+import { initSentry } from '@/platform/sentry/utils/init-sentry.util';
+import { ErrorScreen } from '@/views/error/error-screen.component';
 import { App } from './App';
-import { hideBootSplash, showBootError } from './boot';
-import { ConfigProvider, loadConfig } from './config';
-import { MissingRootElementError } from './errors';
-import { I18nProvider } from './i18n';
-import { captureError, initSentry, MinervaErrorBoundary, RootErrorBoundary } from './sentry';
-import { ErrorScreen } from './views';
 
 import '@minerva/ui-lib/styles.css';
 import '../../../../shared/assets/fonts.css';

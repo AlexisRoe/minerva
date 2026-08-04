@@ -1,12 +1,12 @@
 import { MinervaThemeProvider } from '@minerva/ui-lib';
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it } from 'vitest';
 
 import { UnsupportedView } from './unsupported.view';
 
 /** Mounts the view at `/unsupported` with the given query string. */
-function renderView(search: string) {
+function renderView(search: string): RenderResult {
   const router = createMemoryRouter([{ path: '/unsupported', Component: UnsupportedView }], {
     initialEntries: [`/unsupported${search}`],
   });

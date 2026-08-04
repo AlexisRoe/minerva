@@ -1,10 +1,11 @@
 import { MinervaError } from '@minerva/typescript-lib';
 import { BrandLogo, ErrorView as ErrorPanel, ReportButtonPage } from '@minerva/ui-lib';
-
-import { MAX_RETRY, RETRY_PARAM, useConfig } from '../../config';
-import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
-import { lookupErrorPolicy } from '../../errors';
-import { useTranslations } from '../../i18n';
+import type { ReactElement } from 'react';
+import { LOGO_SIZE } from '@/constants/icon-sizes.constants';
+import { lookupErrorPolicy } from '@/domain/errors/errors.registry';
+import { MAX_RETRY, RETRY_PARAM } from '@/platform/config/config.types';
+import { useConfig } from '@/platform/config/hooks/use-config.hook';
+import { useTranslations } from '@/platform/i18n/hooks/use-translations.hook';
 
 /** What {@link ErrorScreen} needs. */
 export interface ErrorScreenProps {
@@ -53,7 +54,7 @@ export interface ErrorScreenProps {
  * <ErrorScreen error={error} errorId={eventId} />
  * ```
  */
-export function ErrorScreen({ error, errorId }: ErrorScreenProps) {
+export function ErrorScreen({ error, errorId }: ErrorScreenProps): ReactElement {
   const { t } = useTranslations();
   const config = useConfig();
 

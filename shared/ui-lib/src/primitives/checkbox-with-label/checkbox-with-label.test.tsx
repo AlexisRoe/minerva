@@ -1,10 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { MinervaThemeProvider } from '../../theme/minerva-provider.component';
 import { CheckboxWithLabel } from './checkbox-with-label.component';
 
-function renderCheckbox(ui: ReactElement) {
+function renderCheckbox(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 
