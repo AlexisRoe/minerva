@@ -1,43 +1,50 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
+import { MinervaRequestFailedError } from '../../errors';
 import { BootstrapErrorView } from './bootstrap-error.view';
 
 describe('BootstrapErrorView', () => {
-  // Deliberately rendered bare: the boundary this backs sits above every
-  // provider in `main.tsx`, so anything it needed from context would be absent
-  // at exactly the moment it is drawn.
+  // Every test renders bare on purpose: the boundary this backs sits above every
+  // provider in `main.tsx`, so anything it needed from context would be absent at
+  // exactly the moment it is drawn.
   it('draws with no provider around it at all', () => {
-    render(<BootstrapErrorView />);
+    render(<BootstrapErrorView error={new Error('render blew up')} />);
 
-    expect(screen.getByText(/could not start/i)).toBeInTheDocument();
-  });
-
-  it('is drawn in the pane frame, mark and all', () => {
-    render(<BootstrapErrorView />);
-
-    // A crash is still Minerva speaking; a bare paragraph reads as a broken page.
     expect(screen.getByText('Minerva')).toBeInTheDocument();
   });
 
-  it('says what to do about it', () => {
-    render(<BootstrapErrorView />);
+  it('translates off-provider, because the i18next instance is registered globally', () => {
+    render(<BootstrapErrorView error={new Error('render blew up')} />);
 
-    expect(screen.getByText(/open the message again/i)).toBeInTheDocument();
+    // A raw key on screen would be the giveaway that this fell back to nothing.
+    expect(screen.queryByText('error-title')).not.toBeInTheDocument();
   });
 
-  it('offers no retry, because it has no budget to spend', () => {
-    render(<BootstrapErrorView />);
+  it('quotes the code of one of ours, so a crash is as reportable as a loader failure', () => {
+    render(<BootstrapErrorView error={new MinervaRequestFailedError('/api/button/settings', 503)} />);
 
-    // The retry count lives in a configuration this screen cannot reach, so a
-    // button here would reload without limit.
-    expect(screen.queryByRole('button', { name: /try again/i })).not.toBeInTheDocument();
+    expect(screen.getByText(/ERR_/)).toBeInTheDocument();
   });
 
-  it('quotes no code and no id, having neither', () => {
-    render(<BootstrapErrorView />);
+  it('quotes the event id the boundary reported it under', () => {
+    render(<BootstrapErrorView error={new Error('render blew up')} errorId="a1b2c3d4e5f60718293a4b5c6d7e8f90" />);
 
+    expect(screen.getByText(/a1b2c3d4e5f60718293a4b5c6d7e8f90/)).toBeInTheDocument();
+  });
+
+  it('shows no code for a failure that is not ours', () => {
+    render(<BootstrapErrorView error={new TypeError('undefined is not a function')} />);
+
+    // Showing one would invite someone to look up a reference in no registry.
     expect(screen.queryByText(/ERR_/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/^[0-9a-f]{32}$/)).not.toBeInTheDocument();
+  });
+
+  it('offers no retry, having no budget to spend', () => {
+    render(<BootstrapErrorView error={new Error('render blew up')} />);
+
+    // The retry count lives in a configuration that sits below the boundary, so a
+    // button here would reload without limit.
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 });

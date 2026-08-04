@@ -1,8 +1,6 @@
 {
   "error": "Etwas ist schiefgelaufen.",
   "error-title": "Minerva konnte nicht fortfahren.",
-  "bootstrap-error-title": "Minerva konnte nicht starten.",
-  "bootstrap-error-body": "Das Add-In wurde beendet, bevor es sich öffnen konnte. Schließen Sie den Bereich und öffnen Sie die Nachricht erneut. Wenn das Problem weiterhin auftritt, teilen Sie Ihrer IT-Abteilung mit, dass Minerva nicht starten konnte.",
   "back": "Zurück",
   "retry": "Erneut versuchen",
   "tip-generic": "Schließen Sie den Bereich und öffnen Sie die Nachricht erneut. Wenn das Problem bestehen bleibt, nennen Sie Ihrer IT den Code unten.",

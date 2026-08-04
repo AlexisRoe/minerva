@@ -28,6 +28,7 @@ export { configFixture } from './config.fixture';
 export type { AppConfig, RuntimeConfig } from './config.types';
 export { CONFIG_PATH, DEMO_PARAM, isRuntimeConfig, MAX_RETRY, RETRY_PARAM } from './config.types';
 export { useConfig } from './hooks/use-config.hook';
+export { useOptionalConfig } from './hooks/use-optional-config.hook';
 export type { ConfigProviderProps } from './provider/config.provider';
 export { ConfigProvider } from './provider/config.provider';
 export { loadConfig } from './utils/load-config.util';

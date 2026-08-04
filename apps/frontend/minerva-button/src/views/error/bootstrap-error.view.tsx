@@ -1,50 +1,51 @@
-import { BrandLogo, ErrorView as ErrorPanel, MinervaThemeProvider, ReportButtonPage } from '@minerva/ui-lib';
+import { MinervaThemeProvider } from '@minerva/ui-lib';
 
-import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
-import { translate } from '../../i18n';
+import { ErrorScreen } from './error-screen.component';
+
+/** What {@link BootstrapErrorView} needs -- exactly what the boundary hands its fallback. */
+export interface BootstrapErrorViewProps {
+  /** Whatever was thrown below the boundary. */
+  readonly error: unknown;
+  /**
+   * Sentry's event id for it, once `componentDidCatch` has reported it.
+   *
+   * `undefined` on the first render after the throw: the fallback is shown
+   * during the same commit the error was caught in, and the report goes out
+   * after it. The line appears on the re-render that follows.
+   */
+  readonly errorId?: string | undefined;
+}
 
 /**
  * The screen behind a failure that took the whole tree down with it.
  *
  * {@link MinervaErrorBoundary}'s fallback, and the last thing this app can draw.
- * It says the same things in the same frame as {@link ErrorScreen} -- the mark,
- * the panel, a title and a line of advice -- so a user meets one Minerva rather
- * than a designed screen for the failures that were anticipated and a bare
- * paragraph for the one that was not.
+ * Everything it shows is {@link ErrorScreen} -- the same screen a failed loader
+ * lands on -- because a user cannot tell which layer broke and should not have
+ * to: one Minerva, whether the failure was anticipated or not.
  *
- * It carries **no retry**, no error code and no error id, and that is the whole
- * difference from {@link ErrorScreen}. Not one of the three could be honest
- * here: the retry budget is read from a configuration this screen cannot reach,
- * a code exists only on a {@link MinervaError} and a render crash is usually not
- * one, and the Sentry event id is reported by the boundary rather than returned
- * to it. Showing an empty code or a button that reloads on no budget would be
- * worse than showing neither.
+ * What is left here is the two things that screen cannot do for itself in this
+ * position. It brings a {@link MinervaThemeProvider}, because the boundary sits
+ * above every provider in `main.tsx` -- deliberately, so that a provider
+ * throwing is still caught -- and without one the panel would draw unstyled at
+ * the exact moment looking broken is least affordable. And it passes the error
+ * and its event id straight through, so the code and the reference a user is
+ * asked to quote are on screen for a render crash exactly as they are for a
+ * loader failure.
  *
- * It brings its own {@link MinervaThemeProvider} because of where it renders.
- * The boundary sits above every provider in `main.tsx` -- deliberately, so that
- * a provider throwing is still caught -- which leaves the fallback with no theme
- * on context. Without this the panel would draw unstyled at the exact moment
- * looking broken is least affordable. For the same reason the copy comes from
- * {@link translate} rather than `useTranslations`: there is no i18n provider
- * either, and the module-level instance answers regardless.
+ * Translation needs nothing: `initReactI18next` registers the instance globally,
+ * so `useTranslations` answers off-provider. The configuration does not, and
+ * {@link ErrorScreen} degrades to offering no retry when it is absent.
  *
  * @example
  * ```tsx
- * <MinervaErrorBoundary fallback={() => <BootstrapErrorView />}>
+ * <MinervaErrorBoundary fallback={(error, errorId) => <BootstrapErrorView error={error} errorId={errorId} />}>
  * ```
  */
-export function BootstrapErrorView() {
+export function BootstrapErrorView({ error, errorId }: BootstrapErrorViewProps) {
   return (
     <MinervaThemeProvider>
-      <ReportButtonPage>
-        <ReportButtonPage.Header>
-          <BrandLogo size={LOGO_SIZE} />
-        </ReportButtonPage.Header>
-
-        <ReportButtonPage.Content>
-          <ErrorPanel description={translate('bootstrap-error-body')} title={translate('bootstrap-error-title')} />
-        </ReportButtonPage.Content>
-      </ReportButtonPage>
+      <ErrorScreen error={error} errorId={errorId} />
     </MinervaThemeProvider>
   );
 }

@@ -1,8 +1,6 @@
 {
   "error": "Er is iets misgegaan.",
   "error-title": "Minerva kon niet verdergaan.",
-  "bootstrap-error-title": "Minerva kon niet starten.",
-  "bootstrap-error-body": "De invoegtoepassing is gestopt voordat deze kon worden geopend. Sluit het deelvenster en open het bericht opnieuw. Als dit blijft gebeuren, meld dan bij uw IT-team dat Minerva niet kon starten.",
   "back": "Terug",
   "retry": "Opnieuw proberen",
   "tip-generic": "Sluit het deelvenster en open het bericht opnieuw. Blijft dit gebeuren, geef dan de onderstaande code door aan uw IT-afdeling.",

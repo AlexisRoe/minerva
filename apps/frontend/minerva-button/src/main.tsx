@@ -36,7 +36,7 @@ async function bootstrap(): Promise<void> {
 
   createRoot(container).render(
     <StrictMode>
-      <MinervaErrorBoundary fallback={() => <BootstrapErrorView />}>
+      <MinervaErrorBoundary fallback={(error, errorId) => <BootstrapErrorView error={error} errorId={errorId} />}>
         <I18nProvider>
           <MinervaThemeProvider>
             <ConfigProvider config={config}>

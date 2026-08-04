@@ -1,8 +1,6 @@
 {
   "error": "Algo ha salido mal.",
   "error-title": "Minerva no ha podido continuar.",
-  "bootstrap-error-title": "Minerva no ha podido iniciarse.",
-  "bootstrap-error-body": "El complemento se detuvo antes de poder abrirse. Cierre el panel y abra el mensaje de nuevo. Si sigue ocurriendo, indique a su equipo de TI que Minerva no ha podido iniciarse.",
   "back": "Volver",
   "retry": "Volver a intentarlo",
   "tip-generic": "Cierre el panel y vuelva a abrir el mensaje. Si sigue ocurriendo, indique el código de abajo a su equipo de TI.",

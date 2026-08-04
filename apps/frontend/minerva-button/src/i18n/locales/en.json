@@ -1,8 +1,6 @@
 {
   "error": "Something went wrong.",
   "error-title": "Minerva could not continue.",
-  "bootstrap-error-title": "Minerva could not start.",
-  "bootstrap-error-body": "The add-in stopped before it could open. Close the pane and open the message again. If it keeps happening, tell your IT team that Minerva failed to start.",
   "back": "Back",
   "retry": "Try again",
   "tip-generic": "Close the pane and open the message again. If it keeps happening, quote the code below to your IT team.",

@@ -1,8 +1,6 @@
 {
   "error": "Une erreur s'est produite.",
   "error-title": "Minerva n'a pas pu continuer.",
-  "bootstrap-error-title": "Minerva n'a pas pu démarrer.",
-  "bootstrap-error-body": "Le complément s'est arrêté avant de pouvoir s'ouvrir. Fermez le volet et rouvrez le message. Si le problème persiste, indiquez à votre équipe informatique que Minerva n'a pas pu démarrer.",
   "back": "Retour",
   "retry": "Réessayer",
   "tip-generic": "Fermez le volet et rouvrez le message. Si cela se reproduit, communiquez le code ci-dessous à votre service informatique.",
