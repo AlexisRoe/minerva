@@ -395,7 +395,7 @@ Entra registration `E81D4C4B-767E-4F5B-865F-87F816C0C953` needs the SPA redirect
 `brk-multihub://localhost:4101`, and `APP_FE_RB_ENTRA_CLIENT_ID` has to be set in the root `.env`.
 Neither is a code change, and sign-in cannot be exercised in a real client until both are done.
 
-## Step 5 — Stores
+## Step 5 — Stores ✅ done
 
 **Files:** `src/store/office/`, `src/store/session/`, `src/store/settings/`
 
@@ -404,6 +404,45 @@ Three plain (non-persisted) zustand stores following the shape of the existing
 `hooks/`. Only `error-log` uses `persist`; session and office data must not outlive the pane.
 `useSettingsStore` also exposes derived selectors the views need: `canReportSpam`
 (`features.enableSpamReporting`), `hasContact` (`contact.enable`), `reasonsFor(variant)`.
+
+### Outcome
+
+`session` and `settings` built; `office` already existed from Step 2. All three non-persisted, all
+three shaped like `error-log` (store, types, read hook under `hooks/`). Exported from
+`src/store/index.ts`. `make verify` green: 721 tests across 98 files. No new error codes — **next
+free is still `ERR_016`.**
+
+The derived selectors went further than the three the plan named, because the `null`-before-loaded
+case is the same problem at every call site. `useSettings()` answers `isEnabled`, `canShowDetails`,
+`canReportSpam`, `hasContact`, `contact`, `reportingMethods`, `isReasonMandatory`,
+`hasFreetextField` and `reasonsFor(variant)` — every flag `false` and every list empty until the
+settings land. That default is the safe direction: a pane that briefly showed nothing is
+recoverable, one that briefly offered a button the tenant disabled is not.
+
+### Notes
+
+1. **The session store holds no token, of either kind.** The pane's own session is an httpOnly
+   cookie `request()` sends automatically and JavaScript cannot read; Graph tokens belong to MSAL,
+   which knows when they expire and this store would not. A copy here would be a credential going
+   stale in silence. There is a test asserting the serialised state contains no `token` at all.
+
+2. **`hasContact` is not `contact.enable`.** The contact block carries an address and a person even
+   when disabled, so `useSettings()` returns `contact: null` rather than the object — otherwise the
+   confirmation screen renders a block the tenant switched off.
+
+3. **`reasonsFor(variant)` ignores its argument, deliberately.** The contract carries one list, not
+   one per variant. The parameter is taken anyway because both drawers ask for their own reasons,
+   so the day the backend splits the list this changes here and nowhere else.
+
+4. **`useSettings` has two empty-array constants, not one.** They are module-level so a component
+   reading one twice is not re-rendered by a fresh array identity, and separate so each keeps its
+   element type — sharing one `[]` failed typecheck, which was the right complaint.
+
+### Verified
+
+`make verify` green. Two selectors mutation-tested, both failed correctly when broken: returning the
+contact block regardless of `enable`, and ignoring the master `userFeedback.enabled` switch so the
+reasons underneath a disabled drawer leaked out.
 
 ## Step 6 — Router loaders and the boot sequence
 
