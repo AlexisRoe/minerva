@@ -14,7 +14,7 @@ import {
   type UserFeedbackValue,
 } from '@minerva/ui-lib';
 import { useDisclosure } from '@minerva/ui-lib/hooks';
-import { Box, Button } from '@minerva/ui-lib/primitives';
+import { Button } from '@minerva/ui-lib/primitives';
 import { useState } from 'react';
 import { useSubmit } from 'react-router';
 import { FeatureGuard } from '../../components';
@@ -37,12 +37,6 @@ const contentStyle = {
 const listStyle = { flex: '1 1 auto', minHeight: 0 } as const;
 
 /**
- * The drawers portal into the pane rather than the document, so the element they
- * land in has to be positioned and has to have a height of its own.
- */
-const containerStyle = { overflow: 'hidden' } as const;
-
-/**
  * The pane's first screen: what this message is, and the two ways to report it.
  *
  * Everything on it is the tenant's decision rather than this file's. Whether the
@@ -61,6 +55,11 @@ const containerStyle = { overflow: 'hidden' } as const;
  * the work happens: React Router holds the transition non-idle for the whole
  * action, and `PaneLayout` draws the reel for exactly that long.
  *
+ * The drawers portal to the document rather than into a container of this view's
+ * own. In a real add-in the task pane *is* the window, so there is nothing to
+ * stay inside -- the container prop exists for the Storybook fixture, which
+ * renders the page inside a mock Outlook frame.
+ *
  * @see {@link https://reactrouter.com/api/hooks/useSubmit}
  *
  * @example
@@ -74,7 +73,6 @@ export function ReportView() {
   const { message, user, environment, hasMessage } = useOffice();
   const { canShowDetails, canReportSpam, isReasonMandatory, hasFreetextField, reasonsFor } = useSettings();
 
-  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [detailsOpened, details] = useDisclosure(false);
   const [filing, setFiling] = useState<ReportButtonVariant | null>(null);
   const [feedback, setFeedback] = useState<UserFeedbackValue | null>(null);
@@ -111,82 +109,81 @@ export function ReportView() {
   const reasons = filing === null ? [] : reasonsFor(filing);
 
   return (
-    <Box h="100%" pos="relative" ref={setContainer} style={containerStyle}>
-      <ReportButtonPage>
-        <ReportButtonPage.Header>
-          <BrandLogo size={LOGO_SIZE} />
-          <FeatureGuard feature={canShowDetails}>
-            <SateliteButton label={t('details-open')} onClick={details.open} />
-          </FeatureGuard>
-        </ReportButtonPage.Header>
-        <ReportButtonPage.Content style={contentStyle}>
-          <PageDescription description={t('report-description')} title={t('report-title')} />
-          <ReportButtonList style={listStyle}>
-            <ReportButton
-              description={t('report-suspicious-description')}
-              onReport={setFiling}
-              title={t('report-suspicious-title')}
-              variant="suspicious"
-            />
-            <FeatureGuard feature={canReportSpam}>
-              <ReportButton
-                description={t('report-spam-description')}
-                onReport={setFiling}
-                title={t('report-spam-title')}
-                variant="spam"
-              />
-            </FeatureGuard>
-          </ReportButtonList>
-        </ReportButtonPage.Content>
-
+    <ReportButtonPage>
+      <ReportButtonPage.Header>
+        <BrandLogo size={LOGO_SIZE} />
         <FeatureGuard feature={canShowDetails}>
-          <ButtonDrawer
-            container={container}
-            footer={
-              <Button onClick={details.close} variant="outline">
-                {t('close')}
-              </Button>
-            }
-            onClose={details.close}
-            opened={detailsOpened}
-            title={t('details-title')}
-          >
-            <ButtonInfoContent sections={buildSections(t, { message, user, environment })} />
-          </ButtonDrawer>
+          <SateliteButton label={t('details-open')} onClick={details.open} />
         </FeatureGuard>
+      </ReportButtonPage.Header>
 
-        <ButtonDrawer
-          container={container}
-          footer={
-            <>
-              <Button disabled={feedback?.isValid !== true} onClick={sendReport}>
-                {t('send-report')}
-              </Button>
+      <ReportButtonPage.Content style={contentStyle}>
+        <PageDescription description={t('report-description')} title={t('report-title')} />
 
-              <Button onClick={cancelReport} variant="outline">
-                {t('cancel')}
-              </Button>
-            </>
-          }
-          onClose={cancelReport}
-          opened={filing !== null}
-          title={filing === 'spam' ? t('drawer-spam-title') : t('drawer-suspicious-title')}
-        >
-          <FeatureGuard feature={!!filing}>
-            <UserFeedback
-              hasUserInput={hasFreetextField}
-              inputLabel={t('comment-label')}
-              inputPlaceholder={t('comment-placeholder')}
-              isMandatory={isReasonMandatory}
-              mandatoryError={t('reasons-mandatory-error')}
-              onChange={setFeedback}
-              reasons={reasons.map(({ value, label }) => ({ value, label }))}
-              reasonsLabel={t('reasons-label')}
+        <ReportButtonList style={listStyle}>
+          <ReportButton
+            description={t('report-suspicious-description')}
+            onReport={setFiling}
+            title={t('report-suspicious-title')}
+            variant="suspicious"
+          />
+
+          <FeatureGuard feature={canReportSpam}>
+            <ReportButton
+              description={t('report-spam-description')}
+              onReport={setFiling}
+              title={t('report-spam-title')}
+              variant="spam"
             />
           </FeatureGuard>
+        </ReportButtonList>
+      </ReportButtonPage.Content>
+
+      <FeatureGuard feature={canShowDetails}>
+        <ButtonDrawer
+          footer={
+            <Button onClick={details.close} variant="outline">
+              {t('close')}
+            </Button>
+          }
+          onClose={details.close}
+          opened={detailsOpened}
+          title={t('details-title')}
+        >
+          <ButtonInfoContent sections={buildSections(t, { message, user, environment })} />
         </ButtonDrawer>
-      </ReportButtonPage>
-    </Box>
+      </FeatureGuard>
+
+      <ButtonDrawer
+        footer={
+          <>
+            <Button disabled={feedback?.isValid !== true} onClick={sendReport}>
+              {t('send-report')}
+            </Button>
+
+            <Button onClick={cancelReport} variant="outline">
+              {t('cancel')}
+            </Button>
+          </>
+        }
+        onClose={cancelReport}
+        opened={filing !== null}
+        title={filing === 'spam' ? t('drawer-spam-title') : t('drawer-suspicious-title')}
+      >
+        <FeatureGuard feature={filing !== null}>
+          <UserFeedback
+            hasUserInput={hasFreetextField}
+            inputLabel={t('comment-label')}
+            inputPlaceholder={t('comment-placeholder')}
+            isMandatory={isReasonMandatory}
+            mandatoryError={t('reasons-mandatory-error')}
+            onChange={setFeedback}
+            reasons={reasons.map(({ value, label }) => ({ value, label }))}
+            reasonsLabel={t('reasons-label')}
+          />
+        </FeatureGuard>
+      </ButtonDrawer>
+    </ReportButtonPage>
   );
 }
 

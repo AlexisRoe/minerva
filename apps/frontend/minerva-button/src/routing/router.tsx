@@ -38,7 +38,7 @@ export function createRoutes(config: AppConfig): RouteObject[] {
         {
           path: ROUTES.confirmation,
           Component: ConfirmationView,
-          action: createReportAction(),
+          action: createReportAction(config),
         },
         { path: ROUTES.unsupported, Component: UnsupportedView },
         { path: ROUTES.error, Component: ErrorView },

@@ -602,7 +602,22 @@ blank *after a send*, but a send navigates to the confirmation screen, so there 
 to open. It now checks that after an abandoned report, and a separate case checks that a filed
 report leaves the screen.
 
-## Step 8 — The reporting action
+### Follow-up (requested)
+
+Two changes on top, both the user's call:
+
+- **`FeatureGuard` replaces every conditional in the view.** `{flag ? <Thing /> : null}` repeated
+  down a tree buries the markup in punctuation; `<FeatureGuard feature={canReportSpam}>` says what
+  the condition means. It renders no wrapper of its own — several of the things it guards sit inside
+  components that inspect their own children (`ReportButtonList` lays its buttons out, `ButtonDrawer`
+  portals its content), so an extra node would change a layout it is meant to be invisible to. It
+  now has JSDoc, exported props and a test file, including that it adds no element and does not
+  remount its child.
+- **The outer `Box` and the drawers' `container` prop are gone.** In a real add-in the task pane
+  *is* the window, so there is nothing for a drawer to stay inside; the container prop exists for the
+  Storybook fixture, which renders the page inside a mock Outlook frame.
+
+## Step 8 — The reporting action ✅ done
 
 **Files:** `src/routing/actions/report.action.ts`, `src/reporting/*`
 
@@ -626,6 +641,46 @@ In order:
 Docs: [Get MIME content of a message](https://learn.microsoft.com/en-us/graph/outlook-get-mime-message),
 [user: sendMail](https://learn.microsoft.com/en-us/graph/api/user-sendmail),
 [internetMessageHeaders](https://learn.microsoft.com/en-us/graph/api/resources/internetmessageheader).
+
+### Outcome
+
+The flow runs in the order it has to: MIME download → upload → fan-out. `src/reporting/` holds the
+notification template and the shapes it produces; the action holds the order. `make verify` and
+`make verify-i18n` both green: 780 tests across 102 files. No new error codes — **next free is still
+`ERR_016`.**
+
+### Departures from the plan
+
+1. **The action returns instead of redirecting.** Step 5 called for `redirect('/confirmation')`
+   "carrying the `ReportingResponse` plus per-method outcomes", but a redirect carries nothing except
+   a URL. Since the action is already mounted *on* the confirmation route, what it returns is exactly
+   what that screen reads through `useActionData()` — and the per-method outcomes survive, which is
+   the half that cannot be reconstructed anywhere else.
+
+2. **The notification mail is deliberately not translated.** These go to a shared security queue,
+   possibly an MSSP in another country; a report arriving in the reporter's language is a report
+   nobody there can triage. The reporter's language is recorded as a *field* instead, and reasons are
+   rendered from `defaultLabel` rather than the localised `label`.
+
+3. **The template escapes everything it interpolates.** The reported subject is written by the
+   attacker — that is the entire reason the mail exists — and it must not become markup in an
+   analyst's client. The user's own note is escaped for the same reason.
+
+4. **`timeZone` is the browser's, not the mailbox's.** `Intl.DateTimeFormat().resolvedOptions()`
+   reports where the user actually was; `userProfile.timeZone` is the mailbox setting, which is a
+   different fact and often stale.
+
+5. **The action refuses to run on an unstarted pane.** All four stores must be filled before the
+   confirmation route can be reached, so a null there is a wiring fault. Throwing sends it to the
+   error screen rather than uploading a report with holes in it.
+
+### Verified
+
+`make verify` and `make verify-i18n` both green. Three decisions mutation-tested, all failed
+correctly when broken: `allSettled` → `all` (a single failed notification would have sunk a report
+already filed, inviting the user to duplicate it), sending `user.language` instead of
+`user.displayLanguage` (losing the region the backend picks templates by), and dropping the HTML
+escape on the reporter's note.
 
 ## Step 9 — The confirmation view
 
