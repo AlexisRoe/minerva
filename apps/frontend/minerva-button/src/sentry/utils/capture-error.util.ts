@@ -29,7 +29,13 @@ const DEFAULT_LEVEL = 'error';
  * Safe to call before `Sentry.init()`: the SDK drops the event rather than
  * throwing, so the console line and the log entry survive either way.
  *
+ * It returns Sentry's event id, which is the identifier that actually finds the
+ * report: an error's `reference` names the *throw site* and is the same for
+ * every occurrence, so it groups but does not identify. The event id is what a
+ * user should be given to quote and what support searches on.
+ *
  * @param error - Whatever a `catch` produced.
+ * @returns The Sentry event id for this occurrence.
  *
  * @see {@link https://docs.sentry.io/platforms/javascript/guides/react/usage/#capturing-errors}
  * @see {@link https://docs.sentry.io/platforms/javascript/guides/react/usage/sdk-fingerprinting/}
@@ -45,18 +51,18 @@ const DEFAULT_LEVEL = 'error';
  * }
  * ```
  */
-export function captureError(error: unknown): void {
+export function captureError(error: unknown): string {
   useErrorLogStore.getState().log(error);
 
   if (!MinervaError.is(error)) {
     console.error('Minerva error', error);
-    Sentry.captureException(error, { level: DEFAULT_LEVEL });
-    return;
+
+    return Sentry.captureException(error, { level: DEFAULT_LEVEL });
   }
 
   console.error(JSON.stringify(error));
 
-  Sentry.captureException(error, {
+  return Sentry.captureException(error, {
     level: error.logLevel ? convertToSentryLevel(error.logLevel) : DEFAULT_LEVEL,
     tags: { code: error.code, reference: error.reference },
     extra: error.payload,

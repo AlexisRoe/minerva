@@ -12,5 +12,7 @@
 
 export { ConfirmationView } from './confirmation/confirmation.view';
 export { ErrorView } from './error/error.view';
+export type { ErrorScreenProps } from './error/error-screen.component';
+export { ErrorScreen } from './error/error-screen.component';
 export { ReportView } from './report/report.view';
 export { UnsupportedView } from './unsupported/unsupported.view';

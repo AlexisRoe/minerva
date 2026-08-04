@@ -1,44 +1,45 @@
-import { Button, Text, Title } from '@minerva/ui-lib/primitives';
-import { useNavigate, useRouteError } from 'react-router';
+import { useEffect, useState } from 'react';
+import { useRouteError } from 'react-router';
 
-import { useTranslations } from '../../i18n';
-import { ROUTES } from '../../routing';
 import { captureError } from '../../sentry';
+import { ErrorScreen } from './error-screen.component';
 
 /**
- * The screen behind a failed submission, an unknown path, and a thrown route.
+ * The screen behind a failed loader, a failed action, and an unknown path.
  *
- * It doubles as the router's `errorElement`, which is why it reads
- * `useRouteError()`: navigated to directly there is nothing to read, and the
- * user only ever sees the same message. What is not shown is reported --
- * `SentryErrorBoundary` in `main.tsx` never sees an error the router caught, so
- * this is the only place it can be captured.
+ * The router's `errorElement`, and the reason it needs one of its own: a loader
+ * or action rejection never reaches a React error boundary. React Router catches
+ * it before it can propagate through the tree, so {@link MinervaErrorBoundary}
+ * would never see it and it would go unreported.
+ *
+ * Reporting therefore happens here, which is the only place it can -- and the
+ * event id it produces is what the screen shows the user, so the report and the
+ * number they quote are the same thing.
+ *
+ * Rendering is handed to {@link ErrorScreen}, shared with the boundary so a
+ * loader failure and a render failure look the same to a user -- they cannot
+ * tell which layer broke, and should not have to.
  *
  * @see {@link https://reactrouter.com/api/hooks/useRouteError}
  *
  * @example
  * ```tsx
- * { path: ROUTES.error, Component: ErrorView }
+ * { path: ROUTES.taskPane, Component: PaneLayout, errorElement: <ErrorView /> }
  * ```
  */
 export function ErrorView() {
-  const { t } = useTranslations();
-  const navigate = useNavigate();
-  const routeError = useRouteError();
+  const error = useRouteError();
+  const [errorId, setErrorId] = useState<string | undefined>(undefined);
 
-  if (routeError) {
-    captureError(routeError);
-  }
+  // In an effect rather than in the render body: reporting is a side effect, and
+  // in the render body it would fire again on every re-render of this screen.
+  useEffect(() => {
+    if (error === undefined || error === null) {
+      return;
+    }
 
-  return (
-    <>
-      <Title order={2}>{t('error-title')}</Title>
-      <Text c="dimmed" size="sm">
-        {t('error')}
-      </Text>
-      <Button onClick={() => void navigate(ROUTES.taskPane)} variant="light">
-        {t('back')}
-      </Button>
-    </>
-  );
+    setErrorId(captureError(error));
+  }, [error]);
+
+  return <ErrorScreen error={error} errorId={errorId} />;
 }

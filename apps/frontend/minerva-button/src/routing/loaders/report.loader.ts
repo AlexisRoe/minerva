@@ -12,18 +12,21 @@ import {
 import { acquireToken } from '../../auth';
 import type { AppConfig } from '../../config';
 import { demoEnvironment, demoMessage, demoUser } from '../../demo';
+import { lookupErrorPolicy } from '../../errors';
 import { useOfficeStore, useSessionStore, useSettingsStore } from '../../store';
 import { REASON_PARAM, ROUTES } from '../routes';
 
 /**
- * The failures that mean "this pane cannot run here", rather than "something broke".
+ * Whether a failure means "this pane cannot run here" rather than "something broke".
  *
- * Every one of them is a fact about the environment the user is in, which no
- * retry changes: Office.js unreachable, not Outlook, an Outlook too old. They
- * are redirected to an explanatory screen; anything else is thrown and caught by
- * the router's `errorElement`.
+ * Asked of the error registry rather than a list kept here, so the loader, the
+ * unsupported screen and the error screen cannot disagree about which failures
+ * are environmental. Adding an error answers this once, where the error is
+ * declared.
  */
-const UNSUPPORTED_CODES = new Set(['ERR_007', 'ERR_008', 'ERR_009']);
+function isUnsupported(error: unknown): boolean {
+  return MinervaError.is(error) && lookupErrorPolicy(error.code).screen === 'no-content';
+}
 
 /**
  * Builds the adapter set for a signed-in pane.
@@ -106,8 +109,8 @@ export function createReportLoader(config: AppConfig) {
 
       return null;
     } catch (error) {
-      if (error instanceof MinervaError && UNSUPPORTED_CODES.has(error.code)) {
-        return redirect(`${ROUTES.unsupported}?${REASON_PARAM}=${error.code}`);
+      if (isUnsupported(error)) {
+        return redirect(`${ROUTES.unsupported}?${REASON_PARAM}=${(error as MinervaError).code}`);
       }
 
       throw error;

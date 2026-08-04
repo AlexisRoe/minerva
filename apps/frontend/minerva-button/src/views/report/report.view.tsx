@@ -18,20 +18,10 @@ import { Button } from '@minerva/ui-lib/primitives';
 import { useState } from 'react';
 import { useSubmit } from 'react-router';
 import { FeatureGuard } from '../../components';
+import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
 import { useTranslations } from '../../i18n';
 import { ROUTES } from '../../routing';
 import { useOffice, useSettings } from '../../store';
-
-/** The mark is sized for a pane that can be as narrow as 220px. */
-const LOGO_SIZE = 28;
-
-/** The content column: the description above the buttons, and no taller than the row. */
-const contentStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1.5rem',
-  minHeight: 0,
-} as const;
 
 /** The list takes what the description leaves, which is what lets the buttons grow. */
 const listStyle = { flex: '1 1 auto', minHeight: 0 } as const;
@@ -117,7 +107,7 @@ export function ReportView() {
         </FeatureGuard>
       </ReportButtonPage.Header>
 
-      <ReportButtonPage.Content style={contentStyle}>
+      <ReportButtonPage.Content>
         <PageDescription description={t('report-description')} title={t('report-title')} />
 
         <ReportButtonList style={listStyle}>

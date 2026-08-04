@@ -7,14 +7,12 @@ import type { WellKnownFolder } from '../../adapters/graph';
 import { closePane } from '../../adapters/office';
 import { FeatureGuard } from '../../components';
 import { useConfig } from '../../config';
+import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
 import { type TranslationKey, useTranslations } from '../../i18n';
 import type { ReportResult } from '../../reporting';
 import { createPaneAdapters } from '../../routing';
 import { captureError } from '../../sentry';
 import { type ReportVariant, useOffice, useSettings } from '../../store';
-
-/** The mark is sized for a pane that can be as narrow as 220px. */
-const LOGO_SIZE = 28;
 
 /**
  * Where each report sends the mail, and what the button offering it says.

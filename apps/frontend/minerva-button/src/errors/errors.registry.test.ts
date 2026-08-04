@@ -1,7 +1,8 @@
 import { MinervaError } from '@minerva/typescript-lib';
 import { describe, expect, it } from 'vitest';
 
-import { errorRegistry } from './errors.registry';
+import en from '../i18n/locales/en.json';
+import { errorRegistry, lookupErrorPolicy, UNKNOWN_ERROR_POLICY } from './errors.registry';
 
 const entries = Object.entries(errorRegistry);
 
@@ -46,5 +47,55 @@ describe('errorRegistry', () => {
     for (const [, { description }] of entries) {
       expect(description.length).toBeGreaterThan(0);
     }
+  });
+
+  it('never offers a retry on a screen that has no button', () => {
+    for (const [code, { screen, canRetry }] of entries) {
+      if (screen === 'no-content') {
+        // NoContentView is the end of the road by ui-lib's design; a `canRetry`
+        // here would be a promise the screen cannot keep.
+        expect(canRetry, code).toBe(false);
+      }
+    }
+  });
+
+  it('tells every code what to say, from the catalogue', () => {
+    for (const [code, { message }] of entries) {
+      expect(message.length, code).toBeGreaterThan(0);
+      // The type already pins this to a TranslationKey; this catches a key that
+      // was renamed in the catalogue and left behind here.
+      expect(Object.keys(en), code).toContain(message);
+    }
+  });
+
+  it('explains a no-content failure rather than advising about it', () => {
+    for (const [code, { screen, message }] of entries) {
+      if (screen === 'no-content') {
+        // These screens say what is wrong with the environment; a `tip-` string
+        // would be advice for a screen that offers nothing to act on.
+        expect(message.startsWith('unsupported-'), code).toBe(true);
+      }
+    }
+  });
+});
+
+describe('lookupErrorPolicy', () => {
+  it('answers for a registered code', () => {
+    expect(lookupErrorPolicy('ERR_008')).toMatchObject({
+      screen: 'no-content',
+      canRetry: false,
+    });
+  });
+
+  it('falls back rather than returning nothing for an unknown code', () => {
+    // A code from a newer build, or from a dependency. Returning `undefined`
+    // would leave every caller to invent its own fallback.
+    expect(lookupErrorPolicy('ERR_999')).toEqual(UNKNOWN_ERROR_POLICY);
+    expect(lookupErrorPolicy('')).toEqual(UNKNOWN_ERROR_POLICY);
+  });
+
+  it('errs towards a screen the user can act on', () => {
+    expect(UNKNOWN_ERROR_POLICY.screen).toBe('error');
+    expect(UNKNOWN_ERROR_POLICY.canRetry).toBe(true);
   });
 });

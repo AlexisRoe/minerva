@@ -753,7 +753,7 @@ was "only a test" is the one mistake this screen must never make. The mutation n
 
 Closing the pane on a failed move also fails correctly.
 
-## Step 10 — Error boundary
+## Step 10 — Error boundary ✅ done
 
 **Files:** `src/sentry/minerva-error-boundary.component.tsx`, `src/views/error/error.view.tsx`
 
@@ -777,6 +777,80 @@ Render `ErrorView` with branching:
 
 The router's `errorElement` needs the same treatment via `useRouteError()`, since loader/action
 rejections never reach a boundary.
+
+### Outcome
+
+`MinervaErrorBoundary` is a real class component; the `Sentry.ErrorBoundary` re-export is gone.
+`ErrorScreen` does the Minerva-vs-plain branching and is shared by the boundary's fallback and the
+router's `errorElement`, so a loader failure and a render failure look the same to a user — they
+cannot tell which layer broke and should not have to. `make verify` and `make verify-i18n` both
+green: 810 tests across 105 files. No new error codes — **next free is still `ERR_016`.**
+
+### Departures from the plan
+
+1. **Tips are keyed by *kind*, not by code.** One string per `ERR_xxx` would mean sixteen
+   near-identical lines in eight languages, when there are only a few things a user can actually do:
+   `tip-network`, `tip-auth`, `tip-deployment`, and `tip-generic` for anything unmapped. A code with
+   no entry therefore still gets advice — adding an error can never leave this screen blank.
+
+2. **The boundary takes `fallback` as a function of the error, not a node.** That is the whole reason
+   it replaces `Sentry.ErrorBoundary`: the screen has to branch on whether the error is one of ours,
+   and a boundary that swallowed the error could not tell it.
+
+3. **The state is checked with `=== null`, not truthiness.** `throw 0` and `throw ''` are legal and
+   would slip past a truthy check, leaving the boundary rendering a broken tree. There is a test for
+   exactly that.
+
+4. **Reporting from `errorElement` happens in an effect, not the render body.** The previous version
+   called `captureError` while rendering, which fires again on every re-render; the effect is keyed
+   on the error, so one failure is one report.
+
+5. **Two boundaries, with different fallbacks.** The one in `main.tsx` sits above the configuration,
+   the theme and i18n, so it can only render a bare translated line — `ErrorScreen` needs
+   `useConfig()` for the retry budget. Everything inside a route is covered by `errorElement`, which
+   has all three. `console.error` on the component stack stays, because the DSN is unset locally and
+   the console line is all there is.
+
+### Verified
+
+`make verify` and `make verify-i18n` both green. Three decisions mutation-tested, all failed
+correctly: truthiness on the boundary state (so `throw 0` renders a broken tree), showing a code for
+an unrecognised error (inviting someone to look up a reference in no registry), and ignoring the
+retry budget (offering a button that cannot help).
+
+### Follow-up (requested)
+
+Two changes on top, both the user's call.
+
+**The registry now owns presentation policy.** Each entry gained `screen` (`'error' | 'no-content'`),
+`canRetry`, and `message` (a `TranslationKey`, so a code cannot be registered against a string the
+catalogues do not define). `lookupErrorPolicy(code)` reads it and never returns `undefined` — an
+unregistered code falls back to `UNKNOWN_ERROR_POLICY`, which errs towards the error screen with a
+retry allowed, because the alternative is a blank pane with no way off it.
+
+That collapsed three maps that had to be kept in step by hand:
+
+| Was | Now |
+| --- | --- |
+| `UNSUPPORTED_CODES` in `report.loader.ts` | `screen === 'no-content'` |
+| `REASON_KEYS` in `unsupported.view.tsx` | `message` |
+| `TIPS` in `error-screen.component.tsx` | `message` |
+
+Two invariants are now enforced by the registry's own test rather than by care: a `no-content` entry
+may never set `canRetry` (that view carries no button by ui-lib's design, so it would be a promise
+the screen cannot keep), and a `no-content` entry's message must be an `unsupported-` string rather
+than a `tip-` one — those screens explain, they do not advise.
+
+**`errorId` is Sentry's event id, not the error's `reference`.** This was wrong before and is worth
+stating plainly: `reference` names the *throw site* and is identical for every occurrence, so it
+groups reports but cannot pick one out. `captureError` now returns the event id
+`Sentry.captureException` produces, `ErrorView` holds it in state and passes it down, and
+`MinervaErrorBoundary` does the same through a second `fallback` argument. `ErrorScreen` takes it as
+a prop and shows nothing while a report is still in flight.
+
+Mutation-tested both. Making `ERR_008` retryable failed the new invariant. Reverting `errorId` to the
+throw-site reference initially failed **nothing** — `ErrorView` had no test asserting *which* id
+reached the screen — so two cases were added, and the mutation now fails both.
 
 ## Step 11 — i18n
 
