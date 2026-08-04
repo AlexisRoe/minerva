@@ -444,7 +444,7 @@ recoverable, one that briefly offered a button the tenant disabled is not.
 contact block regardless of `enable`, and ignoring the master `userFeedback.enabled` switch so the
 reasons underneath a disabled drawer leaked out.
 
-## Step 6 — Router loaders and the boot sequence
+## Step 6 — Router loaders and the boot sequence ✅ done
 
 **Files:** `src/routing/router.tsx`, `src/routing/routes.ts`,
 `src/routing/loaders/report.loader.ts`
@@ -482,6 +482,48 @@ The router is `createHashRouter` so `?retry` / `?demo` survive navigation — ke
 
 Docs: [React Router loaders](https://reactrouter.com/start/data/route-object#loader),
 [actions](https://reactrouter.com/start/data/route-object#action).
+
+### Outcome
+
+The boot sequence runs. `createReportLoader(config)` walks it in order — wait for Office.js, check
+host and requirement set, read message and user, sign in, trade the token for a session, fetch
+settings — writing each result to its store as it lands. `PaneLayout` shows the steps reel, picked
+by the pending route. `/unsupported` exists as its own screen. `make verify`, `make verify-i18n`
+both green: 741 tests across 100 files. No new error codes — **next free is still `ERR_016`.**
+
+### Departures from the plan
+
+1. **`routes` became `createRoutes(config)`, and `createRouter()` became `createRouter(config)`.** A
+   loader runs outside React and cannot call `useConfig()`, so the configuration has to be closed
+   over when the tree is built. `App` now reads it from the provider and builds the router in
+   `useState(() => …)` rather than `useMemo` — `useMemo` is a hint React may discard, and rebuilding
+   the router would lose the pane's history and re-run the whole boot sequence.
+
+2. **Demo mode skips the Office layer in the loader, rather than gaining a fake Office adapter.**
+   The plan's verification notes suggested making `createAdapters` return a stubbed Office reader.
+   Doing it in the loader is less machinery for the same result: `config.demo` selects the office
+   fixtures directly, and no token is ever requested. A fourth adapter would exist only to be
+   bypassed.
+
+3. **The unsupported screen is keyed by error code, not by a reason vocabulary of its own.** A
+   redirect cannot carry a `MinervaError`, so `?reason=ERR_008` is the whole payload. The codes are
+   already unique, already permanent and already what a support call quotes. An unknown code falls
+   back to a generic line, so adding an error can never produce a blank screen.
+
+4. **The i18n keys for this screen were translated now, not deferred to Step 11.** `verify-i18n` runs
+   in CI, and English-only keys would have left it red between steps. Five keys × seven languages,
+   done through the `translate` skill's check-fill-recheck loop; all 7 catalogues report complete.
+
+5. **`App.test.tsx` stubs the loader.** The index route now runs the entire start-up sequence before
+   it renders, which wants a host, a token and a backend. That test's subject is the wiring above the
+   router; the sequence has its own tests.
+
+### Verified
+
+`make verify` and `make verify-i18n` both green. Two decisions mutation-tested, both failed
+correctly when broken: removing the `UNSUPPORTED_CODES` split (so an old Outlook would get a stack
+trace instead of an explanation), and ignoring the destination when picking the reel (so the pane
+would narrate a start-up during a report).
 
 ## Step 7 — The report view
 

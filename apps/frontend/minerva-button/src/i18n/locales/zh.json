@@ -10,5 +10,10 @@
   "confirmation-title": "已发送给 Minerva",
   "confirmation-body": "Minerva 正在处理该邮件，您可以关闭此窗格。",
   "error-title": "Minerva 无法继续。",
-  "back": "返回"
+  "back": "返回",
+  "unsupported-title": "Minerva 无法在此运行",
+  "unsupported-generic": "Minerva 无法在此窗口中启动。请在 Outlook 中重新打开该邮件。",
+  "unsupported-timeout": "Minerva 无法连接到 Outlook。请检查网络连接，然后重新打开该邮件。",
+  "unsupported-host": "Minerva 用于举报邮件，因此仅能在 Outlook 中运行。",
+  "unsupported-requirement-set": "此 Outlook 版本过旧，无法运行 Minerva。请更新 Outlook，或在 Outlook 网页版中打开该邮件。"
 }

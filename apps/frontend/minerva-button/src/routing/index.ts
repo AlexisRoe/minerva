@@ -14,6 +14,7 @@
  */
 
 export { PaneLayout } from './layout/pane-layout.component';
-export { createRouter, routes } from './router';
+export { createPaneAdapters, createReportLoader } from './loaders/report.loader';
+export { createRouter, createRoutes } from './router';
 export type { Route } from './routes';
-export { ROUTES } from './routes';
+export { REASON_PARAM, ROUTES } from './routes';

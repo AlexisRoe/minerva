@@ -15,9 +15,21 @@ export const ROUTES = {
   taskPane: '/',
   /** Shown after a message was accepted by Minerva. */
   confirmation: '/confirmation',
+  /**
+   * Shown when the pane cannot run here at all.
+   *
+   * Distinct from {@link ROUTES.error} on purpose: nothing has gone wrong, the
+   * pane is simply somewhere it does not work -- outside Outlook, on a client
+   * that is too old, or with Office.js unreachable. There is nothing to retry,
+   * so the screen explains rather than offering a way out.
+   */
+  unsupported: '/unsupported',
   /** Shown when a screen cannot be rendered, and for unknown paths. */
   error: '/error',
 } as const;
+
+/** The query parameter carrying *why* {@link ROUTES.unsupported} was reached. */
+export const REASON_PARAM = 'reason';
 
 /** One of the pane's paths. */
 export type Route = (typeof ROUTES)[keyof typeof ROUTES];

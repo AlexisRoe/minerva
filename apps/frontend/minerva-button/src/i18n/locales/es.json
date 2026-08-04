@@ -10,5 +10,10 @@
   "confirmation-title": "Enviado a Minerva",
   "confirmation-body": "Minerva está procesando el mensaje. Puede cerrar este panel.",
   "error-title": "Minerva no ha podido continuar.",
-  "back": "Volver"
+  "back": "Volver",
+  "unsupported-title": "Minerva no puede ejecutarse aquí",
+  "unsupported-generic": "Minerva no pudo iniciarse en esta ventana. Vuelva a abrir el mensaje en Outlook.",
+  "unsupported-timeout": "Minerva no pudo conectar con Outlook. Compruebe su conexión y vuelva a abrir el mensaje.",
+  "unsupported-host": "Minerva informa sobre correos, por lo que solo funciona en Outlook.",
+  "unsupported-requirement-set": "Esta versión de Outlook es demasiado antigua para Minerva. Actualice Outlook o abra el mensaje en Outlook en la web."
 }

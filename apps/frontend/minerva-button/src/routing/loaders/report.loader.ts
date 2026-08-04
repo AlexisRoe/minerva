@@ -1,0 +1,126 @@
+import { MinervaError } from '@minerva/typescript-lib';
+import { redirect } from 'react-router';
+
+import { type Adapters, createAdapters } from '../../adapters';
+import {
+  type OfficeEnvironment,
+  readCurrentMessage,
+  readCurrentUser,
+  readEnvironment,
+  waitForOffice,
+} from '../../adapters/office';
+import { acquireToken } from '../../auth';
+import type { AppConfig } from '../../config';
+import { demoEnvironment, demoMessage, demoUser } from '../../demo';
+import { useOfficeStore, useSessionStore, useSettingsStore } from '../../store';
+import { REASON_PARAM, ROUTES } from '../routes';
+
+/**
+ * The failures that mean "this pane cannot run here", rather than "something broke".
+ *
+ * Every one of them is a fact about the environment the user is in, which no
+ * retry changes: Office.js unreachable, not Outlook, an Outlook too old. They
+ * are redirected to an explanatory screen; anything else is thrown and caught by
+ * the router's `errorElement`.
+ */
+const UNSUPPORTED_CODES = new Set(['ERR_007', 'ERR_008', 'ERR_009']);
+
+/**
+ * Builds the adapter set for a signed-in pane.
+ *
+ * Exported because the reporting action needs the same set, and building it
+ * twice is cheap -- MSAL memoises its client, and a token acquired once is
+ * returned from cache thereafter.
+ *
+ * @param config The configuration the app booted with.
+ * @param environment What the start-up gate learned about the host.
+ * @returns The Minerva and Graph adapters, live or demo.
+ *
+ * @example
+ * ```ts
+ * const { graph } = createPaneAdapters(config, environment);
+ * ```
+ */
+export function createPaneAdapters(config: AppConfig, environment: OfficeEnvironment): Adapters {
+  return createAdapters(config, async () => {
+    const { accessToken } = await acquireToken(config.entraClientId, environment);
+
+    return accessToken;
+  });
+}
+
+/**
+ * Runs the pane's start-up sequence, in order, before the report page renders.
+ *
+ * A loader rather than an effect, and that is the substance of this step rather
+ * than a detail. Every stage here is a precondition for the next -- there is no
+ * settings call without a session, no session without a token, no token without
+ * a host -- so the sequence has to complete before anything renders, or the user
+ * watches a page assemble itself in stages and reflow under them. React Router
+ * holds the transition in `loading` for exactly as long as this runs, which is
+ * what puts the steps reel on screen for free.
+ *
+ * The order is: wait for Office.js, check the host and requirement set, read the
+ * message and the user, sign in, trade the token for a session, fetch the
+ * tenant's settings. Each result is written to its store as it lands, so a
+ * failure half way leaves what did succeed readable rather than rolling back --
+ * the error screen can then say who the user was.
+ *
+ * Failures split two ways. The three environment failures redirect to
+ * {@link ROUTES.unsupported} with their code in the query string, because they
+ * are not faults and a stack trace would be the wrong response. Everything else
+ * is rethrown for the router's `errorElement`.
+ *
+ * @param config The configuration the app booted with.
+ * @returns A React Router loader.
+ *
+ * @see {@link https://reactrouter.com/start/data/route-object#loader}
+ *
+ * @example
+ * ```ts
+ * { index: true, Component: ReportView, loader: createReportLoader(config) }
+ * ```
+ */
+export function createReportLoader(config: AppConfig) {
+  return async function reportLoader(): Promise<Response | null> {
+    try {
+      const { environment, message, user } = config.demo
+        ? { environment: demoEnvironment, message: demoMessage, user: demoUser }
+        : await readHost();
+
+      useOfficeStore.getState().setOffice({ environment, message, user });
+
+      const adapters = createPaneAdapters(config, environment);
+
+      // In demo mode this returns a fixture without ever asking for a token,
+      // which is what lets the whole flow be walked in a plain browser.
+      const authToken = config.demo ? '' : (await acquireToken(config.entraClientId, environment)).accessToken;
+
+      const authorization = await adapters.minerva.authorize({ authToken });
+
+      useSessionStore.getState().setSession({ authorization, flow: environment.naaSupported ? 'naa' : 'dialog' });
+
+      const settings = await adapters.minerva.getSettings({ userLanguage: user.language });
+
+      useSettingsStore.getState().setSettings(settings);
+
+      return null;
+    } catch (error) {
+      if (error instanceof MinervaError && UNSUPPORTED_CODES.has(error.code)) {
+        return redirect(`${ROUTES.unsupported}?${REASON_PARAM}=${error.code}`);
+      }
+
+      throw error;
+    }
+  };
+}
+
+/** Reads everything the host can tell the pane, once Office.js is ready. */
+async function readHost() {
+  const info = await waitForOffice();
+  const environment = readEnvironment(info);
+
+  // Both readers are synchronous and both throw if the gate has not run, which
+  // is why they come after `readEnvironment` rather than beside it.
+  return { environment, message: readCurrentMessage(), user: readCurrentUser() };
+}

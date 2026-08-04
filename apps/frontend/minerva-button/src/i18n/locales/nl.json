@@ -10,5 +10,10 @@
   "confirmation-title": "Naar Minerva gestuurd",
   "confirmation-body": "Minerva verwerkt het bericht. U kunt dit deelvenster sluiten.",
   "error-title": "Minerva kon niet verdergaan.",
-  "back": "Terug"
+  "back": "Terug",
+  "unsupported-title": "Minerva kan hier niet werken",
+  "unsupported-generic": "Minerva kon niet starten in dit venster. Open het bericht opnieuw in Outlook.",
+  "unsupported-timeout": "Minerva kon Outlook niet bereiken. Controleer uw verbinding en open het bericht opnieuw.",
+  "unsupported-host": "Minerva rapporteert e-mail en werkt daarom alleen in Outlook.",
+  "unsupported-requirement-set": "Deze versie van Outlook is te oud voor Minerva. Werk Outlook bij of open het bericht in Outlook op het web."
 }

@@ -10,5 +10,10 @@
   "confirmation-title": "Sent to Minerva",
   "confirmation-body": "Minerva is processing the message. You can close this pane.",
   "error-title": "Minerva could not continue.",
-  "back": "Back"
+  "back": "Back",
+  "unsupported-title": "Minerva cannot run here",
+  "unsupported-generic": "Minerva could not start in this window. Try opening the message in Outlook again.",
+  "unsupported-timeout": "Minerva could not reach Outlook. Check your connection, then open the message again.",
+  "unsupported-host": "Minerva reports email, so it only runs in Outlook.",
+  "unsupported-requirement-set": "This version of Outlook is too old for Minerva. Update Outlook, or open the message in Outlook on the web."
 }

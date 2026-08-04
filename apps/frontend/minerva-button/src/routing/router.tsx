@@ -1,29 +1,47 @@
 import { createHashRouter, type RouteObject } from 'react-router';
 
-import { ConfirmationView, ErrorView, TaskPaneView } from '../views';
+import type { AppConfig } from '../config';
+import { ConfirmationView, ErrorView, TaskPaneView, UnsupportedView } from '../views';
 import { PaneLayout } from './layout/pane-layout.component';
+import { createReportLoader } from './loaders/report.loader';
 import { ROUTES } from './routes';
 
 /**
- * The pane's screens, as one tree under {@link PaneLayout}.
+ * Builds the pane's screens as one tree under {@link PaneLayout}.
+ *
+ * A function of the configuration rather than a constant, because the index
+ * route's loader needs it: a loader runs outside React and so cannot reach
+ * `useConfig()`. Passing it in here keeps that the router's problem rather than
+ * every loader's.
  *
  * Exported separately from the router so tests can mount the same tree through
  * `createMemoryRouter` -- a hash router in jsdom shares one global location and
  * leaks state between cases.
+ *
+ * @param config The configuration the app booted with.
+ * @returns The route tree.
+ *
+ * @example
+ * ```tsx
+ * createMemoryRouter(createRoutes(configFixture));
+ * ```
  */
-export const routes: RouteObject[] = [
-  {
-    path: ROUTES.taskPane,
-    Component: PaneLayout,
-    errorElement: <ErrorView />,
-    children: [
-      { index: true, Component: TaskPaneView },
-      { path: ROUTES.confirmation, Component: ConfirmationView },
-      { path: ROUTES.error, Component: ErrorView },
-      { path: '*', Component: ErrorView },
-    ],
-  },
-];
+export function createRoutes(config: AppConfig): RouteObject[] {
+  return [
+    {
+      path: ROUTES.taskPane,
+      Component: PaneLayout,
+      errorElement: <ErrorView />,
+      children: [
+        { index: true, Component: TaskPaneView, loader: createReportLoader(config) },
+        { path: ROUTES.confirmation, Component: ConfirmationView },
+        { path: ROUTES.unsupported, Component: UnsupportedView },
+        { path: ROUTES.error, Component: ErrorView },
+        { path: '*', Component: ErrorView },
+      ],
+    },
+  ];
+}
 
 /**
  * Builds the router the app runs on.
@@ -33,15 +51,16 @@ export const routes: RouteObject[] = [
  * and no address bar to keep tidy. The hash also keeps the query string
  * `loadConfig` reads (`retry`, `demo`) untouched by navigation.
  *
+ * @param config The configuration the app booted with.
  * @returns A router ready to hand to `<RouterProvider>`.
  *
  * @see {@link https://reactrouter.com/api/data-routers/createHashRouter}
  *
  * @example
  * ```tsx
- * <RouterProvider router={createRouter()} />
+ * <RouterProvider router={createRouter(config)} />
  * ```
  */
-export function createRouter() {
-  return createHashRouter(routes);
+export function createRouter(config: AppConfig) {
+  return createHashRouter(createRoutes(config));
 }

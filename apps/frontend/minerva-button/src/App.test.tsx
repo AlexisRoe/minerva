@@ -12,6 +12,15 @@ vi.mock('./adapters/office', () => ({
   useCurrentMessage: () => ({ message: null, isLoading: false }),
 }));
 
+// The index route now runs the whole start-up sequence before it renders, which
+// wants a host, a token and a backend. What is under test here is the wiring
+// above it -- providers, router, first screen -- so the sequence is stubbed; it
+// has its own tests in `routing/loaders/report.loader.test.ts`.
+vi.mock('./routing/loaders/report.loader', () => ({
+  createReportLoader: () => () => Promise.resolve(null),
+  createPaneAdapters: () => ({ minerva: {}, graph: {} }),
+}));
+
 // Mirrors the bootstrap in `main.tsx`: the app tree runs below a provider, so
 // anything that starts calling `useConfig()` keeps rendering here.
 function renderApp() {
