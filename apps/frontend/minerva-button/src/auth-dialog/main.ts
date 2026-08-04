@@ -1,5 +1,8 @@
 import { PublicClientApplication } from '@azure/msal-browser';
 
+// Imported from the file rather than the adapter barrel, which would pull React
+// and the whole Office adapter into this page's bundle for one function.
+import { restoreHistoryApi } from '../adapters/office/utils/restore-history-api.util';
 import type { DialogMessage } from '../auth/auth.types';
 import { GRAPH_SCOPES } from '../auth/auth.types';
 import { AUTHORITY } from '../auth/utils/naa.util';
@@ -33,6 +36,11 @@ function reply(message: DialogMessage): void {
 
 /** Runs the redirect flow and relays whatever it produces. */
 async function signIn(): Promise<void> {
+  // MSAL clears the response hash through `history.replaceState`, which Office.js
+  // removes on any client it does not recognise. Without this the redirect comes
+  // back and then dies on the way to the token.
+  restoreHistoryApi();
+
   // Passed by the pane rather than read from config.json: Office opens this page
   // as a bare URL, so it never boots the app's configuration loader.
   const clientId = new URLSearchParams(globalThis.location.search).get('clientId');

@@ -1,7 +1,8 @@
 import { MinervaError } from '@minerva/typescript-lib';
-import { ErrorView as ErrorPanel } from '@minerva/ui-lib';
+import { BrandLogo, ErrorView as ErrorPanel, ReportButtonPage } from '@minerva/ui-lib';
 
 import { MAX_RETRY, RETRY_PARAM, useConfig } from '../../config';
+import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
 import { lookupErrorPolicy } from '../../errors';
 import { useTranslations } from '../../i18n';
 
@@ -62,13 +63,21 @@ export function ErrorScreen({ error, errorId }: ErrorScreenProps) {
   }
 
   return (
-    <ErrorPanel
-      buttonAction={canRetry ? retry : undefined}
-      buttonLabel={canRetry ? t('retry') : undefined}
-      description={policy === undefined ? t('error') : t(policy.message)}
-      errorCode={isMinerva ? error.code : undefined}
-      errorId={errorId}
-      title={t('error-title')}
-    />
+    <ReportButtonPage>
+      <ReportButtonPage.Header>
+        <BrandLogo size={LOGO_SIZE} />
+      </ReportButtonPage.Header>
+
+      <ReportButtonPage.Content>
+        <ErrorPanel
+          buttonAction={canRetry ? retry : undefined}
+          buttonLabel={canRetry ? t('retry') : undefined}
+          description={policy === undefined ? t('error') : t(policy.message)}
+          errorCode={isMinerva ? error.code : undefined}
+          errorId={errorId}
+          title={t('error-title')}
+        />
+      </ReportButtonPage.Content>
+    </ReportButtonPage>
   );
 }

@@ -61,6 +61,18 @@ describe('PaneLayout', () => {
     expect(await screen.findByText('screen')).toBeInTheDocument();
   });
 
+  it('draws the wait in the pane frame, mark and all', async () => {
+    const { release } = renderLayout();
+
+    await userEvent.click(await screen.findByRole('link', { name: 'go' }));
+
+    // The pane should look like itself from the first frame, with only its
+    // content missing -- not like a bare spinner on an empty page.
+    expect(await screen.findByText('Minerva')).toBeInTheDocument();
+
+    release();
+  });
+
   it('shows the reporting reel while the report is being filed', async () => {
     const { release } = renderLayout();
 

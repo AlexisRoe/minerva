@@ -13,6 +13,19 @@
   loaded plainly, not as a module, so its names share a namespace with Mantine's
   (`mantine-*`) and with anything the app ships.
 */
+/*
+  The page frame every screen is drawn in fills what it is mounted into, and a
+  percentage height resolves against nothing unless every ancestor has one. The
+  chain has to start here: without it the header sits at the top of the pane and
+  the footer floats up under the content instead of resting at the bottom.
+*/
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
 .minerva-boot {
   /* The step every measure below is a multiple of, so the whole thing scales
      off the one value. At 1px the box is 50px. */

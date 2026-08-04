@@ -37,6 +37,14 @@ describe('ErrorScreen', () => {
     vi.unstubAllGlobals();
   });
 
+  it('is drawn in the pane frame, mark and all', async () => {
+    renderScreen(new MinervaRequestFailedError('/api/button/settings', 503));
+
+    // A failure is still Minerva speaking; a bare panel with no mark reads as a
+    // broken page rather than as an answer.
+    expect(await screen.findByText('Minerva')).toBeInTheDocument();
+  });
+
   it('shows the code and reference for one of ours', async () => {
     const error = new MinervaRequestFailedError('/api/button/settings', 503);
     renderScreen(error);

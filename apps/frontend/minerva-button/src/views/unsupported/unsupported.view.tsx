@@ -1,6 +1,7 @@
-import { NoContentView } from '@minerva/ui-lib';
+import { BrandLogo, NoContentView, ReportButtonPage } from '@minerva/ui-lib';
 import { useSearchParams } from 'react-router';
 
+import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
 import { lookupErrorPolicy } from '../../errors';
 import { useTranslations } from '../../i18n';
 import { REASON_PARAM } from '../../routing';
@@ -41,5 +42,15 @@ export function UnsupportedView() {
   // here, and its message would be advice rather than an explanation.
   const description = screen === 'no-content' ? t(message) : t('unsupported-generic');
 
-  return <NoContentView description={description} title={t('unsupported-title')} />;
+  return (
+    <ReportButtonPage>
+      <ReportButtonPage.Header>
+        <BrandLogo size={LOGO_SIZE} />
+      </ReportButtonPage.Header>
+
+      <ReportButtonPage.Content>
+        <NoContentView description={description} title={t('unsupported-title')} />
+      </ReportButtonPage.Content>
+    </ReportButtonPage>
+  );
 }

@@ -23,4 +23,5 @@ export {
   NAA_REQUIREMENT_SET,
   readEnvironment,
 } from './utils/read-environment.util';
+export { restoreHistoryApi } from './utils/restore-history-api.util';
 export { OFFICE_READY_TIMEOUT_MS, waitForOffice } from './utils/wait-for-office.util';

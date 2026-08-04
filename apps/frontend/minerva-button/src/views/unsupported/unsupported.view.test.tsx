@@ -19,6 +19,14 @@ function renderView(search: string) {
 }
 
 describe('UnsupportedView', () => {
+  it('is drawn in the pane frame, mark and all', async () => {
+    renderView('?reason=ERR_008');
+
+    // An unusable host is still Minerva speaking. A bare panel with no mark
+    // reads as a broken page rather than as a considered answer.
+    expect(await screen.findByText('Minerva')).toBeInTheDocument();
+  });
+
   it('explains a blocked Office.js specifically', async () => {
     renderView('?reason=ERR_007');
 

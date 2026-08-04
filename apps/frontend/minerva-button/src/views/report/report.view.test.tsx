@@ -89,6 +89,14 @@ describe('ReportView', () => {
     expect(await screen.findByText(/open a message in outlook/i)).toBeInTheDocument();
   });
 
+  it('keeps the pane frame when there is no message to report', async () => {
+    renderView(demoSettings, null as unknown as typeof demoMessage);
+
+    // The pane with nothing to work on is still the pane; only its content is
+    // missing, so the mark stays where it was.
+    expect(await screen.findByText('Minerva')).toBeInTheDocument();
+  });
+
   it('does not file anything on the first click', async () => {
     renderView();
 

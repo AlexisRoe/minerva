@@ -93,7 +93,17 @@ export function ReportView() {
   }
 
   if (!hasMessage || message === null) {
-    return <NoContentView description={t('no-message-description')} title={t('no-message')} />;
+    return (
+      <ReportButtonPage>
+        <ReportButtonPage.Header>
+          <BrandLogo size={LOGO_SIZE} />
+        </ReportButtonPage.Header>
+
+        <ReportButtonPage.Content>
+          <NoContentView description={t('no-message-description')} title={t('no-message')} />
+        </ReportButtonPage.Content>
+      </ReportButtonPage>
+    );
   }
 
   const reasons = filing === null ? [] : reasonsFor(filing);
