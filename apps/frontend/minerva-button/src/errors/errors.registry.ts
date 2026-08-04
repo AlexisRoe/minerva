@@ -14,6 +14,7 @@ import {
   OfficeNotReadyError,
   OfficeRequirementSetError,
 } from './office.errors';
+import { GraphRequestFailedError, MinervaRequestFailedError } from './request.errors';
 
 /** What one entry of {@link errorRegistry} records about an error. */
 export interface ErrorRegistryEntry {
@@ -82,6 +83,14 @@ export const errorRegistry = {
   ERR_010: {
     error: OfficeNotReadyError,
     description: 'The host was read before the start-up gate had awaited Office.js.',
+  },
+  ERR_011: {
+    error: MinervaRequestFailedError,
+    description: "Minerva's own API answered with a non-2xx status, or could not be reached.",
+  },
+  ERR_012: {
+    error: GraphRequestFailedError,
+    description: 'Microsoft Graph answered with a non-2xx status, or could not be reached.',
   },
 } as const satisfies Partial<Record<ErrorCode, ErrorRegistryEntry>>;
 

@@ -54,6 +54,8 @@ export interface MinervaButtonSettings {
   features: ReportingFeatures;
   /** Reporting methods */
   reportingMethods: ReportingMethod[];
+  /** What the user may add to a report, and which reasons they can pick from */
+  userFeedback: UserFeedback;
   /** Configure contact for last screen */
   contact: Contact;
 }

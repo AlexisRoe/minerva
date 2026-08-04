@@ -33,7 +33,7 @@ wires those two together and fills in the Office/Graph/auth machinery between th
 
 ---
 
-## Contract fixes first (blocking)
+## Contract fixes first (blocking) ✅ done
 
 `shared/typescript-lib/src/requests/` and `src/response/` are written and built but **not exported
 from `src/index.ts`** — the lib has a single root export and no subpaths, so the button cannot import
@@ -59,6 +59,15 @@ them at all today. Before anything else:
 Naming clash to keep in mind: `UserFeedback` is both a settings type in typescript-lib and a
 component in ui-lib. Import the type as `import type { UserFeedback as UserFeedbackSettings }` at the
 call sites that need both.
+
+### Outcome
+
+All six done as written, and `make build-libs` is green. The button now imports every contract from
+the `@minerva/typescript-lib` root.
+
+One thing worth recording: the root index is the *only* export surface, so the six type names now
+share a namespace with everything else the lib exports. `UserFeedback` is the one collision waiting
+to happen (the ui-lib component of the same name), which is why the alias note above stays.
 
 ---
 
@@ -197,7 +206,7 @@ Three existing fixtures needed the two new `OutlookMessage` fields
 (`use-current-message.hook.test.ts`, `message-summary.component.test.tsx`,
 `task-pane.view.test.tsx`) — mechanical, no behaviour changed.
 
-## Step 3 — Adapter seam and demo data
+## Step 3 — Adapter seam and demo data ✅ done
 
 **Files:** `src/adapters/minerva/*`, `src/adapters/graph/*`, `src/demo/*`
 
@@ -227,6 +236,57 @@ Demo fixtures live in `src/demo/` and cover: an Outlook environment, a message, 
 `AuthorizationResult`, a `MinervaButtonSettings` exercising every toggle (two reporting methods,
 mandatory reasons, contact block filled), a MIME blob, and a `ReportingResponse` for each
 `identifiedAs` value. `configFixture` is the model for how these are written.
+
+### Outcome
+
+Built as planned. `MinervaAdapter` and `GraphAdapter` each have an `http` and a `demo`
+implementation, `createAdapters(config, getAccessToken)` picks a set, and `request()` is the only
+place either adapter touches `fetch`. The work-item and message-body code is gone. `make verify` is
+green: 680 tests across 91 files.
+
+**Two new error codes. Next free code is `ERR_013`.**
+
+- `ERR_011` `MinervaRequestFailedError` — reference `062700dc-07d8-4f83-a247-4675423e1b8a`
+- `ERR_012` `GraphRequestFailedError` — reference `21824843-60bf-49be-9d02-59e19360ebab`
+
+One code per *service* rather than per call or per status, so an `ERR_011` spike routes to us and an
+`ERR_012` spike routes to the tenant without anyone reading the payload. Status and path travel in
+the payload, which keeps the message constant and stops the Sentry fingerprint splitting per URL.
+
+### Departures from the plan
+
+1. **`createAdapters` takes a second argument.** The plan wrote it as `createAdapters(config)`, but
+   Graph needs a bearer token and this folder must not import `src/auth/` — which of the two sign-in
+   flows won is not Graph's business. So the signature is
+   `createAdapters(config, getAccessToken: AccessTokenProvider)`. The token is resolved *per call*
+   rather than captured once: a pane can sit open far longer than a token lives.
+
+2. **`sendMail` takes a `NotificationMail`, not "message + method".** Templating is Step 8's job and
+   Graph's wire format is this folder's, so the seam carries a plain
+   `{ to, subject, bodyHtml, headers, attachment? }`. Everything Graph-specific — `saveToSentItems`,
+   the `@odata.type` discriminator, base64-encoding the attachment, the `internetMessageHeaders`
+   array shape — lives on the far side of it.
+
+3. **The demo Graph adapter records rather than returning bare voids.**
+   `createGraphDemoAdapter()` returns `{ adapter, sentMail, movedMessages }`. Its two write calls
+   have real side effects — mail landing in front of a security team, a message leaving a mailbox —
+   so demo mode is not a convenience here but the thing that keeps a walkthrough from filing real
+   reports; the record makes that assertable.
+
+4. **`TaskPaneView` was unwired, not deleted.** It imported the deleted `useSubmitWorkItem`. Since
+   Step 7 replaces it outright with the report view, it now only navigates, and its test lost the two
+   submit cases. Not worth building a bridge to code that is about to go.
+
+5. **Attachments are base64-encoded via `FileReader`, not `btoa(await blob.text())`.** MIME is bytes.
+   Reading it as text decodes it as UTF-8 first and corrupts every byte above 0x7F — which any
+   non-ASCII subject in the reported mail will contain. `encodeAttachment()` has a round-trip test
+   for exactly this.
+
+### Verified
+
+`make verify` green. Two assertions were mutation-tested and both failed correctly when the code was
+broken: putting `credentials: 'include'` *before* the `...init` spread (so a caller could opt out),
+and dropping the `.slice(0, MAX_CUSTOM_HEADERS)` cap on the Graph headers.
 
 ## Step 4 — Authentication
 

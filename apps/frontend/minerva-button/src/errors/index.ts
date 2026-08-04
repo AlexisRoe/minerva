@@ -28,3 +28,4 @@ export {
   OfficeNotReadyError,
   OfficeRequirementSetError,
 } from './office.errors';
+export { GraphRequestFailedError, MinervaRequestFailedError } from './request.errors';

@@ -17,14 +17,8 @@ const message: OutlookMessage = {
   receivedAt: '2026-08-03T09:15:00.000Z',
 };
 
-const { submit } = vi.hoisted(() => ({ submit: vi.fn() }));
-
 vi.mock('../../adapters/office', () => ({
   useCurrentMessage: () => ({ message, isLoading: false }),
-}));
-
-vi.mock('../../adapters/minerva', () => ({
-  useSubmitWorkItem: () => ({ submit, isSubmitting: false, receipt: null }),
 }));
 
 /** Mounts the view with the two screens it can navigate to. */
@@ -49,26 +43,13 @@ describe('TaskPaneView', () => {
     expect(await screen.findByText('Invoice 2026-0042')).toBeInTheDocument();
   });
 
-  it('goes to the confirmation once the message is accepted', async () => {
-    submit.mockResolvedValueOnce({ workItemId: 'wi_1', acceptedAt: '2026-08-03T09:20:00.000Z' });
+  it('goes on to the confirmation', async () => {
     renderView();
 
     await userEvent.click(await screen.findByRole('button', { name: /send to minerva/i }));
 
     await waitFor(() => {
       expect(screen.getByText('confirmation')).toBeInTheDocument();
-    });
-    expect(submit).toHaveBeenCalledWith(expect.objectContaining({ messageId: 'AAMkAD==' }));
-  });
-
-  it('goes to the error screen when it is not', async () => {
-    submit.mockResolvedValueOnce(null);
-    renderView();
-
-    await userEvent.click(await screen.findByRole('button', { name: /send to minerva/i }));
-
-    await waitFor(() => {
-      expect(screen.getByText('error screen')).toBeInTheDocument();
     });
   });
 });

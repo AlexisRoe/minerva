@@ -20,6 +20,22 @@ export {
 } from './languages/languages.utils';
 export type { EmailJob, EmailJobKind } from './queue';
 export { EMAIL_JOB_KINDS, isEmailJob, isEmailJobKind } from './queue';
+export type { AuthorizationRequest } from './requests/minerva-button-authorization.request';
+export type { ReportingFormData } from './requests/minerva-button-reporting.request';
+export type { MinervaSettingsRequest } from './requests/minerva-button-settings.request';
+export type {
+  AuthorizationResult,
+  UserProfile,
+} from './response/minerva-button-authorization.response';
+export type { EmailType, ReportingResponse } from './response/minerva-button-reporting.response';
+export type {
+  Contact,
+  MinervaButtonSettings,
+  ReportingFeatures,
+  ReportingMethod,
+  ReportingReasons,
+  UserFeedback,
+} from './response/minerva-button-settings.response';
 export type { FailureResult, SuccessResult } from './result-type/result.class';
 export { Result } from './result-type/result.class';
 export type { SerializedResult } from './result-type/result.util';
