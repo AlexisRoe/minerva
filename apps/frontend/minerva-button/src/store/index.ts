@@ -13,3 +13,7 @@ export type { ErrorLogState, LoggedError } from './error-log/error-log.types';
 export { toLoggedError } from './error-log/error-log.util';
 export type { UseErrorLog } from './error-log/hooks/use-error-log.hook';
 export { useErrorLog } from './error-log/hooks/use-error-log.hook';
+export type { UseOffice } from './office/hooks/use-office.hook';
+export { useOffice } from './office/hooks/use-office.hook';
+export { useOfficeStore } from './office/office.store';
+export type { OfficeState } from './office/office.types';

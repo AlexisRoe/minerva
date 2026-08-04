@@ -10,6 +10,8 @@ import { TaskPaneView } from './task-pane.view';
 
 const message: OutlookMessage = {
   id: 'AAMkAD==',
+  exchangeId: 'rest:AAMkAD==',
+  internetMessageId: '<abc@example.com>',
   subject: 'Invoice 2026-0042',
   from: 'billing@example.com',
   receivedAt: '2026-08-03T09:15:00.000Z',

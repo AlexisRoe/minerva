@@ -2,11 +2,21 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { readCurrentMessage } from './read-current-message.util';
 
-/** Installs a minimal `Office` global, the way the host script would. */
+/**
+ * Installs a minimal `Office` global, the way the host script would.
+ *
+ * `convertToRestId` prefixes rather than returning a fixed string, so a test can
+ * tell a converted id from an unconverted one.
+ */
 function stubOffice(item: Partial<Office.MessageRead> | undefined): void {
   vi.stubGlobal('Office', {
-    onReady: () => Promise.resolve({}),
-    context: { mailbox: { item } },
+    MailboxEnums: { RestVersion: { v2_0: 'v2.0' } },
+    context: {
+      mailbox: {
+        item,
+        convertToRestId: (id: string, version: string) => `rest(${version}):${id}`,
+      },
+    },
   });
 }
 
@@ -15,25 +25,67 @@ describe('readCurrentMessage', () => {
     vi.unstubAllGlobals();
   });
 
-  it('narrows the open item to an OutlookMessage', async () => {
+  it('narrows the open item to an OutlookMessage', () => {
     stubOffice({
       itemId: 'AAMkAD==',
+      internetMessageId: '<abc@example.com>',
       subject: 'Invoice 2026-0042',
       from: { emailAddress: 'billing@example.com', displayName: 'Billing' },
       dateTimeCreated: new Date('2026-08-03T09:15:00.000Z'),
     } as Partial<Office.MessageRead>);
 
-    expect(await readCurrentMessage()).toEqual({
+    expect(readCurrentMessage()).toEqual({
       id: 'AAMkAD==',
+      exchangeId: 'rest(v2.0):AAMkAD==',
+      internetMessageId: '<abc@example.com>',
       subject: 'Invoice 2026-0042',
       from: 'billing@example.com',
       receivedAt: '2026-08-03T09:15:00.000Z',
     });
   });
 
-  it('answers with null when the pane is not on a message', async () => {
+  it('converts the EWS id once, so no Graph call has to remember to', () => {
+    stubOffice({
+      itemId: 'AAMkAD==',
+      subject: '',
+      dateTimeCreated: new Date(0),
+    } as Partial<Office.MessageRead>);
+
+    const message = readCurrentMessage();
+
+    expect(message?.exchangeId).not.toBe(message?.id);
+    expect(message?.exchangeId).toContain('v2.0');
+  });
+
+  it('tolerates a message with no sender and no Message-ID', () => {
+    stubOffice({
+      itemId: 'AAMkAD==',
+      subject: 'Draft',
+      dateTimeCreated: new Date('2026-08-03T09:15:00.000Z'),
+    } as Partial<Office.MessageRead>);
+
+    expect(readCurrentMessage()).toMatchObject({ from: '', internetMessageId: '' });
+  });
+
+  it('answers with null when the pane is not on a message', () => {
     stubOffice(undefined);
 
-    expect(await readCurrentMessage()).toBeNull();
+    expect(readCurrentMessage()).toBeNull();
+  });
+
+  it('fails with ERR_010 when called before the gate has run', () => {
+    // No `Office` at all: the CDN tag has not executed, or this was called
+    // outside a route that awaits waitForOffice().
+    expect(() => readCurrentMessage()).toThrow(
+      expect.objectContaining({ code: 'ERR_010', payload: { reader: 'readCurrentMessage' } }),
+    );
+  });
+
+  it('separates a wiring fault from an ordinary empty pane', () => {
+    vi.stubGlobal('Office', { context: {} });
+
+    // No mailbox is the gate having been skipped, and must not be mistaken for
+    // the pane simply not being open on a message.
+    expect(() => readCurrentMessage()).toThrow(expect.objectContaining({ code: 'ERR_010' }));
   });
 });

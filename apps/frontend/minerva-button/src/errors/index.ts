@@ -22,3 +22,9 @@ export {
 } from './config.errors';
 export type { ErrorRegistryEntry, UsedErrorCode } from './errors.registry';
 export { errorRegistry } from './errors.registry';
+export {
+  OfficeHostUnsupportedError,
+  OfficeLoadTimeoutError,
+  OfficeNotReadyError,
+  OfficeRequirementSetError,
+} from './office.errors';

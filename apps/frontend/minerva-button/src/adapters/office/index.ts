@@ -14,5 +14,12 @@
 
 export type { CurrentMessageState } from './hooks/use-current-message.hook';
 export { useCurrentMessage } from './hooks/use-current-message.hook';
-export type { OutlookMessage } from './office.types';
+export type { OfficeEnvironment, OfficeReadyInfo, OutlookMessage, OutlookUser } from './office.types';
 export { readCurrentMessage } from './utils/read-current-message.util';
+export { readCurrentUser } from './utils/read-current-user.util';
+export {
+  MAILBOX_REQUIREMENT_SET,
+  NAA_REQUIREMENT_SET,
+  readEnvironment,
+} from './utils/read-environment.util';
+export { OFFICE_READY_TIMEOUT_MS, waitForOffice } from './utils/wait-for-office.util';

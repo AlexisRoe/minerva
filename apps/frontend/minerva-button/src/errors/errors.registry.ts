@@ -8,6 +8,12 @@ import {
   ConfigRequestFailedError,
   MissingRootElementError,
 } from './config.errors';
+import {
+  OfficeHostUnsupportedError,
+  OfficeLoadTimeoutError,
+  OfficeNotReadyError,
+  OfficeRequirementSetError,
+} from './office.errors';
 
 /** What one entry of {@link errorRegistry} records about an error. */
 export interface ErrorRegistryEntry {
@@ -60,6 +66,22 @@ export const errorRegistry = {
   ERR_006: {
     error: ConfigDomainMismatchError,
     description: 'The app is served from a host other than the configured appDomain.',
+  },
+  ERR_007: {
+    error: OfficeLoadTimeoutError,
+    description: 'Office.js did not become ready within the start-up timeout.',
+  },
+  ERR_008: {
+    error: OfficeHostUnsupportedError,
+    description: 'Office.js is ready, but the host application is not Outlook.',
+  },
+  ERR_009: {
+    error: OfficeRequirementSetError,
+    description: 'The Outlook client does not support the required Mailbox requirement set.',
+  },
+  ERR_010: {
+    error: OfficeNotReadyError,
+    description: 'The host was read before the start-up gate had awaited Office.js.',
   },
 } as const satisfies Partial<Record<ErrorCode, ErrorRegistryEntry>>;
 
