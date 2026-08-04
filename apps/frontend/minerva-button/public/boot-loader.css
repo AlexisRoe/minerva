@@ -36,17 +36,38 @@ body,
   --minerva-boot-color-lead: #495057;
   --minerva-boot-color-trail: #dee2e6;
   --minerva-boot-color-text: #495057;
+  --minerva-boot-color-surface: #ffffff;
+
+  /*
+    Overlaid on the app rather than stacked above it. The splash is a sibling of
+    `#root` so that it outlives React's first commit -- `RootErrorBoundary` shows
+    it again when the tree fails too high up to draw a styled screen -- and in
+    normal flow that would push the app down the page instead of replacing it.
+    An opaque surface is part of the same job: whatever half-rendered tree was on
+    screen when it broke must not show through the message saying it broke.
+  */
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: var(--minerva-boot-color-surface);
 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  min-height: 100vh;
   font-family: system-ui, sans-serif;
   color: var(--minerva-boot-color-text);
   text-align: center;
   padding: 1rem;
+}
+
+/*
+  `display: flex` above out-specifies the `hidden` attribute's UA rule, so
+  hideBootSplash() would otherwise hide nothing at all.
+*/
+.minerva-boot[hidden] {
+  display: none;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -54,6 +75,7 @@ body,
     --minerva-boot-color-lead: #dee2e6;
     --minerva-boot-color-trail: #495057;
     --minerva-boot-color-text: #dee2e6;
+    --minerva-boot-color-surface: #1a1b1e;
   }
 }
 

@@ -11,8 +11,6 @@
  */
 
 export { ConfirmationView } from './confirmation/confirmation.view';
-export type { BootstrapErrorViewProps } from './error/bootstrap-error.view';
-export { BootstrapErrorView } from './error/bootstrap-error.view';
 export { ErrorView } from './error/error.view';
 export type { ErrorScreenProps } from './error/error-screen.component';
 export { ErrorScreen } from './error/error-screen.component';

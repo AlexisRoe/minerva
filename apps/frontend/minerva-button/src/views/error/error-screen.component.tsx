@@ -1,7 +1,7 @@
 import { MinervaError } from '@minerva/typescript-lib';
 import { BrandLogo, ErrorView as ErrorPanel, ReportButtonPage } from '@minerva/ui-lib';
 
-import { MAX_RETRY, RETRY_PARAM, useOptionalConfig } from '../../config';
+import { MAX_RETRY, RETRY_PARAM, useConfig } from '../../config';
 import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
 import { lookupErrorPolicy } from '../../errors';
 import { useTranslations } from '../../i18n';
@@ -37,12 +37,14 @@ export interface ErrorScreenProps {
  * Retrying reloads rather than re-rendering: the point is to redo the start-up
  * sequence, which happens above React.
  *
- * The budget is read through {@link useOptionalConfig} rather than
- * {@link useConfig} for one caller only: {@link BootstrapErrorView} draws this
- * from inside the error boundary, which sits above every provider so that a
- * provider throwing is still caught. No configuration there means no budget to
- * spend, so no retry is offered -- which is the honest answer, and better than
- * throwing a second error out of the screen explaining the first.
+ * Both of its callers render it below {@link ConfigProvider} -- the router's
+ * {@link ErrorView} and {@link MinervaErrorBoundary}'s fallback, which is
+ * mounted inside the providers precisely so that this screen can count on a
+ * theme, a translator and a budget. {@link useConfig} therefore throws
+ * off-provider as it does everywhere else: a failure screen with no
+ * configuration behind it is a wiring mistake, not a state to render. What
+ * happens above the providers is {@link RootErrorBoundary}'s problem, and it
+ * does not render components at all.
  *
  * @see {@link ../../errors/errors.registry.ts} -- where the policy lives
  *
@@ -53,16 +55,16 @@ export interface ErrorScreenProps {
  */
 export function ErrorScreen({ error, errorId }: ErrorScreenProps) {
   const { t } = useTranslations();
-  const config = useOptionalConfig();
+  const config = useConfig();
 
   const isMinerva = MinervaError.is(error);
   const policy = isMinerva ? lookupErrorPolicy(error.code) : undefined;
 
-  const canRetry = (policy?.canRetry ?? true) && config !== null && config.retry < MAX_RETRY;
+  const canRetry = (policy?.canRetry ?? true) && config.retry < MAX_RETRY;
 
   function retry(): void {
     const url = new URL(globalThis.location.href);
-    url.searchParams.set(RETRY_PARAM, String((config?.retry ?? 0) + 1));
+    url.searchParams.set(RETRY_PARAM, String(config.retry + 1));
 
     globalThis.location.assign(url.toString());
   }

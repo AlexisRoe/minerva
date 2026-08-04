@@ -28,17 +28,24 @@ function fill(elementId: string, label: string, value: string | undefined): void
 /**
  * Shows the static failure screen `index.html` ships alongside the loader.
  *
- * The counterpart to {@link BootstrapErrorView} for everything that fails
- * *before* React exists -- `loadConfig()` above all, which the whole bootstrap
- * hangs on and which fails for the two most ordinary reasons there are: no
- * network, or a deployment with no `config.json` beside it. Until this, those
- * failures reached the user as a spinner that never stopped.
+ * The screen for both failures React cannot draw itself.
  *
- * There is no component tree at this point and no translator worth the name, so
- * this manipulates markup the document already carries rather than rendering
- * anything. It is deliberately the same *shape* as the React screen -- title,
- * advice, then the details worth quoting -- so the user meets one Minerva on
- * either side of the line where React starts.
+ * The first is everything that fails *before* React exists -- `loadConfig()`
+ * above all, which the whole bootstrap hangs on and which fails for the two most
+ * ordinary reasons there are: no network, or a deployment with no `config.json`
+ * beside it. Until this, those failures reached the user as a spinner that never
+ * stopped.
+ *
+ * The second is {@link RootErrorBoundary}: a throw from the theme provider, the
+ * i18n provider or the ui-lib itself lands above every provider, where rendering
+ * a styled screen would only invite the same throw a second time -- and that one
+ * escapes to nothing and leaves a blank pane. So the last resort renders no
+ * components at all. It manipulates markup the document already carries, which
+ * cannot fail on a broken bundle because it is not the bundle.
+ *
+ * It is deliberately the same *shape* as {@link ErrorScreen} -- title, advice,
+ * then the details worth quoting -- so the user meets one Minerva on either side
+ * of the line where React can be trusted.
  *
  * A code only exists on a {@link MinervaError}, and the event id only once
  * Sentry has answered; each line stays hidden without one. The spinner is
@@ -56,7 +63,14 @@ function fill(elementId: string, label: string, value: string | undefined): void
  * ```
  */
 export function showBootError(error: unknown, errorId?: string): void {
-  document.getElementById(BOOT_ELEMENT_ID)?.setAttribute('data-failed', 'true');
+  const splash = document.getElementById(BOOT_ELEMENT_ID);
+
+  splash?.setAttribute('data-failed', 'true');
+  // It may already be hidden: `RootErrorBoundary` calls this long after
+  // `hideBootSplash()` has put the splash away, and then the point of the call
+  // is to bring it back over whatever the app had managed to draw.
+  splash?.removeAttribute('hidden');
+
   document.getElementById(BOOT_ERROR_ELEMENT_ID)?.removeAttribute('hidden');
 
   const isMinerva = MinervaError.is(error);

@@ -7,4 +7,5 @@
  * `src/constants/bootstrap.constants.ts`, shared with `index.html`.
  */
 
+export { hideBootSplash } from './hide-boot-splash.util';
 export { showBootError } from './show-boot-error.util';

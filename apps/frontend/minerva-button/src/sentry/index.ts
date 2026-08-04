@@ -19,6 +19,8 @@
 
 export type { MinervaErrorBoundaryProps } from './components/minerva-error-boundary.component';
 export { MinervaErrorBoundary } from './components/minerva-error-boundary.component';
+export type { RootErrorBoundaryProps } from './components/root-error-boundary.component';
+export { RootErrorBoundary } from './components/root-error-boundary.component';
 export { captureError } from './utils/capture-error.util';
 export { initSentry } from './utils/init-sentry.util';
 export { setBuildTags, setTag } from './utils/sentry-tags.util';

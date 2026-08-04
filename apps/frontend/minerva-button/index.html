@@ -60,38 +60,47 @@
 </head>
 
 <body>
-    <!-- The splash sits inside #root, so React's first commit clears it even if
-         the bootstrap's explicit removal is missed. The app cannot render until
-         it has fetched /config.json, which is a network round trip.
-         English only: this is shown before i18next is loaded. -->
-    <div id="root">
-        <div id="minerva-boot" class="minerva-boot">
-            <span class="minerva-boot__spinner" role="status" aria-label="Loading Minerva"></span>
-            <!-- The failure screen for everything that goes wrong before React
-                 exists: the config fetch above all, which is what the whole
-                 bootstrap hangs on. It is markup rather than a component
-                 because at this point there is no bundle to render one with,
-                 and the three ids below are filled in by showBootError().
+    <div id="root"></div>
 
-                 It mirrors what <BootstrapErrorView /> says once React is up,
-                 so a user meets the same screen either side of that line. The
-                 code and the id stay hidden until there is one: an empty label
-                 invites someone to quote nothing. -->
-            <div id="minerva-boot-error" class="minerva-boot__error" hidden>
-                <h1 class="minerva-boot__title">Minerva could not start.</h1>
-                <p class="minerva-boot__message">
-                    The add-in stopped before it could open. Close the pane and open the message again. If it keeps
-                    happening, quote the details below to your IT team.
-                </p>
-                <p id="minerva-boot-error-message" class="minerva-boot__message" hidden></p>
-                <p id="minerva-boot-error-code" class="minerva-boot__detail" hidden></p>
-                <p id="minerva-boot-error-id" class="minerva-boot__detail" hidden></p>
-            </div>
-            <noscript>
-                <p class="minerva-boot__message">Minerva needs JavaScript to run. Please enable it and reload the task
-                    pane.</p>
-            </noscript>
+    <!-- The splash is a sibling of #root, not a child of it, and that placement
+         is load-bearing: React's first commit empties #root, and this markup has
+         to outlive it. RootErrorBoundary draws its last-resort screen by
+         revealing this again, which is what makes that screen survive a failure
+         in the theme provider or in the ui-lib itself -- there is no component
+         to render, so there is nothing left to throw.
+
+         It is overlaid rather than stacked (see boot-loader.css), so it covers
+         whatever the app had managed to draw. hideBootSplash() hides it once the
+         first render is through; showBootError() brings it back.
+         English only: this is shown before i18next is loaded. -->
+    <div id="minerva-boot" class="minerva-boot">
+        <span class="minerva-boot__spinner" role="status" aria-label="Loading Minerva"></span>
+        <!-- The failure screen for everything React cannot draw itself: what
+             goes wrong before it exists -- the config fetch above all, which
+             the whole bootstrap hangs on -- and what goes wrong so far up the
+             tree that no styled screen can be trusted. It is markup rather
+             than a component because in the first case there is no bundle to
+             render one with, and in the second no confidence that rendering
+             would work; the three ids below are filled in by showBootError().
+
+             It mirrors what <ErrorScreen /> says once React is up, so a user
+             meets the same screen either side of that line. The code and the
+             id stay hidden until there is one: an empty label invites someone
+             to quote nothing. -->
+        <div id="minerva-boot-error" class="minerva-boot__error" hidden>
+            <h1 class="minerva-boot__title">Minerva could not start.</h1>
+            <p class="minerva-boot__message">
+                The add-in stopped before it could open. Close the pane and open the message again. If it keeps
+                happening, quote the details below to your IT team.
+            </p>
+            <p id="minerva-boot-error-message" class="minerva-boot__message" hidden></p>
+            <p id="minerva-boot-error-code" class="minerva-boot__detail" hidden></p>
+            <p id="minerva-boot-error-id" class="minerva-boot__detail" hidden></p>
         </div>
+        <noscript>
+            <p class="minerva-boot__message">Minerva needs JavaScript to run. Please enable it and reload the task
+                pane.</p>
+        </noscript>
     </div>
     <script type="module" src="/src/main.tsx"></script>
 </body>
