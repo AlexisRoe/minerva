@@ -10,18 +10,18 @@ afterEach(async () => {
 
 describe('translate', () => {
   it('reads the active catalogue', async () => {
-    expect(translate('submit')).toBe('Send to Minerva');
+    expect(translate('back')).toBe('Back');
 
     await changeLanguage(Languages.German);
 
-    expect(translate('submit')).toBe('An Minerva senden');
+    expect(translate('back')).toBe('Zurück');
   });
 
   it('serves every catalogue, not just the Latin-script ones', async () => {
     await changeLanguage(Languages.Arabic);
-    expect(translate('submit')).toBe('إرسال إلى Minerva');
+    expect(translate('back')).toBe('رجوع');
 
     await changeLanguage(Languages.Mandarin);
-    expect(translate('submit')).toBe('发送给 Minerva');
+    expect(translate('back')).toBe('返回');
   });
 });

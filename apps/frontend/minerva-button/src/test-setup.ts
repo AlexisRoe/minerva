@@ -28,6 +28,18 @@ Object.defineProperty(window, 'localStorage', {
   } satisfies Storage,
 });
 
+// The report drawer's note is an autosizing Textarea, which re-measures itself
+// when a webfont swaps in and hears about that from `document.fonts`; jsdom
+// implements no FontFaceSet at all. `shared/ui-lib/src/test-setup.ts` carries
+// the same stub, for the same component.
+Object.defineProperty(document, 'fonts', {
+  writable: true,
+  value: {
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  },
+});
+
 // Mantine components read `window.matchMedia` for the colour scheme; jsdom does
 // not implement it.
 Object.defineProperty(window, 'matchMedia', {

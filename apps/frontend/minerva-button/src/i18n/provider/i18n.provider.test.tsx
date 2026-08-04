@@ -10,7 +10,7 @@ import { I18nProvider } from './i18n.provider';
 function Probe() {
   const { t } = useTranslations();
 
-  return <span>{t('submit')}</span>;
+  return <span>{t('back')}</span>;
 }
 
 // This runs before Testing Library's auto-cleanup, so the tree rendered by the
@@ -29,7 +29,7 @@ describe('I18nProvider', () => {
       </I18nProvider>,
     );
 
-    expect(screen.getByText('Send to Minerva')).toBeInTheDocument();
+    expect(screen.getByText('Back')).toBeInTheDocument();
   });
 
   it('re-renders its children when the language changes', async () => {
@@ -43,6 +43,6 @@ describe('I18nProvider', () => {
       await changeLanguage(Languages.German);
     });
 
-    expect(screen.getByText('An Minerva senden')).toBeInTheDocument();
+    expect(screen.getByText('Zurück')).toBeInTheDocument();
   });
 });

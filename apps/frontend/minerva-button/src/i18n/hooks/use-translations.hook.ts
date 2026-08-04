@@ -20,7 +20,7 @@ import type { Translator } from '../utils/translate.util';
  * ```tsx
  * function Header() {
  *   const { t } = useTranslations();
- *   return <Title>{t('title')}</Title>;
+ *   return <Title>{t('report-title')}</Title>;
  * }
  * ```
  */

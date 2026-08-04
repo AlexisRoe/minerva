@@ -525,7 +525,7 @@ correctly when broken: removing the `UNSUPPORTED_CODES` split (so an old Outlook
 trace instead of an explanation), and ignoring the destination when picking the reel (so the pane
 would narrate a start-up during a report).
 
-## Step 7 — The report view
+## Step 7 — The report view ✅ done
 
 **Files:** `src/views/report/report.view.tsx`
 
@@ -557,6 +557,50 @@ navigates to the reporting flow — that's what puts the steps loader on screen 
 Two structural details the drawers require: the pane needs a `useState<HTMLDivElement | null>`
 container passed as `ButtonDrawer`'s `container` prop so both drawers portal inside the task pane
 rather than the document, and that container element needs `position: relative` and a height.
+
+### Outcome
+
+`ReportView` is built from scratch against the ui-lib components — the example was read for
+composition and never copied. It is now the index route; `TaskPaneView` and `MessageSummary` are
+deleted, both superseded. Every branch on the page comes from `useSettings()`: the spam button, the
+details drawer, the reasons, whether one is mandatory, whether a note is asked for. `make verify`
+and `make verify-i18n` both green: 753 tests across 100 files. No new error codes — **next free is
+still `ERR_016`.**
+
+### Departures from the plan
+
+1. **The action target already exists, with `readReportIntent` in it.** Wiring `useSubmit` to a
+   route with no action would have left the tree broken between steps, so
+   `src/routing/actions/report.action.ts` landed here holding only the form-data parsing — which is
+   the view's half of that contract anyway. Step 8 fills in the reporting work behind it.
+
+2. **The action lives on `/confirmation`, not a separate `/reporting` route.** One less route, and
+   it makes `PaneLayout`'s existing reel check correct for free: React Router reports the pending
+   location as the action's target, so the reporting reel shows for the whole submission.
+
+3. **`SateliteButton` needed an explicit `label`.** It defaults its `aria-label` to the string
+   `Satelite`, which is neither translated nor meaningful; it now takes `t('details-open')`.
+
+4. **The i18n catalogues were rewritten, not extended.** Five keys went stale with `TaskPaneView`
+   (`title`, `intro`, `submit`, `loading`, `from`, `received`) and 29 arrived; `no-message` also
+   changed meaning, which no script can catch, so its seven translations were rewritten by hand.
+   Typecheck caught the removals in four i18n tests and one JSDoc `@example`, which is exactly what
+   `i18next.d.ts` deriving from `en.json` is for.
+
+5. **`src/test-setup.ts` gained a `document.fonts` stub.** The report drawer's note is an autosizing
+   Textarea, which re-measures itself when a webfont swaps in; jsdom implements no FontFaceSet.
+   `shared/ui-lib/src/test-setup.ts` already carried the same stub for the same component.
+
+### Verified
+
+`make verify` and `make verify-i18n` both green. Mutation-tested reading `reasons` with `get()`
+instead of `getAll()` — three tests failed correctly, since every pick but the first would be
+silently dropped from the report.
+
+One test of mine was wrong and was rewritten rather than patched: it asserted the drawer reopens
+blank *after a send*, but a send navigates to the confirmation screen, so there is no second drawer
+to open. It now checks that after an abandoned report, and a separate case checks that a filed
+report leaves the screen.
 
 ## Step 8 — The reporting action
 

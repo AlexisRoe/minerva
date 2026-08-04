@@ -12,5 +12,5 @@
 
 export { ConfirmationView } from './confirmation/confirmation.view';
 export { ErrorView } from './error/error.view';
-export { TaskPaneView } from './task-pane/task-pane.view';
+export { ReportView } from './report/report.view';
 export { UnsupportedView } from './unsupported/unsupported.view';

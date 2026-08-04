@@ -13,6 +13,8 @@
  * @see {@link https://reactrouter.com/start/data/routing}
  */
 
+export type { ReportIntent } from './actions/report.action';
+export { createReportAction, readReportIntent } from './actions/report.action';
 export { PaneLayout } from './layout/pane-layout.component';
 export { createPaneAdapters, createReportLoader } from './loaders/report.loader';
 export { createRouter, createRoutes } from './router';

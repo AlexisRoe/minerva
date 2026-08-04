@@ -1,7 +1,8 @@
 import { createHashRouter, type RouteObject } from 'react-router';
 
 import type { AppConfig } from '../config';
-import { ConfirmationView, ErrorView, TaskPaneView, UnsupportedView } from '../views';
+import { ConfirmationView, ErrorView, ReportView, UnsupportedView } from '../views';
+import { createReportAction } from './actions/report.action';
 import { PaneLayout } from './layout/pane-layout.component';
 import { createReportLoader } from './loaders/report.loader';
 import { ROUTES } from './routes';
@@ -33,8 +34,12 @@ export function createRoutes(config: AppConfig): RouteObject[] {
       Component: PaneLayout,
       errorElement: <ErrorView />,
       children: [
-        { index: true, Component: TaskPaneView, loader: createReportLoader(config) },
-        { path: ROUTES.confirmation, Component: ConfirmationView },
+        { index: true, Component: ReportView, loader: createReportLoader(config) },
+        {
+          path: ROUTES.confirmation,
+          Component: ConfirmationView,
+          action: createReportAction(),
+        },
         { path: ROUTES.unsupported, Component: UnsupportedView },
         { path: ROUTES.error, Component: ErrorView },
         { path: '*', Component: ErrorView },
