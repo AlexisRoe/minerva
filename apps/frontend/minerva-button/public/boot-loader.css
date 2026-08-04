@@ -91,10 +91,39 @@ body,
   display: none;
 }
 
+.minerva-boot__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.minerva-boot__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
 .minerva-boot__message {
   max-width: 32ch;
   font-size: 0.875rem;
   line-height: 1.5;
+  margin: 0;
+}
+
+/*
+  The code and the event id are things to be read back over a support call
+  rather than prose, so they are set monospaced and quieter than the advice
+  above them -- and allowed to break, because an event id is 32 characters and
+  the pane is narrow.
+*/
+.minerva-boot__detail {
+  max-width: 32ch;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  opacity: 0.75;
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 @keyframes minerva-boot-rotate {

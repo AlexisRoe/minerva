@@ -67,9 +67,26 @@
     <div id="root">
         <div id="minerva-boot" class="minerva-boot">
             <span class="minerva-boot__spinner" role="status" aria-label="Loading Minerva"></span>
-            <p id="minerva-boot-error" class="minerva-boot__message" hidden>
-                Minerva could not start. Please reload the task pane, and contact support if this keeps happening.
-            </p>
+            <!-- The failure screen for everything that goes wrong before React
+                 exists: the config fetch above all, which is what the whole
+                 bootstrap hangs on. It is markup rather than a component
+                 because at this point there is no bundle to render one with,
+                 and the three ids below are filled in by showBootError().
+
+                 It mirrors what <BootstrapErrorView /> says once React is up,
+                 so a user meets the same screen either side of that line. The
+                 code and the id stay hidden until there is one: an empty label
+                 invites someone to quote nothing. -->
+            <div id="minerva-boot-error" class="minerva-boot__error" hidden>
+                <h1 class="minerva-boot__title">Minerva could not start.</h1>
+                <p class="minerva-boot__message">
+                    The add-in stopped before it could open. Close the pane and open the message again. If it keeps
+                    happening, quote the details below to your IT team.
+                </p>
+                <p id="minerva-boot-error-message" class="minerva-boot__message" hidden></p>
+                <p id="minerva-boot-error-code" class="minerva-boot__detail" hidden></p>
+                <p id="minerva-boot-error-id" class="minerva-boot__detail" hidden></p>
+            </div>
             <noscript>
                 <p class="minerva-boot__message">Minerva needs JavaScript to run. Please enable it and reload the task
                     pane.</p>

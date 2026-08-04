@@ -2,7 +2,9 @@ import { MinervaThemeProvider } from '@minerva/ui-lib';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import { showBootError } from './boot';
 import { ConfigProvider, loadConfig } from './config';
+import { BOOT_ELEMENT_ID } from './constants/bootstrap.constants';
 import { MissingRootElementError } from './errors';
 import { I18nProvider } from './i18n';
 import { captureError, initSentry, MinervaErrorBoundary } from './sentry';
@@ -10,11 +12,6 @@ import { BootstrapErrorView } from './views';
 
 import '@minerva/ui-lib/styles.css';
 import '../../../../shared/assets/fonts.css';
-
-/** The splash markup `index.html` ships, replaced by the first render. */
-const BOOT_ELEMENT_ID = 'minerva-boot';
-/** The message inside it that the failure path reveals. */
-const BOOT_ERROR_ELEMENT_ID = 'minerva-boot-error';
 
 /**
  * Loads the runtime configuration, then starts the app against it.
@@ -54,20 +51,6 @@ async function bootstrap(): Promise<void> {
   document.getElementById(BOOT_ELEMENT_ID)?.remove();
 }
 
-/**
- * Shows the static failure message `index.html` ships alongside the loader.
- *
- * A configuration this app cannot read is not something it can degrade around,
- * and at this point React never mounted -- there is no component tree and no
- * translator to render an error through, only the markup already in the
- * document.
- */
-function showBootError(): void {
-  document.getElementById(BOOT_ELEMENT_ID)?.setAttribute('data-failed', 'true');
-  document.getElementById(BOOT_ERROR_ELEMENT_ID)?.removeAttribute('hidden');
-}
-
 bootstrap().catch((error: unknown) => {
-  captureError(error);
-  showBootError();
+  showBootError(error, captureError(error));
 });
