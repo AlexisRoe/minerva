@@ -1,6 +1,8 @@
 {
   "error": "Algo correu mal.",
   "error-title": "O Minerva não conseguiu continuar.",
+  "bootstrap-error-title": "O Minerva não conseguiu iniciar.",
+  "bootstrap-error-body": "O suplemento parou antes de conseguir abrir. Feche o painel e abra a mensagem novamente. Se continuar a acontecer, informe a sua equipa de TI de que o Minerva não conseguiu iniciar.",
   "back": "Voltar",
   "retry": "Tentar novamente",
   "tip-generic": "Feche o painel e abra a mensagem novamente. Se continuar a acontecer, indique o código abaixo à sua equipa de TI.",

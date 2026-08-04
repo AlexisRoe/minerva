@@ -6,7 +6,7 @@ import { MinervaErrorBoundary } from './minerva-error-boundary.component';
 
 const { captureError } = vi.hoisted(() => ({ captureError: vi.fn() }));
 
-vi.mock('./utils/capture-error.util', () => ({ captureError }));
+vi.mock('../utils/capture-error.util', () => ({ captureError }));
 
 /** A component that throws whatever it is given, during render. */
 function Explode({ error }: { error: unknown }): never {

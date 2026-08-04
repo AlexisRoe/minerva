@@ -7,9 +7,10 @@ import { createRouter } from './routing';
 /**
  * The task-pane surface hosted inside Outlook.
  *
- * Nothing but wiring: the providers the whole tree needs, and the router that
- * decides which screen is on. The rest of the bootstrap -- configuration,
- * Sentry, the theme -- is in `main.tsx`, above this.
+ * Nothing but the router that decides which screen is on. Every provider now
+ * sits above this in `main.tsx`, alongside the rest of the bootstrap --
+ * configuration, Sentry and the theme -- which leaves this file with exactly one
+ * job and makes it mountable in a test with nothing but a `ConfigProvider`.
  *
  * The router is built from the configuration, because the start-up loader needs
  * it and a loader runs outside React. `useState` with an initialiser rather than

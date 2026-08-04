@@ -1,6 +1,8 @@
 {
   "error": "出错了。",
   "error-title": "Minerva 无法继续。",
+  "bootstrap-error-title": "Minerva 无法启动。",
+  "bootstrap-error-body": "加载项在打开前已停止。请关闭窗格并重新打开邮件。如果问题持续出现，请告知 IT 团队 Minerva 启动失败。",
   "back": "返回",
   "retry": "重试",
   "tip-generic": "请关闭此窗格并重新打开该邮件。如果问题持续出现，请将下方的代码告知您的 IT 团队。",

@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
-import { captureError } from './utils/capture-error.util';
+import { captureError } from '../utils/capture-error.util';
 
 /** What {@link MinervaErrorBoundary} needs. */
 export interface MinervaErrorBoundaryProps {

@@ -1,13 +1,14 @@
 import { MinervaThemeProvider } from '@minerva/ui-lib';
-import '@minerva/ui-lib/styles.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { ConfigProvider, loadConfig } from './config';
 import { MissingRootElementError } from './errors';
-import { I18nProvider, translate } from './i18n';
+import { I18nProvider } from './i18n';
 import { captureError, initSentry, MinervaErrorBoundary } from './sentry';
+import { BootstrapErrorView } from './views';
 
+import '@minerva/ui-lib/styles.css';
 import '../../../../shared/assets/fonts.css';
 
 /** The splash markup `index.html` ships, replaced by the first render. */
@@ -38,7 +39,7 @@ async function bootstrap(): Promise<void> {
 
   createRoot(container).render(
     <StrictMode>
-      <MinervaErrorBoundary fallback={() => <p>{translate('error')}</p>}>
+      <MinervaErrorBoundary fallback={() => <BootstrapErrorView />}>
         <I18nProvider>
           <MinervaThemeProvider>
             <ConfigProvider config={config}>

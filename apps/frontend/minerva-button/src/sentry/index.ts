@@ -17,8 +17,8 @@
  * @see {@link https://docs.sentry.io/platforms/javascript/guides/react/enriching-events/tags/} -- the tags set at start-up
  */
 
-export type { MinervaErrorBoundaryProps } from './minerva-error-boundary.component';
-export { MinervaErrorBoundary } from './minerva-error-boundary.component';
+export type { MinervaErrorBoundaryProps } from './components/minerva-error-boundary.component';
+export { MinervaErrorBoundary } from './components/minerva-error-boundary.component';
 export { captureError } from './utils/capture-error.util';
 export { initSentry } from './utils/init-sentry.util';
 export { setBuildTags, setTag } from './utils/sentry-tags.util';
