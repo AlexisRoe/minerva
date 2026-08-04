@@ -1,11 +1,6 @@
+import { AUTH_DIALOG_PATH, DIALOG_SIZE } from '../../constants/authentication.constants';
 import { AuthDialogFailedError } from '../../errors';
-import type { DialogMessage } from '../auth.types';
-
-/** Where the sign-in page lives, relative to the deployed pane. */
-export const AUTH_DIALOG_PATH = '/auth-dialog.html';
-
-/** How much of the screen the dialog takes, as a percentage. */
-export const DIALOG_SIZE = { height: 60, width: 30 } as const;
+import type { DialogMessage } from '../types/auth.types';
 
 /**
  * Acquires a Graph token through the Office dialog.
@@ -47,16 +42,12 @@ export function acquireTokenViaDialog(clientId: string): Promise<string> {
 
       const dialog = result.value;
 
-      /** Closes the dialog once, whichever way the flow ended. */
       function settle(outcome: () => void): void {
         dialog.close();
         outcome();
       }
 
       dialog.addEventHandler(Office.EventType.DialogMessageReceived, (event) => {
-        // The relay carries a string, so a malformed payload is a real
-        // possibility rather than a theoretical one -- an error page served in
-        // place of the dialog would land here as HTML.
         let message: DialogMessage;
 
         try {

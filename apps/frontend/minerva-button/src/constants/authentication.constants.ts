@@ -31,30 +31,15 @@ export const SHARED_GRAPH_SCOPES = [
 ] as const;
 
 /**
- * Which of the two sign-in flows produced a token.
+ * The authority every sign-in goes to.
  *
- * Recorded rather than discarded because it changes what a failure means: `naa`
- * failing is a tenant or consent problem, `dialog` failing is usually a user
- * closing a window, and the two want different messages.
+ * `/common` rather than a tenant id: the add-in is installed by whichever tenant
+ * deploys it, and hard-coding one would make the artefact per-customer.
  */
-export type AuthFlow = 'naa' | 'dialog';
+export const AUTHORITY = 'https://login.microsoftonline.com/common';
 
-/** What a completed sign-in hands back. */
-export interface AuthResult {
-  /** The Graph access token, ready for an `Authorization` header. */
-  readonly accessToken: string;
-  /** Which flow produced it. */
-  readonly flow: AuthFlow;
-}
+/** Where the sign-in page lives, relative to the deployed pane. */
+export const AUTH_DIALOG_PATH = '/auth-dialog.html';
 
-/**
- * What the sign-in dialog posts back to the pane through `messageParent`.
- *
- * `messageParent` carries a string and nothing else, so both sides agree on this
- * shape and JSON. The failure case travels in-band rather than as a thrown
- * error, because the dialog is a separate document -- nothing can be thrown
- * across the boundary.
- */
-export type DialogMessage =
-  | { readonly status: 'success'; readonly accessToken: string }
-  | { readonly status: 'failure'; readonly reason: string };
+/** How much of the screen the dialog takes, as a percentage. */
+export const DIALOG_SIZE = { height: 60, width: 30 } as const;

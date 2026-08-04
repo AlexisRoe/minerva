@@ -1,6 +1,7 @@
 import type { OfficeEnvironment } from '../../adapters/office';
+import { GRAPH_SCOPES, SHARED_GRAPH_SCOPES } from '../../constants/authentication.constants';
 import { AuthClientIdMissingError } from '../../errors';
-import { type AuthResult, GRAPH_SCOPES, SHARED_GRAPH_SCOPES } from '../auth.types';
+import type { AuthResult } from '../types/auth.types';
 import { acquireTokenViaDialog } from './dialog.util';
 import { acquireTokenViaNaa } from './naa.util';
 
@@ -38,12 +39,13 @@ export async function acquireToken(
   }
 
   if (!environment.naaSupported) {
-    // The dialog runs a plain redirect flow in its own window, so it asks for
-    // its scopes there rather than being handed them.
-    return { accessToken: await acquireTokenViaDialog(clientId), flow: 'dialog' };
+    const accessToken = await acquireTokenViaDialog(clientId);
+
+    return { accessToken, flow: 'dialog' };
   }
 
   const scopes = sharedMailbox ? SHARED_GRAPH_SCOPES : GRAPH_SCOPES;
+  const accessToken = await acquireTokenViaNaa(clientId, scopes);
 
-  return { accessToken: await acquireTokenViaNaa(clientId, scopes), flow: 'naa' };
+  return { accessToken, flow: 'naa' };
 }

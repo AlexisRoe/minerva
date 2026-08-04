@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { OfficeEnvironment } from '../../adapters/office';
 import { demoEnvironment } from '../../demo';
-import { GRAPH_SCOPES, SHARED_GRAPH_SCOPES } from '../auth.types';
+import { GRAPH_SCOPES, SHARED_GRAPH_SCOPES } from '../types/auth.types';
 import { acquireToken } from './acquire-token.util';
 
 const { acquireTokenViaNaa, acquireTokenViaDialog } = vi.hoisted(() => ({

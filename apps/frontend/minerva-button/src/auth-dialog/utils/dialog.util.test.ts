@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { DialogMessage } from '../auth.types';
+import type { DialogMessage } from '../types/auth.types';
 import { AUTH_DIALOG_PATH, acquireTokenViaDialog } from './dialog.util';
 
 type Handler = (event: unknown) => void;

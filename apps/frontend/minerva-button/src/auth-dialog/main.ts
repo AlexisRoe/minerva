@@ -3,9 +3,8 @@ import { PublicClientApplication } from '@azure/msal-browser';
 // Imported from the file rather than the adapter barrel, which would pull React
 // and the whole Office adapter into this page's bundle for one function.
 import { restoreHistoryApi } from '../adapters/office/utils/restore-history-api.util';
-import type { DialogMessage } from '../auth/auth.types';
-import { GRAPH_SCOPES } from '../auth/auth.types';
-import { AUTHORITY } from '../auth/utils/naa.util';
+import { AUTHORITY, GRAPH_SCOPES } from '../constants/authentication.constants';
+import type { DialogMessage } from './types/auth.types';
 
 /**
  * Entry point of the `/auth-dialog` page.

@@ -3,16 +3,8 @@ import {
   InteractionRequiredAuthError,
   type IPublicClientApplication,
 } from '@azure/msal-browser';
-
+import { AUTHORITY } from '../../constants/authentication.constants';
 import { TokenAcquisitionFailedError } from '../../errors';
-
-/**
- * The authority every sign-in goes to.
- *
- * `/common` rather than a tenant id: the add-in is installed by whichever tenant
- * deploys it, and hard-coding one would make the artefact per-customer.
- */
-export const AUTHORITY = 'https://login.microsoftonline.com/common';
 
 /**
  * Builds a nestable MSAL client, or reuses the one already built.

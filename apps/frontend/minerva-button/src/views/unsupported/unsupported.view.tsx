@@ -1,6 +1,5 @@
 import { BrandLogo, NoContentView, ReportButtonPage } from '@minerva/ui-lib';
 import { useSearchParams } from 'react-router';
-
 import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
 import { ErrorScreenKind, lookupErrorPolicy } from '../../errors';
 import { useTranslations } from '../../i18n';
@@ -31,7 +30,7 @@ import { REASON_PARAM } from '../../routing';
  * { path: ROUTES.unsupported, Component: UnsupportedView }
  * ```
  */
-export function UnsupportedView() {
+export function UnsupportedView(): React.JSX.Element {
   const { t } = useTranslations();
   const [searchParams] = useSearchParams();
 
