@@ -13,6 +13,7 @@ import {
 } from '@minerva/ui-lib';
 import { useDisclosure } from '@minerva/ui-lib/hooks';
 import { Button } from '@minerva/ui-lib/primitives';
+import type React from 'react';
 import { FeatureGuard } from '../../components';
 import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
 import { useReportSubmission } from '../../hooks';
@@ -51,7 +52,7 @@ const listStyle = { flex: '1 1 auto', minHeight: 0 } as const;
  * { index: true, Component: ReportView, loader: createReportLoader(config) }
  * ```
  */
-export function ReportView() {
+export function ReportView(): React.JSX.Element {
   const { t } = useTranslations();
   const { message, user, environment, hasMessage } = useOffice();
   const { canShowDetails, canReportSpam, isReasonMandatory, hasFreetextField } = useSettings();

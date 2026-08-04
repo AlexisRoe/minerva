@@ -69,6 +69,7 @@ export function createRoutes(config: AppConfig): RouteObject[] {
  */
 export function createRouter(config: AppConfig) {
   restoreHistoryApi();
+  const routes = createRoutes(config);
 
-  return createHashRouter(createRoutes(config));
+  return createHashRouter(routes);
 }

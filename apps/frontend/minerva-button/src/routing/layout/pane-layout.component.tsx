@@ -1,11 +1,11 @@
-import { BrandLogo, LoadingIndicator, mixLanguages, ReportButtonPage } from '@minerva/ui-lib';
+import { mixLanguages } from '@minerva/ui-lib';
+import type React from 'react';
 import { useMemo } from 'react';
 import { Outlet, useNavigation } from 'react-router';
-
-import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
 import { InitialLoadingData } from '../../constants/initial-loading.constants';
 import { ReportingLoadingData } from '../../constants/reporting-loading.constants';
 import { ROUTES } from '../../constants/routes.constants';
+import { LoadingView } from '../../views/loading/loading.view';
 
 /**
  * The frame every screen renders inside, and the pane's loading indicator.
@@ -32,7 +32,7 @@ import { ROUTES } from '../../constants/routes.constants';
  * { path: '/', Component: PaneLayout, children: [...] }
  * ```
  */
-export function PaneLayout() {
+export function PaneLayout(): React.JSX.Element {
   const { state, location } = useNavigation();
 
   const isReporting = location?.pathname === ROUTES.confirmation;
@@ -43,15 +43,5 @@ export function PaneLayout() {
     return <Outlet />;
   }
 
-  return (
-    <ReportButtonPage>
-      <ReportButtonPage.Header>
-        <BrandLogo size={LOGO_SIZE} />
-      </ReportButtonPage.Header>
-
-      <ReportButtonPage.Content>
-        <LoadingIndicator steps={steps} />
-      </ReportButtonPage.Content>
-    </ReportButtonPage>
-  );
+  return <LoadingView steps={steps} />;
 }
