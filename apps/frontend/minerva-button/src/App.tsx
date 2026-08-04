@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { RouterProvider } from 'react-router';
 
 import { useConfig } from './config';
-import { I18nProvider } from './i18n';
 import { createRouter } from './routing';
 
 /**
@@ -22,9 +21,5 @@ export function App() {
   const config = useConfig();
   const [router] = useState(() => createRouter(config));
 
-  return (
-    <I18nProvider>
-      <RouterProvider router={router} />
-    </I18nProvider>
-  );
+  return <RouterProvider router={router} />;
 }

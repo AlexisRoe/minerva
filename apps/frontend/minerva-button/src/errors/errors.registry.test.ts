@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import en from '../i18n/locales/en.json';
 import { errorRegistry, lookupErrorPolicy, UNKNOWN_ERROR_POLICY } from './errors.registry';
+import { ErrorScreenKind } from './errors.types';
 
 const entries = Object.entries(errorRegistry);
 
@@ -51,7 +52,7 @@ describe('errorRegistry', () => {
 
   it('never offers a retry on a screen that has no button', () => {
     for (const [code, { screen, canRetry }] of entries) {
-      if (screen === 'no-content') {
+      if (screen === ErrorScreenKind.NoContent) {
         // NoContentView is the end of the road by ui-lib's design; a `canRetry`
         // here would be a promise the screen cannot keep.
         expect(canRetry, code).toBe(false);
@@ -70,7 +71,7 @@ describe('errorRegistry', () => {
 
   it('explains a no-content failure rather than advising about it', () => {
     for (const [code, { screen, message }] of entries) {
-      if (screen === 'no-content') {
+      if (screen === ErrorScreenKind.NoContent) {
         // These screens say what is wrong with the environment; a `tip-` string
         // would be advice for a screen that offers nothing to act on.
         expect(message.startsWith('unsupported-'), code).toBe(true);
@@ -82,7 +83,7 @@ describe('errorRegistry', () => {
 describe('lookupErrorPolicy', () => {
   it('answers for a registered code', () => {
     expect(lookupErrorPolicy('ERR_008')).toMatchObject({
-      screen: 'no-content',
+      screen: ErrorScreenKind.NoContent,
       canRetry: false,
     });
   });
@@ -95,7 +96,7 @@ describe('lookupErrorPolicy', () => {
   });
 
   it('errs towards a screen the user can act on', () => {
-    expect(UNKNOWN_ERROR_POLICY.screen).toBe('error');
+    expect(UNKNOWN_ERROR_POLICY.screen).toBe(ErrorScreenKind.Error);
     expect(UNKNOWN_ERROR_POLICY.canRetry).toBe(true);
   });
 });

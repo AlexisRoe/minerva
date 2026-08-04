@@ -25,8 +25,9 @@ export {
   ConfigRequestFailedError,
   MissingRootElementError,
 } from './config.errors';
-export type { ErrorRegistryEntry, ErrorScreenKind, UsedErrorCode } from './errors.registry';
+export type { ErrorRegistryEntry, UsedErrorCode } from './errors.registry';
 export { errorRegistry, lookupErrorPolicy, UNKNOWN_ERROR_POLICY } from './errors.registry';
+export { ErrorScreenKind } from './errors.types';
 export {
   OfficeHostUnsupportedError,
   OfficeLoadTimeoutError,

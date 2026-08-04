@@ -3,7 +3,7 @@ import type { JSX, ReactElement } from 'react';
 /** What {@link FeatureGuard} needs to decide whether to draw anything. */
 export interface FeatureGuardProps {
   /** The element drawn when {@link FeatureGuardProps.feature} is on. */
-  children: ReactElement;
+  children: ReactElement | ReactElement[];
   /**
    * Whether the tenant has this switched on.
    *
@@ -23,10 +23,11 @@ export interface FeatureGuardProps {
  * punctuation. `<FeatureGuard feature={canReportSpam}>` says what the condition
  * *means*, and the JSX below it reads as JSX.
  *
- * It renders nothing of its own: no wrapper element, no fragment. Several of the
- * things it guards sit inside components that inspect their own children --
- * `ReportButtonList` lays its buttons out, `ButtonDrawer` portals its content --
- * so an extra node here would change the layout it is meant to be invisible to.
+ * It renders no element of its own -- only a fragment, which several of the
+ * things it guards require: `ReportButtonList` lays its buttons out and
+ * `ButtonDrawer` portals its content, so an extra *DOM* node here would change
+ * the layout this is meant to be invisible to. The fragment is what lets it
+ * guard more than one element at a time and still return a single JSX element.
  *
  * The check is deliberately `=== false` rather than truthiness. `feature` is
  * typed `boolean`, so anything else arriving is a bug at the call site, and
@@ -47,5 +48,5 @@ export interface FeatureGuardProps {
  * ```
  */
 export function FeatureGuard(props: FeatureGuardProps): JSX.Element | null {
-  return props.feature === false ? null : props.children;
+  return props.feature === false ? null : <>{props.children}</>;
 }

@@ -31,8 +31,6 @@ export function ErrorView() {
   const error = useRouteError();
   const [errorId, setErrorId] = useState<string | undefined>(undefined);
 
-  // In an effect rather than in the render body: reporting is a side effect, and
-  // in the render body it would fire again on every re-render of this screen.
   useEffect(() => {
     if (error === undefined || error === null) {
       return;

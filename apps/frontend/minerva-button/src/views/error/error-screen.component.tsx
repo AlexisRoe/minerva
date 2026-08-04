@@ -51,8 +51,6 @@ export function ErrorScreen({ error, errorId }: ErrorScreenProps) {
   const isMinerva = MinervaError.is(error);
   const policy = isMinerva ? lookupErrorPolicy(error.code) : undefined;
 
-  // An unrecognised error is worth one attempt: it may well be a transient thing
-  // nobody has classified yet, and there is nothing else to offer.
   const canRetry = (policy?.canRetry ?? true) && config.retry < MAX_RETRY;
 
   function retry(): void {

@@ -2,7 +2,7 @@ import { BrandLogo, NoContentView, ReportButtonPage } from '@minerva/ui-lib';
 import { useSearchParams } from 'react-router';
 
 import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
-import { lookupErrorPolicy } from '../../errors';
+import { ErrorScreenKind, lookupErrorPolicy } from '../../errors';
 import { useTranslations } from '../../i18n';
 import { REASON_PARAM } from '../../routing';
 
@@ -38,16 +38,14 @@ export function UnsupportedView() {
   const reason = searchParams.get(REASON_PARAM) ?? '';
   const { screen, message } = lookupErrorPolicy(reason);
 
-  // A code that belongs on the error screen has no business explaining itself
-  // here, and its message would be advice rather than an explanation.
-  const description = screen === 'no-content' ? t(message) : t('unsupported-generic');
+  const isNoContent = screen === ErrorScreenKind.NoContent;
+  const description = isNoContent ? t(message) : t('unsupported-generic');
 
   return (
     <ReportButtonPage>
       <ReportButtonPage.Header>
         <BrandLogo size={LOGO_SIZE} />
       </ReportButtonPage.Header>
-
       <ReportButtonPage.Content>
         <NoContentView description={description} title={t('unsupported-title')} />
       </ReportButtonPage.Content>

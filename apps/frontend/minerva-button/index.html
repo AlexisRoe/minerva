@@ -13,17 +13,7 @@
 
     <title>Minerva Button</title>
 
-    <!-- Office.js installs the `Office` global the pane talks to Outlook
-         through. It has to come from Microsoft's CDN rather than the bundle:
-         the host matches the served copy against the client it is running in,
-         and a self-hosted one is unsupported.
 
-         `defer` rather than `async`: deferred scripts run in document order, so
-         this one is guaranteed to have installed the global before
-         /src/main.tsx (a module script, deferred by the same rules) executes,
-         while neither of them blocks the splash below from painting. If the CDN
-         is unreachable the global never appears, which waitForOffice() reports
-         as ERR_007. -->
     <!-- Office.js overwrites history.pushState and history.replaceState with
          non-functions when it decides it is running outside an Office client,
          which is fatal to any router that reads them. This runs first and keeps
@@ -39,6 +29,17 @@
         })();
     </script>
 
+    <!-- Office.js installs the `Office` global the pane talks to Outlook
+         through. It has to come from Microsoft's CDN rather than the bundle:
+         the host matches the served copy against the client it is running in,
+         and a self-hosted one is unsupported.
+
+         `defer` rather than `async`: deferred scripts run in document order, so
+         this one is guaranteed to have installed the global before
+         /src/main.tsx (a module script, deferred by the same rules) executes,
+         while neither of them blocks the splash below from painting. If the CDN
+         is unreachable the global never appears, which waitForOffice() reports
+         as ERR_007. -->
     <script defer src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 
     <!-- Plain stylesheet, not part of the bundle: the splash below has to be
@@ -70,7 +71,8 @@
                 Minerva could not start. Please reload the task pane, and contact support if this keeps happening.
             </p>
             <noscript>
-                <p class="minerva-boot__message">Minerva needs JavaScript to run. Please enable it and reload the task pane.</p>
+                <p class="minerva-boot__message">Minerva needs JavaScript to run. Please enable it and reload the task
+                    pane.</p>
             </noscript>
         </div>
     </div>

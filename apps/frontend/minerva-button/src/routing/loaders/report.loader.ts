@@ -12,7 +12,7 @@ import {
 import { acquireToken } from '../../auth';
 import type { AppConfig } from '../../config';
 import { demoEnvironment, demoMessage, demoUser } from '../../demo';
-import { lookupErrorPolicy } from '../../errors';
+import { ErrorScreenKind, lookupErrorPolicy } from '../../errors';
 import { useOfficeStore, useSessionStore, useSettingsStore } from '../../store';
 import { REASON_PARAM, ROUTES } from '../routes';
 
@@ -25,7 +25,7 @@ import { REASON_PARAM, ROUTES } from '../routes';
  * declared.
  */
 function isUnsupported(error: unknown): boolean {
-  return MinervaError.is(error) && lookupErrorPolicy(error.code).screen === 'no-content';
+  return MinervaError.is(error) && lookupErrorPolicy(error.code).screen === ErrorScreenKind.NoContent;
 }
 
 /**

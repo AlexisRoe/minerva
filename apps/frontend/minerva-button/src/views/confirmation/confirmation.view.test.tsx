@@ -206,6 +206,16 @@ describe('ConfirmationView', () => {
     expect(captureError).toHaveBeenCalled();
   });
 
+  it('offers a way out that leaves the mail alone', async () => {
+    renderView(result({ reportedAs: 'spam' }));
+    await file();
+
+    await userEvent.click(await screen.findByRole('button', { name: /close/i }));
+
+    expect(closePane).toHaveBeenCalled();
+    expect(moveMessage).not.toHaveBeenCalled();
+  });
+
   it('falls back to the neutral screen when reached without a report', async () => {
     renderView(undefined);
     await file();

@@ -5,7 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { ConfigProvider, loadConfig } from './config';
 import { MissingRootElementError } from './errors';
-import { translate } from './i18n';
+import { I18nProvider, translate } from './i18n';
 import { captureError, initSentry, MinervaErrorBoundary } from './sentry';
 
 import '../../../../shared/assets/fonts.css';
@@ -31,25 +31,21 @@ async function bootstrap(): Promise<void> {
   initSentry(config);
 
   const container = document.getElementById('root');
+
   if (!container) {
     throw new MissingRootElementError();
   }
 
   createRoot(container).render(
     <StrictMode>
-      {/*
-        The outermost boundary, and deliberately the plainest. It sits above the
-        configuration, the theme and i18n, so a failure it catches is one where
-        none of those can be relied on -- hence a bare line rather than the full
-        error screen. Everything inside a route is caught by the router's
-        `errorElement`, which has all three and renders `ErrorScreen`.
-      */}
       <MinervaErrorBoundary fallback={() => <p>{translate('error')}</p>}>
-        <ConfigProvider config={config}>
+        <I18nProvider>
           <MinervaThemeProvider>
-            <App />
+            <ConfigProvider config={config}>
+              <App />
+            </ConfigProvider>
           </MinervaThemeProvider>
-        </ConfigProvider>
+        </I18nProvider>
       </MinervaErrorBoundary>
     </StrictMode>,
   );

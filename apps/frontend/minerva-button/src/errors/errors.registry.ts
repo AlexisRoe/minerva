@@ -10,6 +10,7 @@ import {
   ConfigRequestFailedError,
   MissingRootElementError,
 } from './config.errors';
+import { ErrorScreenKind } from './errors.types';
 import {
   OfficeHostUnsupportedError,
   OfficeLoadTimeoutError,
@@ -17,16 +18,6 @@ import {
   OfficeRequirementSetError,
 } from './office.errors';
 import { GraphRequestFailedError, MinervaRequestFailedError } from './request.errors';
-
-/**
- * Which screen a failure belongs on.
- *
- * `no-content` is not a lesser error screen -- it is the pane saying it cannot
- * run *here*, which is a different statement. Nothing has broken: the user is
- * outside Outlook, or on a client too old for the requirement set. It carries no
- * way out, by ui-lib's design, because there is nothing for the user to do.
- */
-export type ErrorScreenKind = 'error' | 'no-content';
 
 /** What one entry of {@link errorRegistry} records about an error. */
 export interface ErrorRegistryEntry {
@@ -92,105 +83,105 @@ export const errorRegistry = {
   ERR_001: {
     error: ConfigRequestFailedError,
     description: 'The runtime configuration could not be fetched at start-up.',
-    screen: 'error',
+    screen: ErrorScreenKind.Error,
     canRetry: true,
     message: 'tip-network',
   },
   ERR_002: {
     error: ConfigParseError,
     description: 'The runtime configuration was served but is not JSON.',
-    screen: 'error',
+    screen: ErrorScreenKind.Error,
     canRetry: false,
     message: 'tip-deployment',
   },
   ERR_003: {
     error: ConfigInvalidError,
     description: 'The runtime configuration does not match the expected shape.',
-    screen: 'error',
+    screen: ErrorScreenKind.Error,
     canRetry: false,
     message: 'tip-deployment',
   },
   ERR_004: {
     error: MissingRootElementError,
     description: 'index.html has no #root element to mount React into.',
-    screen: 'error',
+    screen: ErrorScreenKind.Error,
     canRetry: false,
     message: 'tip-deployment',
   },
   ERR_005: {
     error: ConfigProviderMissingError,
     description: 'useConfig() was called outside a ConfigProvider.',
-    screen: 'error',
+    screen: ErrorScreenKind.Error,
     canRetry: false,
     message: 'tip-deployment',
   },
   ERR_006: {
     error: ConfigDomainMismatchError,
     description: 'The app is served from a host other than the configured appDomain.',
-    screen: 'error',
+    screen: ErrorScreenKind.Error,
     canRetry: false,
     message: 'tip-deployment',
   },
   ERR_007: {
     error: OfficeLoadTimeoutError,
     description: 'Office.js did not become ready within the start-up timeout.',
-    screen: 'no-content',
+    screen: ErrorScreenKind.NoContent,
     canRetry: false,
     message: 'unsupported-timeout',
   },
   ERR_008: {
     error: OfficeHostUnsupportedError,
     description: 'Office.js is ready, but the host application is not Outlook.',
-    screen: 'no-content',
+    screen: ErrorScreenKind.NoContent,
     canRetry: false,
     message: 'unsupported-host',
   },
   ERR_009: {
     error: OfficeRequirementSetError,
     description: 'The Outlook client does not support the required Mailbox requirement set.',
-    screen: 'no-content',
+    screen: ErrorScreenKind.NoContent,
     canRetry: false,
     message: 'unsupported-requirement-set',
   },
   ERR_010: {
     error: OfficeNotReadyError,
     description: 'The host was read before the start-up gate had awaited Office.js.',
-    screen: 'error',
+    screen: ErrorScreenKind.Error,
     canRetry: false,
     message: 'tip-deployment',
   },
   ERR_011: {
     error: MinervaRequestFailedError,
     description: "Minerva's own API answered with a non-2xx status, or could not be reached.",
-    screen: 'error',
+    screen: ErrorScreenKind.Error,
     canRetry: true,
     message: 'tip-network',
   },
   ERR_012: {
     error: GraphRequestFailedError,
     description: 'Microsoft Graph answered with a non-2xx status, or could not be reached.',
-    screen: 'error',
+    screen: ErrorScreenKind.Error,
     canRetry: true,
     message: 'tip-network',
   },
   ERR_013: {
     error: AuthClientIdMissingError,
     description: 'Sign-in was attempted with no Entra client id configured.',
-    screen: 'error',
+    screen: ErrorScreenKind.Error,
     canRetry: false,
     message: 'tip-deployment',
   },
   ERR_014: {
     error: TokenAcquisitionFailedError,
     description: 'No Graph access token could be acquired, silently or interactively.',
-    screen: 'error',
+    screen: ErrorScreenKind.Error,
     canRetry: true,
     message: 'tip-auth',
   },
   ERR_015: {
     error: AuthDialogFailedError,
     description: 'The Office sign-in dialog closed without returning a token.',
-    screen: 'error',
+    screen: ErrorScreenKind.Error,
     canRetry: true,
     message: 'tip-auth',
   },
@@ -208,7 +199,7 @@ export type UsedErrorCode = keyof typeof errorRegistry;
  * is a blank screen with no way off it.
  */
 export const UNKNOWN_ERROR_POLICY = {
-  screen: 'error',
+  screen: ErrorScreenKind.Error,
   canRetry: true,
   message: 'tip-generic',
 } as const satisfies Pick<ErrorRegistryEntry, 'screen' | 'canRetry' | 'message'>;

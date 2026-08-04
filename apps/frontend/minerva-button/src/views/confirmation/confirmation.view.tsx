@@ -1,31 +1,13 @@
 import type { EmailType } from '@minerva/typescript-lib';
 import { BrandLogo, ConfirmationView as ConfirmationPanel, ReportButtonPage } from '@minerva/ui-lib';
 import { Anchor, Button, Stack, Text, Title } from '@minerva/ui-lib/primitives';
-import { useState } from 'react';
 import { useActionData } from 'react-router';
-import type { WellKnownFolder } from '../../adapters/graph';
-import { closePane } from '../../adapters/office';
 import { FeatureGuard } from '../../components';
-import { useConfig } from '../../config';
 import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
+import { useMessageDisposition } from '../../hooks';
 import { type TranslationKey, useTranslations } from '../../i18n';
 import type { ReportResult } from '../../reporting';
-import { createPaneAdapters } from '../../routing';
-import { captureError } from '../../sentry';
-import { type ReportVariant, useOffice, useSettings } from '../../store';
-
-/**
- * Where each report sends the mail, and what the button offering it says.
- *
- * Suspicious mail is deleted and spam is filed under junk, which is what the
- * two reports mean to a mailbox: one is a threat to be rid of, the other is
- * noise to be trained on. Both names are Graph's well-known folders, which is
- * the only form that works for every user without a lookup.
- */
-const DISPOSITION = {
-  suspicious: { folder: 'deleteditems', labelKey: 'footer-delete' },
-  spam: { folder: 'junkemail', labelKey: 'footer-spam' },
-} as const satisfies Record<ReportVariant, { folder: WellKnownFolder; labelKey: TranslationKey }>;
+import { useSettings } from '../../store';
 
 /** What is said about an email the backend recognised. */
 const IDENTIFIED_KEYS = {
@@ -47,10 +29,9 @@ const IDENTIFIED_KEYS = {
  * differently; an unrecognised mail gets the neutral line rather than a claim
  * nobody has checked.
  *
- * The footer is the last thing the pane does: move the mail out of the inbox and
- * close. That is deliberately *after* the report rather than part of it. Moving
- * first would leave a user who hit a Graph failure with a mail that had
- * vanished and no report filed.
+ * The footer offers the two ways out: leave the mail where it is and close, or
+ * file it away first. What either means to the mailbox belongs to
+ * {@link useMessageDisposition}; this file only draws the buttons.
  *
  * @see {@link https://reactrouter.com/api/hooks/useActionData}
  *
@@ -61,15 +42,17 @@ const IDENTIFIED_KEYS = {
  */
 export function ConfirmationView() {
   const { t } = useTranslations();
-  const config = useConfig();
   // `undefined` when the route was reached without an action having run, `null`
   // when one ran and returned nothing. Neither is a report, so they collapse.
   const result = (useActionData() as ReportResult | null | undefined) ?? undefined;
-  const { environment, message } = useOffice();
   const { hasContact, contact } = useSettings();
 
-  const [isMoving, setIsMoving] = useState(false);
-  const [moveFailed, setMoveFailed] = useState(false);
+  // Called before the neutral screen returns, because hooks cannot be
+  // conditional. The fallback is never read: nothing offers to move a mail on a
+  // screen that has no report to show.
+  const { labelKey, isMoving, moveFailed, dispose, dismiss } = useMessageDisposition(
+    result?.reportedAs ?? 'suspicious',
+  );
 
   // Reached directly rather than through a report -- a reload, or the pane being
   // reopened. There is nothing to confirm, so it says the neutral thing.
@@ -83,12 +66,19 @@ export function ConfirmationView() {
         <ReportButtonPage.Content>
           <ConfirmationPanel description={t('confirmation-body')} title={t('confirmation-title')} />
         </ReportButtonPage.Content>
+
+        {/* Only the way out: there is no report here, so there is nothing this
+            screen could claim to know about where the mail should go. */}
+        <ReportButtonPage.Footer>
+          <Button onClick={dismiss} variant="outline">
+            {t('close')}
+          </Button>
+        </ReportButtonPage.Footer>
       </ReportButtonPage>
     );
   }
 
   const { response, reportedAs, outcomes } = result;
-  const { folder, labelKey } = DISPOSITION[reportedAs];
 
   // Both halves have to agree before a claim is made. `isIdentified` is what says
   // the backend recognised anything at all, so a payload that leaves it false
@@ -108,29 +98,6 @@ export function ConfirmationView() {
         : t('notified-failed', { address: outcome.address }),
     ),
   ];
-
-  async function dispose(): Promise<void> {
-    if (environment === null || message === null) {
-      return;
-    }
-
-    setIsMoving(true);
-    setMoveFailed(false);
-
-    try {
-      const { graph } = createPaneAdapters(config, environment);
-
-      await graph.moveMessage(message.exchangeId, folder);
-      closePane();
-    } catch (error) {
-      // The report is already filed, so this is not a failed report -- only a
-      // mail still sitting in the inbox. Saying so beats closing the pane and
-      // letting the user believe it had gone.
-      captureError(error);
-      setMoveFailed(true);
-      setIsMoving(false);
-    }
-  }
 
   return (
     <ReportButtonPage>
@@ -179,7 +146,12 @@ export function ConfirmationView() {
       </ReportButtonPage.Content>
 
       <ReportButtonPage.Footer>
-        <Button loading={isMoving} onClick={() => void dispose()}>
+        {/* Leaving is the safe move, so it is the one that is not emphasised --
+            the mail stays where it is and the report is already filed. */}
+        <Button disabled={isMoving} onClick={dismiss} variant="outline">
+          {t('close')}
+        </Button>
+        <Button loading={isMoving} onClick={dispose}>
           {t(labelKey)}
         </Button>
       </ReportButtonPage.Footer>
