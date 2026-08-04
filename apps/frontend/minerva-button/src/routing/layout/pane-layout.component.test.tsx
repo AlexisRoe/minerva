@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import { InitialLoadingData } from '../../constants/initial-loading.constants';
 import { ReportingLoadingData } from '../../constants/reporting-loading.constants';
-import { ROUTES } from '../routes';
+import { ROUTES } from '../../constants/routes.constants';
 import { PaneLayout } from './pane-layout.component';
 
 /** Every string either reel can show, so a test can ask which one is on. */

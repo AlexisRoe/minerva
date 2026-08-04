@@ -5,7 +5,7 @@ import { Outlet, useNavigation } from 'react-router';
 import { LOGO_SIZE } from '../../constants/icon-sizes.constants';
 import { InitialLoadingData } from '../../constants/initial-loading.constants';
 import { ReportingLoadingData } from '../../constants/reporting-loading.constants';
-import { ROUTES } from '../routes';
+import { ROUTES } from '../../constants/routes.constants';
 
 /**
  * The frame every screen renders inside, and the pane's loading indicator.
@@ -37,9 +37,6 @@ export function PaneLayout() {
 
   const isReporting = location?.pathname === ROUTES.confirmation;
 
-  // Drawn once per destination rather than per render: mixLanguages picks a
-  // language at random for each step, so re-running it mid-wait would reshuffle
-  // the reel under the reader.
   const steps = useMemo(() => mixLanguages(isReporting ? ReportingLoadingData : InitialLoadingData), [isReporting]);
 
   if (state === 'idle') {

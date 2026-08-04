@@ -33,6 +33,10 @@ vi.mock('../../adapters', () => ({
   createAdapters: () => ({ minerva: { authorize, getSettings }, graph: {} }),
 }));
 
+const { captureError } = vi.hoisted(() => ({ captureError: vi.fn((_error: unknown) => 'event-1') }));
+
+vi.mock('../../sentry', () => ({ captureError }));
+
 /** The live (non-demo) configuration these cases boot with. */
 const config = { ...configFixture, entraClientId: 'client-1' };
 
@@ -130,6 +134,25 @@ describe('createReportLoader', () => {
       const result = (await createReportLoader(config)()) as Response;
 
       expect(result.headers.get('Location')).toContain('reason=ERR_008');
+    });
+
+    it('still reports it, so the redirect leaves a trace', async () => {
+      const failure = new OfficeLoadTimeoutError(5000);
+      waitForOffice.mockRejectedValueOnce(failure);
+
+      await createReportLoader(config)();
+
+      expect(captureError).toHaveBeenCalledWith(failure);
+    });
+
+    it('reports it as the warning it declares itself to be', async () => {
+      // The volume is the error's own business: `captureError` reads `logLevel`,
+      // so the loader does not get to decide how loud an environment failure is.
+      waitForOffice.mockRejectedValueOnce(new OfficeHostUnsupportedError('Word', 'PC'));
+
+      await createReportLoader(config)();
+
+      expect(vi.mocked(captureError).mock.calls[0]?.[0]).toHaveProperty('logLevel', 'warn');
     });
   });
 

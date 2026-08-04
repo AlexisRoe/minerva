@@ -17,6 +17,7 @@ import {
   OfficeNotReadyError,
   OfficeRequirementSetError,
 } from './office.errors';
+import { ReportNotificationFailedError } from './reporting.errors';
 import { GraphRequestFailedError, MinervaRequestFailedError } from './request.errors';
 
 /** What one entry of {@link errorRegistry} records about an error. */
@@ -184,6 +185,16 @@ export const errorRegistry = {
     screen: ErrorScreenKind.Error,
     canRetry: true,
     message: 'tip-auth',
+  },
+  ERR_016: {
+    error: ReportNotificationFailedError,
+    description: 'A tenant reporting method could not be notified after a report was filed.',
+    // Listed for completeness rather than for a screen: this one is reported and
+    // dropped, never thrown, so nothing ever looks its policy up. The
+    // confirmation screen says what happened, per address.
+    screen: ErrorScreenKind.Error,
+    canRetry: false,
+    message: 'tip-network',
   },
 } as const satisfies Partial<Record<ErrorCode, ErrorRegistryEntry>>;
 

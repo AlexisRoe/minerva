@@ -21,6 +21,10 @@ const demoReportingResponseStub = {
   identifiedAs: 'system' as const,
 };
 
+const { captureError } = vi.hoisted(() => ({ captureError: vi.fn((_error: unknown) => 'event-1') }));
+
+vi.mock('../../sentry', () => ({ captureError }));
+
 vi.mock('../loaders/report.loader', () => ({
   createPaneAdapters: () => ({
     graph: { getMimeMessage, sendMail, moveMessage: vi.fn() },
@@ -206,6 +210,45 @@ describe('createReportAction', () => {
     // it did not go through and invite a duplicate for every method that worked.
     expect(result.outcomes.map((outcome) => outcome.delivered)).toEqual([false, true]);
     expect(result.response).toEqual(demoReportingResponseStub);
+  });
+
+  it('reports a failed notification even though it swallows it', async () => {
+    const failure = new Error('mailbox full');
+    sendMail.mockRejectedValueOnce(failure);
+
+    await createReportAction(configFixture)({ request: request([['variant', 'spam']]) });
+
+    // Swallowed for the user is not swallowed for us: undelivered would otherwise
+    // be visible only on a screen the user closes.
+    expect(captureError).toHaveBeenCalledTimes(1);
+
+    const [reported] = vi.mocked(captureError).mock.calls[0] ?? [];
+
+    expect(reported).toMatchObject({
+      code: 'ERR_016',
+      logLevel: 'warn',
+      payload: {
+        address: demoSettings.reportingMethods[0]?.address,
+        reportId: demoReportingResponseStub.reportId,
+      },
+    });
+    expect(reported).toHaveProperty('cause.message', 'mailbox full');
+  });
+
+  it('reports one event per failed address, not one per submission', async () => {
+    sendMail.mockRejectedValue(new Error('relay refused'));
+
+    await createReportAction(configFixture)({ request: request([['variant', 'spam']]) });
+
+    // A single misconfigured mailbox and a Graph outage are different problems,
+    // and grouping them into one event would hide which of the two happened.
+    expect(captureError).toHaveBeenCalledTimes(demoSettings.reportingMethods.length);
+  });
+
+  it('does not report anything when every notification lands', async () => {
+    await createReportAction(configFixture)({ request: request([['variant', 'spam']]) });
+
+    expect(captureError).not.toHaveBeenCalled();
   });
 
   it('survives every method failing', async () => {

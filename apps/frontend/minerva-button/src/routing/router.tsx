@@ -2,11 +2,11 @@ import { createHashRouter, type RouteObject } from 'react-router';
 
 import { restoreHistoryApi } from '../adapters/office';
 import type { AppConfig } from '../config';
+import { ROUTES } from '../constants/routes.constants';
 import { ConfirmationView, ErrorView, ReportView, UnsupportedView } from '../views';
 import { createReportAction } from './actions/report.action';
 import { PaneLayout } from './layout/pane-layout.component';
 import { createReportLoader } from './loaders/report.loader';
-import { ROUTES } from './routes';
 
 /**
  * Builds the pane's screens as one tree under {@link PaneLayout}.
@@ -43,7 +43,7 @@ export function createRoutes(config: AppConfig): RouteObject[] {
         },
         { path: ROUTES.unsupported, Component: UnsupportedView },
         { path: ROUTES.error, Component: ErrorView },
-        { path: '*', Component: ErrorView },
+        { path: ROUTES.all, Component: ErrorView },
       ],
     },
   ];
@@ -68,9 +68,6 @@ export function createRoutes(config: AppConfig): RouteObject[] {
  * ```
  */
 export function createRouter(config: AppConfig) {
-  // `createHashRouter` reads `history.replaceState` immediately, and Office.js
-  // will have removed it if the pane is open in a plain browser rather than in
-  // Outlook -- which is how demo mode is meant to be run.
   restoreHistoryApi();
 
   return createHashRouter(createRoutes(config));

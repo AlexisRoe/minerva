@@ -26,6 +26,8 @@ export const ROUTES = {
   unsupported: '/unsupported',
   /** Shown when a screen cannot be rendered, and for unknown paths. */
   error: '/error',
+  /** Everything else */
+  all: '*',
 } as const;
 
 /** The query parameter carrying *why* {@link ROUTES.unsupported} was reached. */

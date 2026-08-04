@@ -34,4 +34,5 @@ export {
   OfficeNotReadyError,
   OfficeRequirementSetError,
 } from './office.errors';
+export { ReportNotificationFailedError } from './reporting.errors';
 export { GraphRequestFailedError, MinervaRequestFailedError } from './request.errors';

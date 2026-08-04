@@ -11,10 +11,11 @@ import {
 } from '../../adapters/office';
 import { acquireToken } from '../../auth';
 import type { AppConfig } from '../../config';
+import { REASON_PARAM, ROUTES } from '../../constants/routes.constants';
 import { demoEnvironment, demoMessage, demoUser } from '../../demo';
 import { ErrorScreenKind, lookupErrorPolicy } from '../../errors';
+import { captureError } from '../../sentry';
 import { useOfficeStore, useSessionStore, useSettingsStore } from '../../store';
-import { REASON_PARAM, ROUTES } from '../routes';
 
 /**
  * Whether a failure means "this pane cannot run here" rather than "something broke".
@@ -72,7 +73,10 @@ export function createPaneAdapters(config: AppConfig, environment: OfficeEnviron
  * Failures split two ways. The three environment failures redirect to
  * {@link ROUTES.unsupported} with their code in the query string, because they
  * are not faults and a stack trace would be the wrong response. Everything else
- * is rethrown for the router's `errorElement`.
+ * is rethrown for the router's `errorElement`. Both halves are reported first --
+ * the split decides which screen a user lands on, not whether anyone hears about
+ * it -- and {@link captureError} takes the volume from the error's own
+ * `logLevel`.
  *
  * @param config The configuration the app booted with.
  * @returns A React Router loader.
@@ -110,6 +114,14 @@ export function createReportLoader(config: AppConfig) {
       return null;
     } catch (error) {
       if (isUnsupported(error)) {
+        // Reported like everything else, and at its own volume: the three
+        // environment errors declare `logLevel: 'warn'`, so this is a warning in
+        // Sentry and in the console rather than an error. Redirecting without
+        // reporting was the one path out of this loader that left no trace at
+        // all -- and "how many panes cannot run here" is exactly the number
+        // worth having.
+        captureError(error);
+
         return redirect(`${ROUTES.unsupported}?${REASON_PARAM}=${(error as MinervaError).code}`);
       }
 

@@ -2,8 +2,10 @@ import type { ReportingMethod, ReportingReasons } from '@minerva/typescript-lib'
 
 import type { GraphAdapter } from '../../adapters/graph';
 import type { AppConfig } from '../../config';
+import { ReportNotificationFailedError } from '../../errors';
 import { buildNotificationMail } from '../../reporting/email-template';
 import type { MethodOutcome, ReportResult } from '../../reporting/reporting.types';
+import { captureError } from '../../sentry';
 import { type ReportVariant, useOfficeStore, useSettingsStore } from '../../store';
 import { createPaneAdapters } from '../loaders/report.loader';
 
@@ -61,19 +63,36 @@ export function readReportIntent(formData: FormData): ReportIntent {
  * action would tell the user their report did not go through, and invite them to
  * file it again -- producing a duplicate for every method that *did* work.
  *
+ * Swallowed for the user is not swallowed for us: each rejection is wrapped in a
+ * {@link ReportNotificationFailedError} and reported, so a mailbox that stopped
+ * accepting mail is visible in Sentry and in the error log instead of only as an
+ * undelivered row on a screen the user closes. One event per address rather than
+ * one per submission -- a single failing method and a Graph outage are different
+ * problems and should not group as one issue. The Graph error itself is kept as
+ * the `cause`, so the status that explains it survives.
+ *
+ * @param reportId The id the backend gave the report these notify about.
  * @returns One outcome per method, in the order the tenant configured them.
  */
 async function notify(
   graph: GraphAdapter,
   methods: readonly ReportingMethod[],
+  reportId: string,
   build: (method: ReportingMethod) => ReturnType<typeof buildNotificationMail>,
 ): Promise<MethodOutcome[]> {
   const results = await Promise.allSettled(methods.map((method) => graph.sendMail(build(method))));
 
-  return methods.map((method, index) => ({
-    address: method.address,
-    delivered: results[index]?.status === 'fulfilled',
-  }));
+  return methods.map((method, index) => {
+    const result = results[index];
+
+    if (result?.status === 'rejected') {
+      const cause = result.reason instanceof Error ? result.reason : undefined;
+
+      captureError(new ReportNotificationFailedError(method.address, reportId, cause));
+    }
+
+    return { address: method.address, delivered: result?.status === 'fulfilled' };
+  });
 }
 
 /**
@@ -138,7 +157,7 @@ export function createReportAction(config: AppConfig) {
 
     const picked = resolveReasons(settings.userFeedback.reportingReasons, intent.reasons);
 
-    const outcomes = await notify(graph, settings.reportingMethods, (method) =>
+    const outcomes = await notify(graph, settings.reportingMethods, response.reportId, (method) =>
       buildNotificationMail({
         method,
         message,

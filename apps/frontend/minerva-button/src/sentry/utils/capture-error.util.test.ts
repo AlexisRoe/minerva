@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ConfigRequestFailedError, MissingRootElementError } from '../../errors';
+import { ConfigRequestFailedError, MissingRootElementError, OfficeHostUnsupportedError } from '../../errors';
 import { useErrorLogStore } from '../../store';
 import { captureError } from './capture-error.util';
 
@@ -96,6 +96,25 @@ describe('captureError', () => {
     captureError(error);
 
     expect(console.error).toHaveBeenCalledWith(JSON.stringify(error));
+  });
+
+  it('writes the console line with the method the level asks for', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    const error = new OfficeHostUnsupportedError('Word', 'PC');
+
+    captureError(error);
+
+    // A warning in Sentry and a red line in the console would be two different
+    // stories about one event.
+    expect(console.warn).toHaveBeenCalledWith(JSON.stringify(error));
+    expect(console.error).not.toHaveBeenCalled();
+  });
+
+  it("logs 'fatal' through console.error, which is as loud as the console gets", () => {
+    captureError(new MissingRootElementError());
+
+    expect(console.error).toHaveBeenCalledTimes(1);
   });
 
   it('still reports something it did not throw itself, at the default level', () => {
