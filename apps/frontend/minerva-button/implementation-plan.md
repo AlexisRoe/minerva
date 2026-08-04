@@ -682,7 +682,7 @@ already filed, inviting the user to duplicate it), sending `user.language` inste
 `user.displayLanguage` (losing the region the backend picks templates by), and dropping the HTML
 escape on the reporter's note.
 
-## Step 9 — The confirmation view
+## Step 9 — The confirmation view ✅ done
 
 **Files:** `src/views/confirmation/confirmation.view.tsx`
 
@@ -707,6 +707,51 @@ accepted in place of ids.
 Docs: [message: move](https://learn.microsoft.com/en-us/graph/api/message-move),
 [mailFolder well-known names](https://learn.microsoft.com/en-us/graph/api/resources/mailfolder),
 [closeContainer](https://learn.microsoft.com/en-us/javascript/api/office/office.ui#office-office-ui-closecontainer-member(1)).
+
+### Outcome
+
+Built here from scratch, not copied from the example. It reads the action's return value through
+`useActionData()`, branches its copy on `reportedAs` and `identifiedAs`, lists the per-method
+outcomes, renders the contact block through `FeatureGuard`, and ends on one footer button that moves
+the mail and closes the pane. `make verify` and `make verify-i18n` both green: 796 tests across 103
+files. No new error codes — **next free is still `ERR_016`.**
+
+### Departures from the plan
+
+1. **`Translator` now takes interpolation values.** `notified-ok` and `detail-report-id` carry
+   `{{address}}` and `{{id}}`, which the old single-argument type could not express. `TranslationValues`
+   is deliberately loose about which key takes which values: i18next can derive that from the
+   catalogue, but only if every translation agrees on its placeholders — and a translator dropping one
+   would then break the *call site* rather than the catalogue. `verify-i18n` checks the catalogues
+   against each other, and the placeholders were checked across all eight files by hand.
+
+2. **The move happens on the footer button, after the report, never as part of it.** Moving first
+   would leave a user who hit a Graph failure with a mail that had vanished and no report filed.
+
+3. **A failed move keeps the pane open and says so.** Closing would let the user believe the mail had
+   gone. The report is already filed at that point, so the message says exactly that and offers them
+   the manual route.
+
+4. **`closePane()` is a new office util** (`ERR_010` when the gate has not run). `closeContainer()`
+   is Mailbox 1.5, comfortably under the 1.13 gate, so it needs no capability check of its own.
+
+5. **`useActionData()` returns `null`, not `undefined`, when an action returns nothing.** Both
+   collapse to the neutral screen — a reload or a reopened pane must not claim a report was filed.
+
+### Verified
+
+`make verify` and `make verify-i18n` both green; interpolation placeholders confirmed intact in all
+eight catalogues.
+
+Mutation testing found a real gap rather than confirming the tests. Removing the `isIdentified` guard
+on the status line **did not fail anything** — the "claims nothing" test only checked for the
+*simulation* and *system* wordings, which an unrecognised mail would never show anyway, so it passed
+vacuously. The logic was then made explicit (both halves of the payload must agree before any claim
+is made) and two cases added for the case that actually matters: a payload naming a kind while
+`isIdentified` is false must not be reported as a simulation. Telling someone a real phishing mail
+was "only a test" is the one mistake this screen must never make. The mutation now fails both.
+
+Closing the pane on a failed move also fails correctly.
 
 ## Step 10 — Error boundary
 

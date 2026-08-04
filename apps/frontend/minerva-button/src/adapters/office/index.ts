@@ -15,6 +15,7 @@
 export type { CurrentMessageState } from './hooks/use-current-message.hook';
 export { useCurrentMessage } from './hooks/use-current-message.hook';
 export type { OfficeEnvironment, OfficeReadyInfo, OutlookMessage, OutlookUser } from './office.types';
+export { closePane } from './utils/close-pane.util';
 export { readCurrentMessage } from './utils/read-current-message.util';
 export { readCurrentUser } from './utils/read-current-user.util';
 export {

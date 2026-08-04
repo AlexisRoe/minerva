@@ -3,8 +3,19 @@ import i18next, { type resources } from '../i18next.instance';
 /** Every key the catalogues define, checked at compile time. */
 export type TranslationKey = keyof (typeof resources)['en']['app'];
 
-/** Looks a key up in the active catalogue. */
-export type Translator = (key: TranslationKey) => string;
+/**
+ * The values interpolated into a string's `{{placeholders}}`.
+ *
+ * Deliberately loose about which keys take which values: i18next can derive that
+ * from the catalogue, but only if every translation of a string agrees on its
+ * placeholders -- and a translator adding or dropping one would then break the
+ * *call site* rather than the catalogue, which is the wrong place to find out.
+ * `make verify-i18n` is what checks the catalogues against each other.
+ */
+export type TranslationValues = Readonly<Record<string, string | number>>;
+
+/** Looks a key up in the active catalogue, filling in any placeholders. */
+export type Translator = (key: TranslationKey, values?: TranslationValues) => string;
 
 /**
  * Translates outside React.
@@ -15,15 +26,22 @@ export type Translator = (key: TranslationKey) => string;
  * prefer `useTranslations` wherever a component is available.
  *
  * @param key - A key from the catalogue.
+ * @param values - What to fill the string's `{{placeholders}}` with.
  * @returns The string in the active language, falling back to English.
  *
  * @see {@link https://www.i18next.com/overview/api#t}
+ * @see {@link https://www.i18next.com/translation-function/interpolation}
  *
  * @example
  * ```tsx
  * <Sentry.ErrorBoundary fallback={<p>{translate('error')}</p>}>
  * ```
+ *
+ * @example Filling a placeholder
+ * ```ts
+ * translate('notified-ok', { address: 'soc@contoso.example' });
+ * ```
  */
-export function translate(key: TranslationKey): string {
-  return i18next.t(key);
+export function translate(key: TranslationKey, values?: TranslationValues): string {
+  return i18next.t(key, values);
 }

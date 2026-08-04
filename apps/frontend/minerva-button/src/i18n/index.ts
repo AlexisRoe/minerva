@@ -26,5 +26,5 @@ export { defaultNS, resources, supportedLngs } from './i18next.instance';
 export type { I18nProviderProps } from './provider/i18n.provider';
 export { I18nProvider } from './provider/i18n.provider';
 export { applyMicrosoftLanguage, changeLanguage, currentLanguage } from './utils/change-language.util';
-export type { TranslationKey, Translator } from './utils/translate.util';
+export type { TranslationKey, TranslationValues, Translator } from './utils/translate.util';
 export { translate } from './utils/translate.util';
