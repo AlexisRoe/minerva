@@ -15,4 +15,5 @@ export const configEntries: readonly ConfigEntry[] = [
   { key: 'sentryTracesSampleRate', env: 'APP_FE_RB_SENTRY_TRACES_SAMPLE_RATE', fallback: 0 },
   { key: 'appDomain', env: 'APP_FE_RB_APP_DOMAIN', fallback: null },
   { key: 'allowDemo', env: 'APP_FE_RB_ALLOW_DEMO', fallback: false },
+  { key: 'entraClientId', env: 'APP_FE_RB_ENTRA_CLIENT_ID', fallback: null },
 ];

@@ -288,7 +288,7 @@ the payload, which keeps the message constant and stops the Sentry fingerprint s
 broken: putting `credentials: 'include'` *before* the `...init` spread (so a caller could opt out),
 and dropping the `.slice(0, MAX_CUSTOM_HEADERS)` cap on the Graph headers.
 
-## Step 4 — Authentication
+## Step 4 — Authentication ✅ done
 
 **Files:** `src/auth/naa.util.ts`, `src/auth/dialog.util.ts`, `src/auth/acquire-token.util.ts`,
 `src/auth-dialog/main.ts` (rewrite)
@@ -333,6 +333,67 @@ Docs: [Enable SSO with nested app authentication](https://learn.microsoft.com/en
 Note the NAA API restrictions: `acquireTokenRedirect`, `logout*`, `handleRedirectPromise` and
 `setActiveAccount` all throw or no-op under NAA. Only `acquireTokenSilent`, `acquireTokenPopup`,
 `ssoSilent`, `loginPopup` and the account getters are usable.
+
+### Outcome
+
+Built. `@azure/msal-browser` installed via `pnpm add`, which put `5.17.3` in the workspace catalog by
+itself (`catalogMode: strict`). `acquireToken(clientId, environment, sharedMailbox?)` is the only
+entry point; `naa.util.ts` and `dialog.util.ts` sit behind it. `APP_FE_RB_ENTRA_CLIENT_ID` is wired
+through `config.entries.ts`, `RuntimeConfig`, `isRuntimeConfig`, `configFixture` and `.env.template`.
+`make verify` green: 701 tests across 94 files.
+
+The NAA factory was checked against the installed declarations rather than assumed — v5 does export
+`createNestablePublicClientApplication`, with the signature the plan expected.
+
+**Three new error codes. Next free code is `ERR_016`.**
+
+- `ERR_013` `AuthClientIdMissingError` (`fatal`) — reference `c835513f-9b6d-4cf0-9a3c-fb840b4c81dd`
+- `ERR_014` `TokenAcquisitionFailedError` — reference `f8512657-968b-414b-8fac-142a8c175676`
+- `ERR_015` `AuthDialogFailedError` — reference `c8dc444c-ee53-4bda-87e6-28dd03f0f22b`
+
+Kept apart because different people fix them: a missing client id is a deployment rolled out
+incomplete, a refused token is a tenant's consent or conditional-access policy, a failed dialog is
+usually the user closing a window. `ERR_014` carries the sub-flow (`naa-init` / `naa-silent` /
+`naa-popup`) in its payload rather than splitting into three codes.
+
+### Departures from the plan
+
+1. **The dialog page runs a redirect flow, not a popup.** A popup opened from inside an Office dialog
+   is a second nested window, which several Outlook clients block outright. `main.ts` therefore uses
+   `handleRedirectPromise()` → `acquireTokenRedirect()`. Note this does *not* contradict the NAA
+   restrictions noted above: the dialog is a real top-level window, not a nested app, so the
+   restricted APIs are exactly the ones that work there.
+
+2. **The dialog promise settles on `DialogEventReceived` too.** The plan only described the
+   `messageParent` path. Without the event handler a user who closes the window leaves the pane
+   waiting for ever on a message that will never arrive — `12006` is that case, and it is ordinary
+   rather than exceptional.
+
+3. **A failed dialog reports in-band, as `{ status: 'failure', reason }`.** Nothing can be thrown
+   across a document boundary, and `messageParent` carries one string, so the failure has to travel
+   as data. `DialogMessage` is the shared shape; the pane also tolerates a payload that is not JSON
+   at all, since an error page served in place of the dialog arrives as HTML.
+
+4. **MSAL clients are memoised per client id.** Initialising twice in one document gives two token
+   caches that cannot see each other, which shows up as a user being re-prompted moments after
+   signing in. A construction *failure* is evicted rather than cached, so the next attempt retries.
+   `resetNaaClients()` exists for tests only.
+
+5. **The client id reaches the dialog through the query string.** Office opens that page as a bare
+   URL, so it never boots the app's configuration loader and cannot read `config.json`.
+
+### Verified
+
+`make verify` green. Two assertions mutation-tested, both failed correctly when broken: removing the
+`instanceof InteractionRequiredAuthError` guard (so every silent failure would raise a prompt the
+user cannot act on), and ignoring `environment.naaSupported` (so an old client would never reach the
+dialog fallback).
+
+### Still a deployment prerequisite
+
+Entra registration `E81D4C4B-767E-4F5B-865F-87F816C0C953` needs the SPA redirect
+`brk-multihub://localhost:4101`, and `APP_FE_RB_ENTRA_CLIENT_ID` has to be set in the root `.env`.
+Neither is a code change, and sign-in cannot be exercised in a real client until both are done.
 
 ## Step 5 — Stores
 

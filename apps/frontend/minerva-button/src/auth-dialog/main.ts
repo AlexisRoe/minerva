@@ -1,23 +1,86 @@
+import { PublicClientApplication } from '@azure/msal-browser';
+
+import type { DialogMessage } from '../auth/auth.types';
+import { GRAPH_SCOPES } from '../auth/auth.types';
+import { AUTHORITY } from '../auth/utils/naa.util';
+
 /**
  * Entry point of the `/auth-dialog` page.
  *
- * The dialog is opened by Office through `displayDialogAsync` during the
- * MSAL/NAA sign-in flow: it completes the redirect and hands the result back to
- * the task pane via `messageParent`. That flow is not built yet — this only
- * signals readiness, which keeps the page a valid build entry and lets the
- * round trip be exercised end to end.
+ * Opened by Office through `displayDialogAsync` on clients without Nested App
+ * Authentication. Unlike the task pane this is a real top-level window, which is
+ * the entire point: it can be redirected to Entra and back, and a task pane
+ * iframe cannot.
  *
- * `office.js` is loaded from Microsoft's CDN by auth-dialog.html and brings no
- * types with it (no `@types/office-js` in the workspace), hence the narrow
- * local declaration of the two members used here.
+ * The flow is deliberately a redirect rather than a popup. A popup opened from
+ * inside an Office dialog is a second nested window, which several Outlook
+ * clients block outright.
+ *
+ * Whatever happens, exactly one message goes back through `messageParent` --
+ * the failures included. The pane is waiting on that relay and it is the only
+ * channel there is: nothing can be thrown across a document boundary.
+ *
+ * `@types/office-js` is in the workspace and in `tsconfig.json`'s `types`, so the
+ * `Office` global is typed here with no local declaration of its own.
+ *
+ * @see {@link https://learn.microsoft.com/office/dev/add-ins/develop/auth-with-office-dialog-api}
  */
-interface OfficeGlobal {
-  onReady: (callback: () => void) => void;
-  context: { ui: { messageParent: (message: string) => void } };
+
+/** Posts one message back to the task pane. */
+function reply(message: DialogMessage): void {
+  Office.context.ui.messageParent(JSON.stringify(message));
 }
 
-const office = (globalThis as { Office?: OfficeGlobal }).Office;
+/** Runs the redirect flow and relays whatever it produces. */
+async function signIn(): Promise<void> {
+  // Passed by the pane rather than read from config.json: Office opens this page
+  // as a bare URL, so it never boots the app's configuration loader.
+  const clientId = new URLSearchParams(globalThis.location.search).get('clientId');
 
-office?.onReady(() => {
-  office.context.ui.messageParent(JSON.stringify({ status: 'ready' }));
+  if (clientId === null) {
+    reply({ status: 'failure', reason: 'missing-client-id' });
+
+    return;
+  }
+
+  try {
+    const client = new PublicClientApplication({
+      auth: { clientId, authority: AUTHORITY, redirectUri: globalThis.location.origin },
+      cache: { cacheLocation: 'localStorage' },
+    });
+
+    await client.initialize();
+
+    const request = { scopes: [...GRAPH_SCOPES] };
+
+    // Set on the way back from Entra, and null on the first pass through this
+    // page -- which is what tells us the redirect still has to be started.
+    const redirect = await client.handleRedirectPromise();
+
+    if (redirect !== null) {
+      reply({ status: 'success', accessToken: redirect.accessToken });
+
+      return;
+    }
+
+    const account = client.getAllAccounts()[0];
+
+    if (account !== undefined) {
+      const silent = await client.acquireTokenSilent({ ...request, account });
+
+      reply({ status: 'success', accessToken: silent.accessToken });
+
+      return;
+    }
+
+    // Navigates away; nothing after this runs until the page reloads on the way
+    // back, at which point handleRedirectPromise above answers instead.
+    await client.acquireTokenRedirect(request);
+  } catch (cause) {
+    reply({ status: 'failure', reason: cause instanceof Error ? cause.message : String(cause) });
+  }
+}
+
+Office.onReady(() => {
+  void signIn();
 });

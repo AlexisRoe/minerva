@@ -13,6 +13,11 @@
  */
 
 export {
+  AuthClientIdMissingError,
+  AuthDialogFailedError,
+  TokenAcquisitionFailedError,
+} from './auth.errors';
+export {
   ConfigDomainMismatchError,
   ConfigInvalidError,
   ConfigParseError,

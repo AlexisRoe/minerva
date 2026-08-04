@@ -22,6 +22,7 @@ export const configFixture: AppConfig = {
   sentryTracesSampleRate: 0,
   appDomain: null,
   allowDemo: false,
+  entraClientId: null,
   host: 'localhost',
   retry: 0,
   demo: false,

@@ -40,6 +40,21 @@ export interface RuntimeConfig {
    * for a walkthrough, off everywhere else.
    */
   readonly allowDemo: boolean;
+  /**
+   * The Entra application (client) id the add-in signs in with.
+   *
+   * Runtime configuration rather than a constant because the same artefact is
+   * deployed against different tenants, each with its own registration. It has
+   * to match the `<Id>` in the manifest: NAA brokers the token through the
+   * host, and the host will only broker for the application the manifest
+   * declares.
+   *
+   * `null` switches sign-in off, which is the only state demo mode can run in --
+   * a browser outside Outlook has nothing to acquire a token from.
+   *
+   * @see {@link https://learn.microsoft.com/office/dev/add-ins/develop/enable-nested-app-authentication-in-your-add-in}
+   */
+  readonly entraClientId: string | null;
 }
 
 /**
@@ -122,6 +137,7 @@ export function isRuntimeConfig(value: unknown): value is RuntimeConfig {
     (typeof candidate.sentryDsn === 'string' || candidate.sentryDsn === null) &&
     typeof candidate.sentryTracesSampleRate === 'number' &&
     (typeof candidate.appDomain === 'string' || candidate.appDomain === null) &&
-    typeof candidate.allowDemo === 'boolean'
+    typeof candidate.allowDemo === 'boolean' &&
+    (typeof candidate.entraClientId === 'string' || candidate.entraClientId === null)
   );
 }

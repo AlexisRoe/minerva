@@ -1,5 +1,6 @@
 import type { ErrorCode } from '@minerva/typescript-lib';
 
+import { AuthClientIdMissingError, AuthDialogFailedError, TokenAcquisitionFailedError } from './auth.errors';
 import {
   ConfigDomainMismatchError,
   ConfigInvalidError,
@@ -91,6 +92,18 @@ export const errorRegistry = {
   ERR_012: {
     error: GraphRequestFailedError,
     description: 'Microsoft Graph answered with a non-2xx status, or could not be reached.',
+  },
+  ERR_013: {
+    error: AuthClientIdMissingError,
+    description: 'Sign-in was attempted with no Entra client id configured.',
+  },
+  ERR_014: {
+    error: TokenAcquisitionFailedError,
+    description: 'No Graph access token could be acquired, silently or interactively.',
+  },
+  ERR_015: {
+    error: AuthDialogFailedError,
+    description: 'The Office sign-in dialog closed without returning a token.',
   },
 } as const satisfies Partial<Record<ErrorCode, ErrorRegistryEntry>>;
 

@@ -15,6 +15,7 @@
   "license": "MIT",
   "author": "Alexis Roehrling",
   "dependencies": {
+    "@azure/msal-browser": "catalog:",
     "@minerva/typescript-lib": "workspace:*",
     "@minerva/ui-lib": "workspace:*",
     "@sentry/react": "catalog:",
