@@ -3,13 +3,14 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { demoSettings } from '@/fixtures/demo/minerva.fixture';
 import type { ReportSubmission } from '@/hooks/use-report-submission.hook';
+import { useReportStore } from '@/stores/report/report.store';
 import { useSettingsStore } from '@/stores/settings/settings.store';
 import { useReportSubmission } from './use-report-submission.hook';
 
-const submit = vi.fn();
+const navigate = vi.fn();
 
 vi.mock('react-router', () => ({
-  useSubmit: () => submit,
+  useNavigate: () => navigate,
 }));
 
 /** A feedback block that has collected something valid. */
@@ -29,7 +30,8 @@ function renderWithSettings(): { current: ReportSubmission } {
 describe('useReportSubmission', () => {
   afterEach(() => {
     useSettingsStore.getState().reset();
-    submit.mockClear();
+    useReportStore.getState().reset();
+    navigate.mockClear();
   });
 
   it('starts with the drawer shut and nothing to send', () => {
@@ -66,7 +68,7 @@ describe('useReportSubmission', () => {
     expect(result.current.canSend).toBe(false);
   });
 
-  it('submits one field per ticked reason, so getAll reads them back', () => {
+  it('writes what the drawer collected to the store, then opens the confirmation', () => {
     const result = renderWithSettings();
 
     act(() => {
@@ -78,12 +80,13 @@ describe('useReportSubmission', () => {
       result.current.sendReport();
     });
 
-    const [form, options] = submit.mock.calls[0] ?? [];
-
-    expect(form.get('variant')).toBe('spam');
-    expect(form.get('comment')).toBe('It asked for my password.');
-    expect(form.getAll('reasons')).toEqual(['phishing', 'attachment']);
-    expect(options).toEqual({ method: 'post', action: '/confirmation' });
+    // The reporting loader runs outside React and reads exactly this.
+    expect(useReportStore.getState().draft).toEqual({
+      variant: 'spam',
+      reasons: ['phishing', 'attachment'],
+      comment: 'It asked for my password.',
+    });
+    expect(navigate).toHaveBeenCalledWith('/confirmation');
   });
 
   it('shuts the drawer after sending, so the next report opens blank', () => {
@@ -114,7 +117,8 @@ describe('useReportSubmission', () => {
     });
 
     // Reachable if a caller wires the send button without the disabled state.
-    expect(submit).not.toHaveBeenCalled();
+    expect(useReportStore.getState().draft).toBeNull();
+    expect(navigate).not.toHaveBeenCalled();
     expect(result.current.filing).toBe('spam');
   });
 
@@ -137,6 +141,6 @@ describe('useReportSubmission', () => {
     // A reopened drawer that still held the last report's note would attach it
     // to a different mail.
     expect(result.current.canSend).toBe(false);
-    expect(submit).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
   });
 });

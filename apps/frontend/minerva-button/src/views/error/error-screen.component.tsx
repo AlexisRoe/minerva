@@ -1,8 +1,9 @@
 import { MinervaError } from '@minerva/typescript-lib';
-import { BrandLogo, ErrorView as ErrorPanel, ReportButtonPage } from '@minerva/ui-lib';
+import { BrandLogo, ErrorView as ErrorPanel, NoContentView, ReportButtonPage } from '@minerva/ui-lib';
 import type { ReactElement } from 'react';
 import { LOGO_SIZE } from '@/constants/icon-sizes.constants';
 import { lookupErrorPolicy } from '@/domain/errors/errors.registry';
+import { ErrorScreenKind } from '@/domain/errors/errors.types';
 import { MAX_RETRY, RETRY_PARAM } from '@/platform/config/config.types';
 import { useConfig } from '@/platform/config/hooks/use-config.hook';
 import { useTranslations } from '@/platform/i18n/hooks/use-translations.hook';
@@ -38,10 +39,18 @@ export interface ErrorScreenProps {
  * Retrying reloads rather than re-rendering: the point is to redo the start-up
  * sequence, which happens above React.
  *
- * Both of its callers render it below {@link ConfigProvider} -- the router's
- * {@link ErrorView} and {@link MinervaErrorBoundary}'s fallback, which is
- * mounted inside the providers precisely so that this screen can count on a
- * theme, a translator and a budget. {@link useConfig} therefore throws
+ * Not every failure is a fault. The registry marks three of them
+ * {@link ErrorScreenKind.NoContent} -- the pane is outside Outlook, on a client
+ * too old for the requirement set, or Office.js never arrived -- and those get
+ * the no-content screen instead: nothing has broken, the pane is simply
+ * somewhere it does not work, and a stack reference and a retry button would
+ * both be the wrong response. That branch is what used to be a separate
+ * `/unsupported` route reached by a redirect; keeping it here is what stops the
+ * two screens from ever disagreeing about which failures are environmental.
+ *
+ * It is rendered below {@link ConfigProvider} -- as {@link MinervaErrorBoundary}'s
+ * fallback, mounted inside the providers precisely so that this screen can count
+ * on a theme, a translator and a budget. {@link useConfig} therefore throws
  * off-provider as it does everywhere else: a failure screen with no
  * configuration behind it is a wiring mistake, not a state to render. What
  * happens above the providers is {@link RootErrorBoundary}'s problem, and it
@@ -68,6 +77,20 @@ export function ErrorScreen({ error, errorId }: ErrorScreenProps): ReactElement 
     url.searchParams.set(RETRY_PARAM, String(config.retry + 1));
 
     globalThis.location.assign(url.toString());
+  }
+
+  if (policy?.screen === ErrorScreenKind.NoContent) {
+    return (
+      <ReportButtonPage>
+        <ReportButtonPage.Header>
+          <BrandLogo size={LOGO_SIZE} />
+        </ReportButtonPage.Header>
+
+        <ReportButtonPage.Content>
+          <NoContentView description={t(policy.message)} title={t('unsupported-title')} />
+        </ReportButtonPage.Content>
+      </ReportButtonPage>
+    );
   }
 
   return (

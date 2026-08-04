@@ -2,9 +2,10 @@ import type { EmailType } from '@minerva/typescript-lib';
 import { MinervaThemeProvider } from '@minerva/ui-lib';
 import { type RenderResult, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryRouter, Form, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { AsyncLoading } from '@/components/async-loading/async-loading.component';
 import type { ReportResult } from '@/domain/reporting/reporting.types';
+import { adaptersFixture } from '@/fixtures/adapters.fixture';
 import { configFixture } from '@/fixtures/config.fixture';
 import { demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
@@ -20,13 +21,18 @@ const { moveMessage, closePane, captureError } = vi.hoisted(() => ({
   captureError: vi.fn(),
 }));
 
-vi.mock('@/routing/loaders/report.loader', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/routing/loaders/report.loader')>()),
-  createPaneAdapters: () => ({ graph: { moveMessage }, minerva: {} }),
-}));
-
-vi.mock('@/adapters/office/utils/close-pane.util', () => ({ closePane }));
 vi.mock('@/platform/sentry/utils/capture-error.util', () => ({ captureError }));
+
+/** Demo adapters with the two calls this screen makes replaced by spies. */
+function adapters(): ReturnType<typeof adaptersFixture> {
+  const base = adaptersFixture();
+
+  return {
+    ...base,
+    graph: { ...base.graph, moveMessage },
+    office: { ...base.office, closePane },
+  };
+}
 
 /** A completed report, with both methods delivered unless a case says otherwise. */
 function result(overrides: Partial<ReportResult> = {}): ReportResult {
@@ -46,40 +52,31 @@ function result(overrides: Partial<ReportResult> = {}): ReportResult {
 }
 
 /**
- * Mounts the view with an action that answers with `data`.
+ * Mounts the view behind a loader that resolves with `data`.
  *
- * The screen reads `useActionData()`, so it has to be reached by submitting to
- * its own route -- which is exactly how the report drawer reaches it.
+ * The screen reads `useAsyncData()`, so it has to sit inside an
+ * {@link AsyncLoading} -- which is exactly how `App` mounts it, with the
+ * reporting loader in place of this stub.
  */
 function renderView(data: ReportResult | undefined): RenderResult {
-  const router = createMemoryRouter([
-    {
-      path: '/confirmation',
-      Component: ConfirmationView,
-      action: () => data ?? null,
-    },
-    {
-      path: '/',
-      element: (
-        <Form action="/confirmation" method="post">
-          <button type="submit">file</button>
-        </Form>
-      ),
-    },
-  ]);
+  const loader = (): Promise<ReportResult | undefined> => Promise.resolve(data);
 
   return render(
-    <ConfigProvider config={configFixture}>
+    <ConfigProvider adapters={adapters()} config={configFixture}>
       <MinervaThemeProvider>
-        <RouterProvider router={router} />
+        <AsyncLoading loader={loader} type="report">
+          <ConfirmationView />
+        </AsyncLoading>
       </MinervaThemeProvider>
     </ConfigProvider>,
   );
 }
 
-/** Submits the form, which runs the action and lands on the confirmation. */
+/** Waits for the reporting reel to give way to the screen itself. */
 async function file(): Promise<void> {
-  await userEvent.click(await screen.findByRole('button', { name: 'file' }));
+  await waitFor(() => {
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
 }
 
 describe('ConfirmationView', () => {

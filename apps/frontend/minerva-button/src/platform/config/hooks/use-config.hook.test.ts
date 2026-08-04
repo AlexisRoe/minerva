@@ -3,12 +3,13 @@ import { createElement, type ReactElement, type ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 
 import { ConfigProviderMissingError } from '@/domain/errors/config.errors';
+import { adaptersFixture } from '@/fixtures/adapters.fixture';
 import { configFixture } from '@/fixtures/config.fixture';
 import { ConfigProvider } from '@/platform/config/provider/config.provider';
 import { useConfig } from './use-config.hook';
 
 function wrapper({ children }: { children: ReactNode }): ReactElement {
-  return createElement(ConfigProvider, { config: configFixture, children });
+  return createElement(ConfigProvider, { config: configFixture, adapters: adaptersFixture(), children });
 }
 
 describe('useConfig', () => {

@@ -1,8 +1,9 @@
 import type { ReportButtonVariant, UserFeedbackValue } from '@minerva/ui-lib';
 import { useState } from 'react';
-import { useSubmit } from 'react-router';
+import { useNavigate } from 'react-router';
 
 import { ROUTES } from '@/constants/routes.constants';
+import { useReportStore } from '@/stores/report/report.store';
 import { useSettings } from '@/stores/settings/hooks/use-settings.hook';
 
 /** One tickable reason, as the feedback block wants it. */
@@ -45,20 +46,21 @@ export interface ReportSubmission {
  * makes a report sendable, what a cancel forgets, how reasons reach the wire --
  * something you had to read the render tree to find.
  *
- * Sending does not call an adapter. It submits a form to
- * {@link ROUTES.confirmation}, whose router *action* runs the actual flow:
- * download the MIME, upload the report, mail the tenant's reporting methods.
- * That indirection is deliberate and is why no adapter appears here -- React
- * Router holds the transition non-idle for as long as an action runs, which is
- * what puts the reporting reel on screen without this hook or the view owning a
- * scrap of loading state.
+ * Sending does not call an adapter. It writes the draft to
+ * {@link useReportStore} and navigates to {@link ROUTES.confirmation}, whose
+ * loader runs the actual flow: download the MIME, upload the report, mail the
+ * tenant's reporting methods. That indirection is deliberate and is why no
+ * adapter appears here -- the confirmation screen sits behind an `AsyncLoading`,
+ * which shows the reporting reel for as long as the flow runs, so neither this
+ * hook nor the view owns a scrap of loading state.
  *
- * Reasons go one form field per pick rather than JSON in a single field, which
- * is how form data carries a list and what `getAll` reads back in the action.
+ * A store rather than router state because the flow runs outside React and reads
+ * it with `getState()` -- and because a draft in the history entry would be
+ * re-submitted by a back navigation.
  *
  * @returns The drawer's state and the three things that can be done to it.
  *
- * @see {@link https://reactrouter.com/api/hooks/useSubmit}
+ * @see {@link https://reactrouter.com/api/hooks/useNavigate}
  *
  * @example
  * ```tsx
@@ -69,7 +71,7 @@ export interface ReportSubmission {
  * ```
  */
 export function useReportSubmission(): ReportSubmission {
-  const submit = useSubmit();
+  const navigate = useNavigate();
   const { reasonsFor } = useSettings();
 
   const [filing, setFiling] = useState<ReportButtonVariant | null>(null);
@@ -86,15 +88,13 @@ export function useReportSubmission(): ReportSubmission {
       return;
     }
 
-    const form = new FormData();
-    form.set('variant', filing);
-    form.set('comment', feedback.comment);
+    useReportStore.getState().setDraft({
+      variant: filing,
+      reasons: [...feedback.reasons],
+      comment: feedback.comment,
+    });
 
-    for (const reason of feedback.reasons) {
-      form.append('reasons', reason);
-    }
-
-    void submit(form, { method: 'post', action: ROUTES.confirmation });
+    void navigate(ROUTES.confirmation);
     cancelReport();
   }
 

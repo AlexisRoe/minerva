@@ -16,22 +16,20 @@ export const ROUTES = {
   /** Shown after a message was accepted by Minerva. */
   confirmation: '/confirmation',
   /**
-   * Shown when the pane cannot run here at all.
+   * Everything else.
    *
-   * Distinct from {@link ROUTES.error} on purpose: nothing has gone wrong, the
-   * pane is simply somewhere it does not work -- outside Outlook, on a client
-   * that is too old, or with Office.js unreachable. There is nothing to retry,
-   * so the screen explains rather than offering a way out.
+   * Nothing navigates here: the pane has two screens and a memory history that
+   * starts on the first. It exists so a wiring mistake renders the error screen
+   * rather than nothing at all.
+   *
+   * There is no `/unsupported` and no `/error` any more. A pane that cannot run
+   * where it was opened now throws from the start-up loader, and the error
+   * screen reads the error registry to decide whether that is a failure or
+   * simply the wrong place -- so the wording lives in one screen instead of two
+   * that could disagree.
    */
-  unsupported: '/unsupported',
-  /** Shown when a screen cannot be rendered, and for unknown paths. */
-  error: '/error',
-  /** Everything else */
   all: '*',
 } as const;
-
-/** The query parameter carrying *why* {@link ROUTES.unsupported} was reached. */
-export const REASON_PARAM = 'reason';
 
 /** One of the pane's paths. */
 export type Route = (typeof ROUTES)[keyof typeof ROUTES];

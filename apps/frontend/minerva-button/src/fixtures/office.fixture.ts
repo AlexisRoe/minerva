@@ -14,6 +14,14 @@ export interface OfficeStubOptions {
   readonly requirementSets?: Readonly<Record<string, boolean>>;
   /** Whether the dialog surface exists. */
   readonly hasUi?: boolean;
+  /**
+   * What `Office.onReady()` resolves with.
+   *
+   * Present so a test can drive the start-up gate, which waits for this before
+   * anything else is read. The strings are what Office.js really sends, asserted
+   * into the enums `@types/office-js` declares as numeric.
+   */
+  readonly readyInfo?: { host: unknown; platform: unknown };
 }
 
 /** The parts of the fake a test may want to assert on. */
@@ -58,6 +66,7 @@ export function stubOffice(options: OfficeStubOptions = {}): OfficeStub {
     hasMailbox = true,
     requirementSets = { 'Mailbox/1.13': true, 'NestedAppAuth/1.1': true },
     hasUi = true,
+    readyInfo = { host: 'Outlook', platform: 'OfficeOnline' },
   } = options;
 
   const closeContainer = vi.fn();
@@ -71,6 +80,7 @@ export function stubOffice(options: OfficeStubOptions = {}): OfficeStub {
 
   vi.stubGlobal('Office', {
     MailboxEnums: { RestVersion: { v2_0: 'v2.0' } },
+    onReady: () => Promise.resolve(readyInfo),
     context: {
       displayLanguage,
       mailbox: hasMailbox ? mailbox : undefined,

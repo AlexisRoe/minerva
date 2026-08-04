@@ -1,11 +1,9 @@
 import { useState } from 'react';
 
 import type { WellKnownFolder } from '@/adapters/graph/graph.types';
-import { closePane } from '@/adapters/office/utils/close-pane.util';
-import { useConfig } from '@/platform/config/hooks/use-config.hook';
+import { useAdapters } from '@/platform/config/hooks/use-adapters.hook';
 import type { TranslationKey } from '@/platform/i18n/utils/translate.util';
 import { captureError } from '@/platform/sentry/utils/capture-error.util';
-import { createPaneAdapters } from '@/routing/loaders/report.loader';
 import { useOffice } from '@/stores/office/hooks/use-office.hook';
 import type { ReportVariant } from '@/stores/settings/settings.types';
 
@@ -69,7 +67,7 @@ export interface MessageDisposition {
  * ```
  */
 export function useMessageDisposition(reportedAs: ReportVariant): MessageDisposition {
-  const config = useConfig();
+  const { office, graph } = useAdapters();
   const { environment, message } = useOffice();
 
   const [isMoving, setIsMoving] = useState(false);
@@ -88,10 +86,8 @@ export function useMessageDisposition(reportedAs: ReportVariant): MessageDisposi
     setMoveFailed(false);
 
     try {
-      const { graph } = createPaneAdapters(config, environment);
-
       await graph.moveMessage(message.exchangeId, folder);
-      closePane();
+      office.closePane();
     } catch (error) {
       captureError(error);
       setMoveFailed(true);
@@ -106,6 +102,6 @@ export function useMessageDisposition(reportedAs: ReportVariant): MessageDisposi
     // Wrapped rather than handed over directly, so the caller can pass this to
     // `onClick` without a floating promise.
     dispose: () => void move(),
-    dismiss: closePane,
+    dismiss: () => office.closePane(),
   };
 }

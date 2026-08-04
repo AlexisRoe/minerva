@@ -2,7 +2,7 @@ import type { EmailType } from '@minerva/typescript-lib';
 import { BrandLogo, ConfirmationView as ConfirmationPanel, ReportButtonPage } from '@minerva/ui-lib';
 import { Anchor, Button, Stack, Text, Title } from '@minerva/ui-lib/primitives';
 import type { ReactElement } from 'react';
-import { useActionData } from 'react-router';
+import { useAsyncData } from '@/components/async-loading/async-loading.component';
 import { FeatureGuard } from '@/components/feature-guard/feature-guard.component';
 import { LOGO_SIZE } from '@/constants/icon-sizes.constants';
 import type { ReportResult } from '@/domain/reporting/reporting.types';
@@ -21,9 +21,10 @@ const IDENTIFIED_KEYS = {
 /**
  * The pane once a report has gone.
  *
- * It reads the reporting action's return value rather than a loader's, which is
- * the whole reason the action is mounted on this route: the per-method outcomes
- * exist nowhere else, and a redirect could not have carried them.
+ * It reads what the reporting loader wrapped around it resolved with, which is
+ * the whole reason that loader is mounted on this route rather than the one
+ * before it: the per-method outcomes exist nowhere else, and a navigation could
+ * not have carried them.
  *
  * What it says is keyed on two things the user cannot see for themselves --
  * which report they filed, and what the backend recognised the mail as. A
@@ -35,26 +36,18 @@ const IDENTIFIED_KEYS = {
  * file it away first. What either means to the mailbox belongs to
  * {@link useMessageDisposition}; this file only draws the buttons.
  *
- * @see {@link https://reactrouter.com/api/hooks/useActionData}
- *
  * @example
  * ```tsx
- * { path: ROUTES.confirmation, Component: ConfirmationView, action: createReportAction(config) }
+ * <AsyncLoading loader={reportLoader} type="report"><ConfirmationView /></AsyncLoading>
  * ```
  */
 export function ConfirmationView(): ReactElement {
   const { t } = useTranslations();
-  // `undefined` when the route was reached without an action having run, `null`
-  // when one ran and returned nothing. Neither is a report, so they collapse.
-  const result = (useActionData() as ReportResult | null | undefined) ?? undefined;
+  const result = useAsyncData<ReportResult | undefined>();
   const { hasContact, contact } = useSettings();
 
-  // Called before the neutral screen returns, because hooks cannot be
-  // conditional. The fallback is never read: nothing offers to move a mail on a
-  // screen that has no report to show.
-  const { labelKey, isMoving, moveFailed, dispose, dismiss } = useMessageDisposition(
-    result?.reportedAs ?? 'suspicious',
-  );
+  const isReportedAs = result?.reportedAs ?? 'suspicious';
+  const { labelKey, isMoving, moveFailed, dispose, dismiss } = useMessageDisposition(isReportedAs);
 
   // Reached directly rather than through a report -- a reload, or the pane being
   // reopened. There is nothing to confirm, so it says the neutral thing.
@@ -64,13 +57,9 @@ export function ConfirmationView(): ReactElement {
         <ReportButtonPage.Header>
           <BrandLogo size={LOGO_SIZE} />
         </ReportButtonPage.Header>
-
         <ReportButtonPage.Content>
           <ConfirmationPanel description={t('confirmation-body')} title={t('confirmation-title')} />
         </ReportButtonPage.Content>
-
-        {/* Only the way out: there is no report here, so there is nothing this
-            screen could claim to know about where the mail should go. */}
         <ReportButtonPage.Footer>
           <Button onClick={dismiss} variant="outline">
             {t('close')}
@@ -148,13 +137,11 @@ export function ConfirmationView(): ReactElement {
       </ReportButtonPage.Content>
 
       <ReportButtonPage.Footer>
-        {/* Leaving is the safe move, so it is the one that is not emphasised --
-            the mail stays where it is and the report is already filed. */}
-        <Button disabled={isMoving} onClick={dismiss} variant="outline">
-          {t('close')}
-        </Button>
         <Button loading={isMoving} onClick={dispose}>
           {t(labelKey)}
+        </Button>
+        <Button disabled={isMoving} onClick={dismiss} variant="outline">
+          {t('close')}
         </Button>
       </ReportButtonPage.Footer>
     </ReportButtonPage>

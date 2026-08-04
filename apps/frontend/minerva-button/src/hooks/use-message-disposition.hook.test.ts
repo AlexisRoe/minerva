@@ -11,14 +11,14 @@ const { moveMessage, closePane, captureError } = vi.hoisted(() => ({
   captureError: vi.fn(),
 }));
 
-vi.mock('@/routing/loaders/report.loader', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/routing/loaders/report.loader')>()),
-  createPaneAdapters: () => ({ graph: { moveMessage }, minerva: {} }),
+// The hook reaches Graph and the host through the adapter set on the config
+// context; handing it fakes here is the whole seam, so nothing else has to be
+// mocked to keep this test off the network.
+vi.mock('@/platform/config/hooks/use-adapters.hook', () => ({
+  useAdapters: () => ({ graph: { moveMessage }, office: { closePane }, minerva: {} }),
 }));
 
-vi.mock('@/adapters/office/utils/close-pane.util', () => ({ closePane }));
 vi.mock('@/platform/sentry/utils/capture-error.util', () => ({ captureError }));
-vi.mock('@/platform/config/hooks/use-config.hook', () => ({ useConfig: () => ({ demo: true }) }));
 
 describe('useMessageDisposition', () => {
   beforeEach(() => {

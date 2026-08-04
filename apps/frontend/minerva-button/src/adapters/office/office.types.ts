@@ -137,3 +137,81 @@ export interface OutlookUser {
    */
   readonly language: Languages;
 }
+
+/**
+ * Everything the host can tell the pane about itself, read in one go.
+ *
+ * One object rather than three calls because the three readings are only valid
+ * together: the message and the user can only be read once Office.js is ready
+ * and the environment has been checked, so returning them separately would
+ * invite an order that cannot work.
+ */
+export interface OfficeHost {
+  /** Which client the pane is running in, and what it supports. */
+  readonly environment: OfficeEnvironment;
+  /** The open message, or `null` when the pane was opened without one. */
+  readonly message: OutlookMessage | null;
+  /** Whose mailbox this is. */
+  readonly user: OutlookUser;
+}
+
+/**
+ * Everything the pane needs from the Office host, behind one seam.
+ *
+ * The counterpart to `MinervaAdapter` and `GraphAdapter`, and the reason demo
+ * mode costs nothing above it: a screen holding one of these cannot tell whether
+ * Office.js is on the page at all. Sign-in belongs here rather than beside it
+ * because a Graph token is brokered *by the host* -- NAA asks Outlook for it,
+ * and the dialog fallback opens an Office dialog -- so a pane with no host has
+ * no token either.
+ *
+ * @see {@link https://learn.microsoft.com/office/dev/add-ins/reference/javascript-api-for-office}
+ *
+ * @example
+ * ```ts
+ * const { environment, message, user } = await office.readHost();
+ * ```
+ */
+export interface OfficeAdapter {
+  /**
+   * Waits for Office.js, checks the requirement set, reads the message and the user.
+   *
+   * The pane's first call, and the one that decides whether it can run here at
+   * all: it throws {@link OfficeLoadTimeoutError},
+   * {@link OfficeHostUnsupportedError} or {@link OfficeRequirementSetError} when
+   * it cannot.
+   *
+   * @returns What the host reported.
+   *
+   * @example
+   * ```ts
+   * const host = await office.readHost();
+   * ```
+   */
+  readHost(): Promise<OfficeHost>;
+
+  /**
+   * A Microsoft Graph access token for the signed-in user.
+   *
+   * Requires {@link OfficeAdapter.readHost} to have run: which sign-in flow is
+   * available depends on what that reported about the client.
+   *
+   * @returns The bearer token, or an empty string in demo mode.
+   *
+   * @example
+   * ```ts
+   * const graph = createGraphHttpAdapter(() => office.acquireToken());
+   * ```
+   */
+  acquireToken(): Promise<string>;
+
+  /**
+   * Closes the task pane.
+   *
+   * @example
+   * ```ts
+   * office.closePane();
+   * ```
+   */
+  closePane(): void;
+}

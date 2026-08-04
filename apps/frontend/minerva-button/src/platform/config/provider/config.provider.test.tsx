@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 
+import { adaptersFixture } from '@/fixtures/adapters.fixture';
 import { configFixture } from '@/fixtures/config.fixture';
 import { useConfig } from '@/platform/config/hooks/use-config.hook';
 import { ConfigProvider } from './config.provider';
@@ -14,7 +15,7 @@ function Version(): ReactElement {
 describe('ConfigProvider', () => {
   it('serves the configuration to the tree below it', () => {
     render(
-      <ConfigProvider config={configFixture}>
+      <ConfigProvider adapters={adaptersFixture()} config={configFixture}>
         <Version />
       </ConfigProvider>,
     );
@@ -24,7 +25,7 @@ describe('ConfigProvider', () => {
 
   it('serves whatever configuration it is given', () => {
     render(
-      <ConfigProvider config={{ ...configFixture, version: '9.9.9' }}>
+      <ConfigProvider adapters={adaptersFixture()} config={{ ...configFixture, version: '9.9.9' }}>
         <Version />
       </ConfigProvider>,
     );

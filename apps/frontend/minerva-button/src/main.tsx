@@ -1,6 +1,7 @@
 import { MinervaThemeProvider } from '@minerva/ui-lib';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { createAdapters } from '@/adapters/create-adapters.util';
 import { MissingRootElementError } from '@/domain/errors/config.errors';
 import { hideBootSplash } from '@/platform/boot/hide-boot-splash.util';
 import { showBootError } from '@/platform/boot/show-boot-error.util';
@@ -35,17 +36,23 @@ import '../../../../shared/assets/fonts.css';
  * having no provider to draw against, it renders nothing and reveals the
  * document's own failure markup instead.
  *
- * Nothing between them is unguarded: React Router's `errorElement` covers the
- * whole route subtree, including loader and action rejections, which never reach
- * a React boundary at all.
+ * Nothing between them is unguarded, and there is no third boundary: the pane's
+ * two long-running sequences run inside `AsyncLoading`, which rethrows a
+ * rejection during render precisely so that {@link MinervaErrorBoundary} is the
+ * one thing that has to catch it.
+ *
+ * The adapters are built here, next to the configuration they are chosen from,
+ * and handed to the whole tree through {@link ConfigProvider}. One decision
+ * about demo mode, one Office adapter holding the environment sign-in needs, and
+ * one Graph token cache shared by the boot sequence and the screen that moves
+ * the mail at the very end.
  *
  * @see {@link https://react.dev/reference/react-dom/client/createRoot}
  */
 async function bootstrap(): Promise<void> {
   const config = await loadConfig();
-
   initSentry(config);
-
+  const adapters = createAdapters(config);
   const container = document.getElementById('root');
 
   if (!container) {
@@ -57,7 +64,7 @@ async function bootstrap(): Promise<void> {
       <RootErrorBoundary>
         <I18nProvider>
           <MinervaThemeProvider>
-            <ConfigProvider config={config}>
+            <ConfigProvider adapters={adapters} config={config}>
               <MinervaErrorBoundary fallback={(error, errorId) => <ErrorScreen error={error} errorId={errorId} />}>
                 <App />
               </MinervaErrorBoundary>

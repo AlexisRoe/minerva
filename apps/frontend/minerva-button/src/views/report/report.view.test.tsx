@@ -2,23 +2,22 @@ import type { MinervaButtonSettings } from '@minerva/typescript-lib';
 import { MinervaThemeProvider } from '@minerva/ui-lib';
 import { type RenderResult, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryRouter, RouterProvider } from 'react-router';
+import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ROUTES } from '@/constants/routes.constants';
 import { demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
 import { useOfficeStore } from '@/stores/office/office.store';
+import { useReportStore } from '@/stores/report/report.store';
 import { useSettingsStore } from '@/stores/settings/settings.store';
 import { ReportView } from './report.view';
 
-/** Records what the drawer submitted, so a test can assert on the report. */
-const submitted: FormData[] = [];
-
 /**
- * Mounts the view with the confirmation route as its action target.
+ * Mounts the view with a stand-in for the confirmation screen.
  *
- * The action stands in for the reporting flow: what matters here is *what* the
- * drawer submits, not what is done with it.
+ * The report the drawer collects lands in {@link useReportStore}, so what is
+ * asserted here is *what* the drawer records and that it leaves for the next
+ * screen -- filing it is the reporting loader's job and has its own tests.
  */
 function renderView(settings: MinervaButtonSettings | null = demoSettings, message = demoMessage): RenderResult {
   useOfficeStore.getState().setOffice({
@@ -31,22 +30,14 @@ function renderView(settings: MinervaButtonSettings | null = demoSettings, messa
     useSettingsStore.getState().setSettings(settings);
   }
 
-  const router = createMemoryRouter([
-    { path: ROUTES.taskPane, Component: ReportView },
-    {
-      path: ROUTES.confirmation,
-      element: <p>confirmation</p>,
-      action: async ({ request }: { request: Request }) => {
-        submitted.push(await request.formData());
-
-        return null;
-      },
-    },
-  ]);
-
   return render(
     <MinervaThemeProvider>
-      <RouterProvider router={router} />
+      <MemoryRouter initialEntries={[ROUTES.taskPane]}>
+        <Routes>
+          <Route element={<ReportView />} path={ROUTES.taskPane} />
+          <Route element={<p>confirmation</p>} path={ROUTES.confirmation} />
+        </Routes>
+      </MemoryRouter>
     </MinervaThemeProvider>,
   );
 }
@@ -62,7 +53,7 @@ async function openSuspiciousDrawer(): Promise<void> {
 
 describe('ReportView', () => {
   afterEach(() => {
-    submitted.length = 0;
+    useReportStore.getState().reset();
     useOfficeStore.getState().reset();
     useSettingsStore.getState().reset();
   });
@@ -105,7 +96,7 @@ describe('ReportView', () => {
 
     // The button opens the drawer that asks what is wrong. Filing here would make
     // a mandatory reason unenforceable.
-    expect(submitted).toEqual([]);
+    expect(useReportStore.getState().draft).toBeNull();
     expect(await screen.findByText(/report as suspicious/i)).toBeInTheDocument();
   });
 
@@ -126,23 +117,22 @@ describe('ReportView', () => {
     });
   });
 
-  it('submits the variant, the reasons and the note', async () => {
+  it('records the variant, the reasons and the note', async () => {
     renderView();
     await openSuspiciousDrawer();
 
     await userEvent.type(await screen.findByRole('textbox'), 'It asked me for my password.');
     await userEvent.click(await screen.findByRole('button', { name: /send the report/i }));
 
-    await waitFor(() => {
-      expect(submitted).toHaveLength(1);
-    });
-
-    const form = submitted[0] as FormData;
     const [firstReason] = demoSettings.userFeedback.reportingReasons;
 
-    expect(form.get('variant')).toBe('suspicious');
-    expect(form.getAll('reasons')).toEqual([firstReason?.value]);
-    expect(form.get('comment')).toBe('It asked me for my password.');
+    await waitFor(() => {
+      expect(useReportStore.getState().draft).toEqual({
+        variant: 'suspicious',
+        reasons: [firstReason?.value],
+        comment: 'It asked me for my password.',
+      });
+    });
   });
 
   it('shows the details drawer only where the tenant enabled it', async () => {
@@ -183,7 +173,7 @@ describe('ReportView', () => {
 
     // Carrying the previous pick over would file a report the user never made.
     expect(await screen.findByRole('button', { name: /send the report/i })).toBeDisabled();
-    expect(submitted).toEqual([]);
+    expect(useReportStore.getState().draft).toBeNull();
   });
 
   it('leaves the report screen once a report is filed', async () => {
@@ -191,10 +181,7 @@ describe('ReportView', () => {
     await openSuspiciousDrawer();
     await userEvent.click(await screen.findByRole('button', { name: /send the report/i }));
 
-    await waitFor(() => {
-      expect(submitted).toHaveLength(1);
-    });
-
     expect(await screen.findByText('confirmation')).toBeInTheDocument();
+    expect(useReportStore.getState().draft).not.toBeNull();
   });
 });

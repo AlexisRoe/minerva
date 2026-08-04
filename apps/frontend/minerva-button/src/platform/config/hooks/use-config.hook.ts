@@ -23,11 +23,11 @@ import { ConfigContext } from '@/platform/config/provider/config.provider';
  * ```
  */
 export function useConfig(): AppConfig {
-  const config = useContext(ConfigContext);
+  const value = useContext(ConfigContext);
 
-  if (config === null) {
+  if (value === null) {
     throw new ConfigProviderMissingError();
   }
 
-  return config;
+  return value.config;
 }

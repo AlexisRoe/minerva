@@ -4,7 +4,9 @@ import { type RenderResult, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AuthClientIdMissingError, TokenAcquisitionFailedError } from '@/domain/errors/auth.errors';
+import { OfficeHostUnsupportedError, OfficeLoadTimeoutError } from '@/domain/errors/office.errors';
 import { MinervaRequestFailedError } from '@/domain/errors/request.errors';
+import { adaptersFixture } from '@/fixtures/adapters.fixture';
 import { configFixture } from '@/fixtures/config.fixture';
 import { MAX_RETRY } from '@/platform/config/config.types';
 import { ConfigProvider } from '@/platform/config/provider/config.provider';
@@ -26,7 +28,7 @@ class UnregisteredError extends MinervaError {
 /** Mounts the screen under a configuration with the given retry count. */
 function renderScreen(error: unknown, retry = 0, errorId?: string): RenderResult {
   return render(
-    <ConfigProvider config={{ ...configFixture, retry }}>
+    <ConfigProvider adapters={adaptersFixture()} config={{ ...configFixture, retry }}>
       <MinervaThemeProvider>
         <ErrorScreen error={error} errorId={errorId} />
       </MinervaThemeProvider>
@@ -37,6 +39,25 @@ function renderScreen(error: unknown, retry = 0, errorId?: string): RenderResult
 describe('ErrorScreen', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it('says the pane cannot run here, with no retry, for an environment failure', async () => {
+    renderScreen(new OfficeHostUnsupportedError('Word', 'PC'));
+
+    // Nothing has broken -- the pane is simply somewhere it does not work -- so
+    // this is the no-content screen rather than the error one, and there is
+    // nothing to retry.
+    expect(await screen.findByText(/only runs in outlook/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /try again/i })).not.toBeInTheDocument();
+  });
+
+  it('shows no error code on the no-content screen', async () => {
+    const error = new OfficeLoadTimeoutError(5_000);
+    renderScreen(error);
+
+    // A stack reference invites someone to report a fault that is not one.
+    await screen.findByText(/could not reach outlook/i);
+    expect(screen.queryByText(new RegExp(error.code))).not.toBeInTheDocument();
   });
 
   it('is drawn in the pane frame, mark and all', async () => {
