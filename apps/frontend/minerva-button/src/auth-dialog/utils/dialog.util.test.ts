@@ -15,8 +15,8 @@ type Handler = (event: unknown) => void;
 function stubOffice(options: { opens?: boolean; openError?: { message: string } | null } = {}): {
   close: ReturnType<typeof vi.fn>;
   displayed: string[];
-  message: (payload: string) => void | undefined;
-  event: (error: number) => void | undefined;
+  message: (payload: string) => void;
+  event: (error: number) => void;
 } {
   // `null` means Office reported a failure but attached no error object, which is
   // distinct from the option simply not being set.

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
+import { CONFIG_PATH, MAX_RETRY } from '@/constants/config.constants';
 import {
   ConfigDomainMismatchError,
   ConfigInvalidError,
@@ -7,7 +7,6 @@ import {
   ConfigRequestFailedError,
 } from '@/domain/errors/config.errors';
 import { configFixture } from '@/fixtures/config.fixture';
-import { CONFIG_PATH, MAX_RETRY } from '@/platform/config/config.types';
 import { loadConfig } from './load-config.util';
 
 /**

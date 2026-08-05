@@ -39,11 +39,13 @@ import { OfficeNotReadyError } from '@/domain/errors/office.errors';
  */
 export function readCurrentMessage(): OutlookMessage | null {
   const mailbox = typeof Office === 'undefined' ? undefined : Office.context?.mailbox;
+
   if (mailbox === undefined) {
     throw new OfficeNotReadyError('readCurrentMessage');
   }
 
   const item = mailbox.item as Office.MessageRead | undefined;
+
   if (!item?.itemId) {
     return null;
   }

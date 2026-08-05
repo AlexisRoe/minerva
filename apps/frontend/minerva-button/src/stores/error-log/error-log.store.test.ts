@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-
+import { ERROR_LOG_LIMIT, ERROR_LOG_STORAGE_KEY } from '@/constants/errors.constants';
 import { ConfigRequestFailedError } from '@/domain/errors/config.errors';
-import { ERROR_LOG_LIMIT, ERROR_LOG_STORAGE_KEY, useErrorLogStore } from './error-log.store';
+import { useErrorLogStore } from './error-log.store';
 
 function logMany(count: number): void {
   for (let index = 0; index < count; index += 1) {

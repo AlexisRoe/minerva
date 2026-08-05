@@ -1,9 +1,8 @@
 import { Languages } from '@minerva/typescript-lib';
 import { afterEach, describe, expect, it, type Mock, vi } from 'vitest';
-
+import { MINERVA_ENDPOINTS } from '@/constants/request.constants';
 import { demoAuthorization, demoReportingResponse, demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { createMinervaHttpAdapter } from './minerva.http';
-import { MINERVA_ENDPOINTS } from './minerva.types';
 
 /** Stubs `fetch` with one JSON answer and hands back the spy. */
 function stubJson(

@@ -1,4 +1,4 @@
-import { DEMO_LATENCY_MS } from '@/adapters/minerva/minerva.demo';
+import { DEMO_LATENCY_MS } from '@/constants/request.constants';
 import { createDemoMime } from '@/fixtures/demo/mime.fixture';
 import type { GraphAdapter, NotificationMail, WellKnownFolder } from './graph.types';
 

@@ -43,15 +43,11 @@ export function createOfficeLiveAdapter(config: AppConfig): OfficeAdapter {
 
       environment = readEnvironment(info);
 
-      // Both readers are synchronous and both throw if the gate has not run,
-      // which is why they come after `readEnvironment` rather than beside it.
       return { environment, message: readCurrentMessage(), user: readCurrentUser() };
     },
 
     async acquireToken(): Promise<string> {
       if (environment === null) {
-        // A wiring fault rather than a state a user can reach: the boot sequence
-        // reads the host before anything asks for a token.
         throw new OfficeNotReadyError('acquireToken');
       }
 

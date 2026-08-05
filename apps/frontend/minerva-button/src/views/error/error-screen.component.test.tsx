@@ -3,12 +3,12 @@ import { MinervaThemeProvider } from '@minerva/ui-lib';
 import { type RenderResult, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { MAX_RETRY } from '@/constants/config.constants';
 import { AuthClientIdMissingError, TokenAcquisitionFailedError } from '@/domain/errors/auth.errors';
 import { OfficeHostUnsupportedError, OfficeLoadTimeoutError } from '@/domain/errors/office.errors';
 import { MinervaRequestFailedError } from '@/domain/errors/request.errors';
 import { adaptersFixture } from '@/fixtures/adapters.fixture';
 import { configFixture } from '@/fixtures/config.fixture';
-import { MAX_RETRY } from '@/platform/config/config.types';
 import { ConfigProvider } from '@/platform/config/provider/config.provider';
 import { ErrorScreen } from './error-screen.component';
 

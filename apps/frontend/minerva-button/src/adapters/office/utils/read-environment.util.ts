@@ -1,29 +1,6 @@
 import type { OfficeEnvironment, OfficeReadyInfo } from '@/adapters/office/office.types';
+import { MAILBOX_REQUIREMENT_SET, NAA_REQUIREMENT_SET } from '@/constants/office-js.constants';
 import { OfficeHostUnsupportedError, OfficeRequirementSetError } from '@/domain/errors/office.errors';
-
-/**
- * The Outlook API surface the pane is written against.
- *
- * 1.13 is what `manifest/manifest.local.xml` declares in its V1_1 version
- * overrides, and the two have to agree: the manifest decides where the add-in is
- * offered, this decides where it will actually run. Raising one without the
- * other either hides the add-in from clients that could run it, or admits
- * clients that cannot.
- *
- * @see {@link https://learn.microsoft.com/javascript/api/requirement-sets/outlook/requirement-set-1.13/outlook-requirement-set-1.13}
- */
-export const MAILBOX_REQUIREMENT_SET = { name: 'Mailbox', minVersion: '1.13' } as const;
-
-/**
- * The requirement set that decides whether the pane can use NAA to sign in.
- *
- * Checked separately from {@link MAILBOX_REQUIREMENT_SET} and never fatal: it
- * is versioned on its own, is not declarable in the manifest, and its absence
- * selects the Office dialog fallback rather than ending start-up.
- *
- * @see {@link https://learn.microsoft.com/javascript/api/requirement-sets/common/nested-app-auth-requirement-sets}
- */
-export const NAA_REQUIREMENT_SET = { name: 'NestedAppAuth', minVersion: '1.1' } as const;
 
 /**
  * Establishes that the pane can run here, and reports what "here" is.

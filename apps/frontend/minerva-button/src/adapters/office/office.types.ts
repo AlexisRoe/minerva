@@ -46,9 +46,20 @@ export type OfficeReadyInfo = {
  * @see {@link https://learn.microsoft.com/javascript/api/office/office.contextinformation}
  */
 export interface OfficeEnvironment {
-  /** The Office application, e.g. `Outlook`. Always Outlook in practice. */
+  /**
+   * The Office application, e.g. `Outlook`. Always Outlook in practice.
+   *
+   * A rendered {@link Office.HostType} rather than the enum itself: the enum is
+   * declared numeric while Office.js assigns strings, and this value is only
+   * ever logged and reported. See the caveat on {@link OfficeReadyInfo}.
+   */
   readonly host: string;
-  /** Where Outlook itself is running, e.g. `OfficeOnline`, `PC`, `Mac`, `iOS`. */
+  /**
+   * Where Outlook itself is running, e.g. `OfficeOnline`, `PC`, `Mac`, `iOS`.
+   *
+   * A rendered {@link Office.PlatformType}, for the same reason as
+   * {@link OfficeEnvironment.host}.
+   */
   readonly platform: string;
   /**
    * Whether Nested App Authentication is available.
@@ -77,31 +88,44 @@ export interface OutlookMessage {
    * for the Office.js calls that take it; {@link OutlookMessage.exchangeId} is
    * what the Graph adapter is queried with.
    */
-  readonly id: string;
+  readonly id: Office.MessageRead['itemId'];
   /**
    * The same item as a REST identifier, for Graph.
    *
-   * Produced by `Office.context.mailbox.convertToRestId()`. Every Graph call the
-   * pane makes — fetching the MIME, moving the message — addresses the message
-   * by this and never by {@link OutlookMessage.id}.
+   * Produced by `Office.context.mailbox.convertToRestId()`, so it is typed as
+   * whatever that call returns. Every Graph call the pane makes — fetching the
+   * MIME, moving the message — addresses the message by this and never by
+   * {@link OutlookMessage.id}.
+   *
+   * @see {@link https://learn.microsoft.com/javascript/api/outlook/office.mailbox#outlook-office-mailbox-converttorestid-member(1)}
    */
-  readonly exchangeId: string;
+  readonly exchangeId: ReturnType<Office.Mailbox['convertToRestId']>;
   /**
    * The RFC 5322 `Message-ID` header, as the transport assigned it.
    *
    * Stable across mailboxes, unlike either of the ids above, which is what lets
    * the backend recognise the same mail reported by two different people.
    */
-  readonly internetMessageId: string;
+  readonly internetMessageId: Office.MessageRead['internetMessageId'];
   /** The message subject, shown to the user before they submit. */
-  readonly subject: string;
-  /** The sender's address, shown alongside the subject. */
-  readonly from: string;
+  readonly subject: Office.MessageRead['subject'];
+  /**
+   * The sender's address, shown alongside the subject.
+   *
+   * `item.from` is an {@link Office.EmailAddressDetails}; only the SMTP address
+   * is carried, and the field is typed from it so a change to that resource
+   * surfaces here.
+   */
+  readonly from: Office.EmailAddressDetails['emailAddress'];
   /**
    * When the message was delivered, as an ISO-8601 string.
    *
    * `item.dateTimeCreated`, which for a received message is its delivery time —
    * this is what the reporting request sends as `deliveredAt`.
+   *
+   * The one field not typed from Office.js: `dateTimeCreated` is a `Date`, and a
+   * `Date` cannot cross into a store or a request body unchanged, so it is
+   * serialised once here rather than at each reader.
    */
   readonly receivedAt: string;
 }
@@ -116,19 +140,22 @@ export interface OutlookMessage {
  * @see {@link https://learn.microsoft.com/javascript/api/outlook/office.userprofile}
  */
 export interface OutlookUser {
-  /** The user's display name. */
-  readonly name: string;
-  /** The mailbox's primary SMTP address. */
-  readonly email: string;
+  /** The user's display name, from {@link Office.UserProfile.displayName}. */
+  readonly name: Office.UserProfile['displayName'];
+  /** The mailbox's primary SMTP address, from {@link Office.UserProfile.emailAddress}. */
+  readonly email: Office.UserProfile['emailAddress'];
   /** The mailbox's time zone, e.g. `W. Europe Standard Time`. */
-  readonly timeZone: string;
+  readonly timeZone: Office.UserProfile['timeZone'];
   /**
    * Outlook's UI language as a BCP-47 tag, e.g. `en-US`.
    *
-   * The full tag, kept verbatim: the reporting request sends this rather than
+   * Read from `Office.context`, not from the user profile — the profile has no
+   * language — and kept verbatim: the reporting request sends this rather than
    * {@link OutlookUser.language}, because the backend wants the region too.
+   *
+   * @see {@link https://learn.microsoft.com/javascript/api/office/office.context#office-office-context-displaylanguage-member}
    */
-  readonly displayLanguage: string;
+  readonly displayLanguage: Office.Context['displayLanguage'];
   /**
    * The same language reduced to a catalogue Minerva actually has.
    *

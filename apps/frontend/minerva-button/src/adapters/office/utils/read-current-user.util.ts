@@ -39,6 +39,7 @@ import { OfficeNotReadyError } from '@/domain/errors/office.errors';
 export function readCurrentUser(): OutlookUser {
   const context = typeof Office === 'undefined' ? undefined : Office.context;
   const profile = context?.mailbox?.userProfile;
+
   if (context === undefined || profile === undefined) {
     throw new OfficeNotReadyError('readCurrentUser');
   }

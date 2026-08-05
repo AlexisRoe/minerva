@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { OfficeReadyInfo } from '@/adapters/office/office.types';
+import { MAILBOX_REQUIREMENT_SET, NAA_REQUIREMENT_SET } from '@/constants/office-js.constants';
 import { stubOffice } from '@/fixtures/office.fixture';
-import { MAILBOX_REQUIREMENT_SET, NAA_REQUIREMENT_SET, readEnvironment } from './read-environment.util';
+import { readEnvironment } from './read-environment.util';
 
 /**
  * What `Office.onReady()` hands back inside Outlook on the web.
