@@ -1,11 +1,11 @@
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import minervaLogoUrl from '../../assets/minerva-logo.svg';
 import { MinervaThemeProvider } from '../../theme/minerva-provider.component';
 import { BrandLogo } from './brand-logo.component';
 
-function renderLogo(ui: ReactElement) {
+function renderLogo(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 

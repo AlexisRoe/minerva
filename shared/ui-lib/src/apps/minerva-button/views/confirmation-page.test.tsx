@@ -1,11 +1,11 @@
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { OutlookWindow } from '../../../primitives/outlook-window/outlook-window.component';
 import { MinervaThemeProvider } from '../../../theme/minerva-provider.component';
 import { ConfirmationPage } from './confirmation-page.example';
 
-function renderView(ui: ReactElement) {
+function renderView(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 

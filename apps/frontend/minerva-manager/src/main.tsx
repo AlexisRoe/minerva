@@ -5,10 +5,13 @@ import { MinervaThemeProvider } from '@minerva/ui-lib';
 import '@minerva/ui-lib/styles.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { MissingRootElementError } from '@/domain/errors/config.errors';
+import { ConfigProvider } from '@/platform/config/provider/config.provider';
+import { loadConfig } from '@/platform/config/utils/load-config.util';
+import { SentryErrorBoundary } from '@/platform/sentry/error-boundary';
+import { captureError } from '@/platform/sentry/utils/capture-error.util';
+import { initSentry } from '@/platform/sentry/utils/init-sentry.util';
 import { App } from './App';
-import { ConfigProvider, loadConfig } from './config';
-import { MissingRootElementError } from './errors';
-import { captureError, initSentry, SentryErrorBoundary } from './sentry';
 
 // The theme names the families; the files are shared across the repo and this
 // app serves them, copied into dist/assets/fonts by `sharedFonts()`.

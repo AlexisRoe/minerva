@@ -15,7 +15,7 @@ type DrawerDemoProps = Omit<DetailDrawerProps, 'opened' | 'onClose' | 'container
  * portal into `document.body` and cover the page — which is what you want in an
  * app, and what makes a story unreadable.
  */
-function DrawerDemo(props: DrawerDemoProps) {
+function DrawerDemo(props: DrawerDemoProps): React.ReactElement {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [opened, { open, close }] = useDisclosure(false);
 

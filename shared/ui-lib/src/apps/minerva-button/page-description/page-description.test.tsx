@@ -1,10 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { MinervaThemeProvider } from '../../../theme/minerva-provider.component';
 import { PageDescription } from './page-description.component';
 
-function renderDescription(ui: ReactElement) {
+function renderDescription(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 

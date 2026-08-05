@@ -1,0 +1,116 @@
+{
+  "product": "Minerva",
+  "general": {
+    "back": "Zurück",
+    "retry": "Erneut versuchen",
+    "close": "Schließen",
+    "cancel": "Abbrechen"
+  },
+  "errors": {
+    "generic": {
+      "title": "Minerva konnte nicht fortfahren.",
+      "message": "Etwas ist schiefgelaufen.",
+      "tip": "Schließen Sie den Bereich und öffnen Sie die Nachricht erneut. Wenn das Problem bestehen bleibt, nennen Sie Ihrer IT den Code unten."
+    },
+    "tips": {
+      "network": "Prüfen Sie Ihre Verbindung und versuchen Sie es erneut. Wenn das Problem bestehen bleibt, nennen Sie Ihrer IT den Code unten.",
+      "auth": "Minerva konnte Sie nicht anmelden. Versuchen Sie es erneut und schließen Sie eine eventuelle Anmeldeaufforderung ab.",
+      "permission": "Ihr Konto ist nicht für Minerva freigegeben. Bitten Sie Ihre IT-Abteilung um Zugriff und nennen Sie den Code unten.",
+      "deployment": "Das liegt an der Minerva-Installation und nicht an Ihnen. Nennen Sie Ihrer IT den Code unten."
+    },
+    "unsupported": {
+      "title": "Minerva kann hier nicht ausgeführt werden",
+      "generic": "Minerva konnte in diesem Fenster nicht gestartet werden. Öffnen Sie die Nachricht erneut in Outlook.",
+      "timeout": "Minerva konnte Outlook nicht erreichen. Prüfen Sie Ihre Verbindung und öffnen Sie die Nachricht erneut.",
+      "host": "Minerva meldet E-Mails und läuft daher nur in Outlook.",
+      "disabled": "Minerva ist für Ihre Organisation deaktiviert. Ihre IT-Abteilung kann es wieder aktivieren.",
+      "requirement-set": "Diese Outlook-Version ist zu alt für Minerva. Aktualisieren Sie Outlook oder öffnen Sie die Nachricht in Outlook im Web."
+    }
+  },
+  "report": {
+    "title": "Diese E-Mail melden",
+    "description": "Sagen Sie uns, was mit der geöffneten Nachricht nicht stimmt.",
+    "empty": {
+      "title": "Keine Nachricht geöffnet",
+      "description": "Öffnen Sie eine Nachricht in Outlook, um sie zu melden."
+    },
+    "variant": {
+      "suspicious": {
+        "title": "Verdächtig",
+        "description": "An dieser Nachricht stimmt etwas nicht.",
+        "drawer-title": "Als verdächtig melden"
+      },
+      "spam": {
+        "title": "Spam",
+        "description": "Massenwerbung, die niemand angefordert hat.",
+        "drawer-title": "Als Spam melden"
+      }
+    },
+    "reasons": {
+      "label": "Was stimmt damit nicht?",
+      "mandatory-error": "Wählen Sie mindestens einen Grund aus."
+    },
+    "comment": {
+      "label": "Sollten wir noch etwas wissen?",
+      "placeholder": "Alles, was beim späteren Lesen hilfreich wäre"
+    },
+    "submit": "Meldung senden"
+  },
+  "details": {
+    "title": "Details",
+    "open": "Details anzeigen",
+    "section": {
+      "user": {
+        "title": "Sie",
+        "name": "Name",
+        "email": "E-Mail"
+      },
+      "email": {
+        "title": "Nachricht",
+        "subject": "Betreff",
+        "from": "Von",
+        "received": "Empfangen",
+        "exchange-id": "Nachrichten-ID"
+      },
+      "environment": {
+        "title": "Umgebung",
+        "host": "Host",
+        "platform": "Plattform"
+      }
+    }
+  },
+  "confirmation": {
+    "title": "An Minerva gesendet",
+    "body": "Minerva verarbeitet die Nachricht. Sie können diesen Bereich schließen.",
+    "report-id": "Melde-ID: {{id}}",
+    "variant": {
+      "suspicious": {
+        "title": "Danke für Ihre Meldung",
+        "body": "Die E-Mail ist auf dem Weg zum Sicherheitsteam."
+      },
+      "spam": {
+        "title": "Als Spam gemeldet",
+        "body": "Solche E-Mails sollten Ihren Posteingang nicht mehr erreichen."
+      }
+    },
+    "identified": {
+      "system": "Minerva kennt diese E-Mail bereits. Das Sicherheitsteam kümmert sich darum.",
+      "simulation": "Das war ein Phishing-Test Ihrer eigenen Organisation. Die Meldung war genau richtig.",
+      "unknown": "Minerva kennt diese E-Mail noch nicht, daher wird sie jemand prüfen."
+    },
+    "notified": {
+      "title": "Wer informiert wurde",
+      "ok": "An {{address}} gesendet",
+      "failed": "{{address}} war nicht erreichbar – die Meldung wurde trotzdem erfasst"
+    },
+    "contact": {
+      "title": "Brauchen Sie Hilfe?",
+      "more": "Mehr zum Melden von E-Mails"
+    },
+    "disposition": {
+      "move-failed": "Die E-Mail konnte nicht verschoben werden. Ihre Meldung wurde erfasst – Sie können die E-Mail selbst verschieben.",
+      "delete": "E-Mail löschen",
+      "spam": "In Junk-E-Mail verschieben"
+    }
+  }
+}

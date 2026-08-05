@@ -43,7 +43,7 @@ function resolveGap(gap: MantineSpacing | undefined): string {
 }
 
 /** Sizes the title off the mark: capitals exactly `size` tall, in a line box of the same height. */
-function resolveTitleHeight(size: number | string) {
+function resolveTitleHeight(size: number | string): { fontSize: string; lineHeight: number } {
   return {
     fontSize: `calc(${rem(size)} / ${CAP_HEIGHT_RATIO} / 2)`,
     lineHeight: CAP_HEIGHT_RATIO,
@@ -89,7 +89,7 @@ export function BrandLogo({
   alt = 'Minerva Logo',
   style,
   ...rest
-}: BrandLogoProps) {
+}: BrandLogoProps): React.ReactElement {
   const hasTitle = withTitle && title !== '';
 
   return (

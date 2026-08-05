@@ -32,7 +32,7 @@ export interface ErrorPageProps {
  * <ErrorPage onRetry={() => report()} />
  * ```
  */
-export function ErrorPage({ onRetry }: ErrorPageProps) {
+export function ErrorPage({ onRetry }: ErrorPageProps): React.ReactElement {
   return (
     <ReportButtonPage>
       <ReportButtonPage.Header>

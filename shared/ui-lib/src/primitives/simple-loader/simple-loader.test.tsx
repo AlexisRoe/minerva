@@ -1,11 +1,11 @@
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { MinervaThemeProvider } from '../../theme/minerva-provider.component';
 import { SimpleLoader } from './simple-loader.component';
 import classes from './simple-loader.module.css';
 
-function renderLoader(ui: ReactElement) {
+function renderLoader(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 

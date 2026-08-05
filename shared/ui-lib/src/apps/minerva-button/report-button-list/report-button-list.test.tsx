@@ -1,11 +1,11 @@
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { MinervaThemeProvider } from '../../../theme/minerva-provider.component';
 import { ReportButton } from '../report-button/report-button.component';
 import { ReportButtonList } from './report-button-list.component';
 
-function renderList(ui: ReactElement) {
+function renderList(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 

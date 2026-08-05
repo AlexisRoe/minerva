@@ -54,7 +54,7 @@ export function ErrorView({
   buttonLabel,
   buttonAction,
   ...rest
-}: ErrorViewProps) {
+}: ErrorViewProps): React.ReactElement {
   const hasReference = Boolean(errorId || errorCode);
   const hasButton = Boolean(buttonLabel && buttonAction);
 

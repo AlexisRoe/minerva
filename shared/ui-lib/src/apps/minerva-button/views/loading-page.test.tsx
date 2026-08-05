@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { OutlookWindow } from '../../../primitives/outlook-window/outlook-window.component';
@@ -6,12 +6,12 @@ import { MinervaThemeProvider } from '../../../theme/minerva-provider.component'
 import { STEP_TRANSLATIONS } from '../loading-indicator/loading-indicator.example';
 import { LoadingPage } from './loading-page.example';
 
-function renderView(ui: ReactElement) {
+function renderView(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 
 /** The language of any given step is drawn, so a test can only know the set it came from. */
-function everyLanguageAt(index: number) {
+function everyLanguageAt(index: number): (string | undefined)[] {
   return Object.values(STEP_TRANSLATIONS).map((language) => language.steps[index]);
 }
 

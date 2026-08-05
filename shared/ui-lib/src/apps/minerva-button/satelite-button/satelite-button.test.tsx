@@ -1,10 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import type { CSSProperties, ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { MinervaThemeProvider } from '../../../theme/minerva-provider.component';
 import { SateliteButton } from './satelite-button.component';
 
-function renderButton(ui: ReactElement) {
+function renderButton(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 

@@ -1,10 +1,10 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MinervaThemeProvider } from '../../../theme/minerva-provider.component';
 import { LoadingIndicator } from './loading-indicator.component';
 
-function renderIndicator(ui: ReactElement) {
+function renderIndicator(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 
@@ -15,7 +15,7 @@ const intervalMs = 1800;
 const transitionMs = 500;
 
 /** The reel is the only thing kept out of the accessibility tree. */
-function reelOf(container: HTMLElement) {
+function reelOf(container: HTMLElement): HTMLElement {
   const viewport = container.querySelector<HTMLElement>('[aria-hidden="true"]');
 
   if (!viewport) throw new Error('the indicator drew no reel');
@@ -24,7 +24,7 @@ function reelOf(container: HTMLElement) {
 }
 
 /** What the reel is showing is a matter of where it has been moved to. */
-function trackOf(container: HTMLElement) {
+function trackOf(container: HTMLElement): HTMLElement {
   const track = reelOf(container).firstElementChild;
 
   if (!(track instanceof HTMLElement)) throw new Error('the reel has no track');
@@ -33,7 +33,7 @@ function trackOf(container: HTMLElement) {
 }
 
 /** Lets the reel turn the given number of times, the way waiting would. */
-function wait(ms: number) {
+function wait(ms: number): void {
   act(() => {
     vi.advanceTimersByTime(ms);
   });

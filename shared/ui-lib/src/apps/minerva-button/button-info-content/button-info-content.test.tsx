@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { MinervaThemeProvider } from '../../../theme/minerva-provider.component';
@@ -18,12 +18,12 @@ const sections: ButtonInfoSection[] = [
   },
 ];
 
-function renderContent(ui: ReactElement) {
+function renderContent(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 
 /** The rules between the blocks, in the order they are drawn. */
-function dividers(container: HTMLElement) {
+function dividers(container: HTMLElement): Element[] {
   return Array.from(container.querySelectorAll('.mantine-Divider-root'));
 }
 
@@ -135,7 +135,7 @@ describe('ButtonInfoContent', () => {
     renderContent(<ButtonInfoContent data-testid="info" sections={sections} />);
 
     // Mantine spaces a Stack through this variable, so each gap shows up there.
-    const gapOf = (element: Element | null | undefined) =>
+    const gapOf = (element: Element | null | undefined): string | undefined =>
       (element as HTMLElement | null)?.style.getPropertyValue('--stack-gap');
 
     const pair = screen.getByText('Address').parentElement;

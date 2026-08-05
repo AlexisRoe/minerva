@@ -15,6 +15,7 @@
   "license": "MIT",
   "author": "Alexis Roehrling",
   "dependencies": {
+    "@azure/msal-browser": "catalog:",
     "@minerva/typescript-lib": "workspace:*",
     "@minerva/ui-lib": "workspace:*",
     "@sentry/react": "catalog:",
@@ -22,16 +23,19 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-i18next": "catalog:",
+    "react-router": "catalog:",
     "zustand": "catalog:"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",
     "@testing-library/user-event": "catalog:",
+    "@types/office-js": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "jsdom": "catalog:",
+    "rollup-plugin-visualizer": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"

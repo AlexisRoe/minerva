@@ -1,0 +1,116 @@
+{
+  "product": "Minerva",
+  "general": {
+    "back": "Volver",
+    "retry": "Volver a intentarlo",
+    "close": "Cerrar",
+    "cancel": "Cancelar"
+  },
+  "errors": {
+    "generic": {
+      "title": "Minerva no ha podido continuar.",
+      "message": "Algo ha salido mal.",
+      "tip": "Cierre el panel y vuelva a abrir el mensaje. Si sigue ocurriendo, indique el código de abajo a su equipo de TI."
+    },
+    "tips": {
+      "network": "Compruebe su conexión y vuelva a intentarlo. Si sigue ocurriendo, indique el código de abajo a su equipo de TI.",
+      "auth": "Minerva no pudo iniciar su sesión. Inténtelo de nuevo y, si se le pide iniciar sesión, complete el proceso.",
+      "permission": "Su cuenta no tiene permiso para usar Minerva. Pida acceso a su equipo de TI e indique el código de abajo.",
+      "deployment": "Es un problema de la instalación de Minerva, no suyo. Indique el código de abajo a su equipo de TI."
+    },
+    "unsupported": {
+      "title": "Minerva no puede ejecutarse aquí",
+      "generic": "Minerva no pudo iniciarse en esta ventana. Vuelva a abrir el mensaje en Outlook.",
+      "timeout": "Minerva no pudo conectar con Outlook. Compruebe su conexión y vuelva a abrir el mensaje.",
+      "host": "Minerva informa sobre correos, por lo que solo funciona en Outlook.",
+      "disabled": "Minerva está desactivado para su organización. Su equipo de TI puede volver a activarlo.",
+      "requirement-set": "Esta versión de Outlook es demasiado antigua para Minerva. Actualice Outlook o abra el mensaje en Outlook en la web."
+    }
+  },
+  "report": {
+    "title": "Denunciar este correo",
+    "description": "Cuéntenos qué ocurre con el mensaje que tiene abierto.",
+    "empty": {
+      "title": "Ningún mensaje abierto",
+      "description": "Abra un mensaje en Outlook para denunciarlo."
+    },
+    "variant": {
+      "suspicious": {
+        "title": "Sospechoso",
+        "description": "Hay algo raro en este mensaje.",
+        "drawer-title": "Denunciar como sospechoso"
+      },
+      "spam": {
+        "title": "Spam",
+        "description": "Correo masivo que nadie ha pedido.",
+        "drawer-title": "Denunciar como spam"
+      }
+    },
+    "reasons": {
+      "label": "¿Qué es lo que no encaja?",
+      "mandatory-error": "Elija al menos un motivo."
+    },
+    "comment": {
+      "label": "¿Algo más que debamos saber?",
+      "placeholder": "Cualquier detalle que ayude a quien lo lea más adelante"
+    },
+    "submit": "Enviar la denuncia"
+  },
+  "details": {
+    "title": "Detalles",
+    "open": "Mostrar detalles",
+    "section": {
+      "user": {
+        "title": "Usted",
+        "name": "Nombre",
+        "email": "Correo electrónico"
+      },
+      "email": {
+        "title": "Mensaje",
+        "subject": "Asunto",
+        "from": "De",
+        "received": "Recibido",
+        "exchange-id": "ID del mensaje"
+      },
+      "environment": {
+        "title": "Entorno",
+        "host": "Host",
+        "platform": "Plataforma"
+      }
+    }
+  },
+  "confirmation": {
+    "title": "Enviado a Minerva",
+    "body": "Minerva está procesando el mensaje. Puede cerrar este panel.",
+    "report-id": "ID de la denuncia: {{id}}",
+    "variant": {
+      "suspicious": {
+        "title": "Gracias por avisar",
+        "body": "El mensaje va camino del equipo de seguridad."
+      },
+      "spam": {
+        "title": "Denunciado como spam",
+        "body": "El correo de este tipo debería dejar de llegar a su bandeja de entrada."
+      }
+    },
+    "identified": {
+      "system": "Minerva ya conoce este mensaje. El equipo de seguridad se está ocupando.",
+      "simulation": "Era una prueba de phishing de su propia organización. Hizo bien en denunciarlo.",
+      "unknown": "Minerva no ha visto antes este mensaje, así que alguien lo revisará."
+    },
+    "notified": {
+      "title": "A quién se avisó",
+      "ok": "Enviado a {{address}}",
+      "failed": "No se pudo contactar con {{address}}: la denuncia se registró igualmente"
+    },
+    "contact": {
+      "title": "¿Necesita ayuda?",
+      "more": "Más información sobre cómo denunciar correos"
+    },
+    "disposition": {
+      "move-failed": "No se pudo mover el mensaje. Su denuncia quedó registrada; puede moverlo usted mismo.",
+      "delete": "Eliminar el mensaje",
+      "spam": "Mover a Correo no deseado"
+    }
+  }
+}

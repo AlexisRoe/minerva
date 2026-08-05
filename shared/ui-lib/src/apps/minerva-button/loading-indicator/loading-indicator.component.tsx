@@ -115,7 +115,7 @@ export function LoadingIndicator({
   visibleRows = defaultVisibleRows,
   transitionMs = defaultTransitionMs,
   ...rest
-}: LoadingIndicatorProps) {
+}: LoadingIndicatorProps): React.ReactElement | null {
   const total = steps.length;
   const rows = useMemo(() => loopRows(steps), [steps]);
 

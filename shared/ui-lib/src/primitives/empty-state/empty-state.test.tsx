@@ -1,11 +1,11 @@
 import { IconSearch } from '@tabler/icons-react';
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { MinervaThemeProvider } from '../../theme/minerva-provider.component';
 import { EmptyState } from './empty-state.component';
 
-function renderState(ui: ReactElement) {
+function renderState(ui: ReactElement): RenderResult {
   return render(<MinervaThemeProvider>{ui}</MinervaThemeProvider>);
 }
 

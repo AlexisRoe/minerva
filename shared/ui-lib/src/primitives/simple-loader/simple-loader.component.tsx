@@ -36,7 +36,7 @@ export interface SimpleLoaderProps extends CenterProps, ElementProps<'div'> {
  * <SimpleLoader label="Loading your reports" mih={240} />
  * ```
  */
-export function SimpleLoader({ label = 'Loading', className, ...rest }: SimpleLoaderProps) {
+export function SimpleLoader({ label = 'Loading', className, ...rest }: SimpleLoaderProps): React.ReactElement {
   return (
     <Center className={[classes.root, className].filter(Boolean).join(' ')} w="100%" h="100%" {...rest}>
       <Box component="span" className={classes.loader} role="status" aria-label={label} />

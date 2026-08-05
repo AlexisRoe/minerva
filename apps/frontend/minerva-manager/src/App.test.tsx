@@ -1,14 +1,14 @@
 import { MinervaThemeProvider } from '@minerva/ui-lib';
-import { render, screen } from '@testing-library/react';
+import { type RenderResult, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
-
+import { configFixture } from '@/fixtures/config.fixture';
+import { ConfigProvider } from '@/platform/config/provider/config.provider';
 import { App } from './App';
-import { ConfigProvider, configFixture } from './config';
 
 // Mirrors the bootstrap in `main.tsx`: the app tree runs below a provider, so
 // anything that starts calling `useConfig()` keeps rendering here.
-function renderApp() {
+function renderApp(): RenderResult {
   return render(
     <ConfigProvider config={configFixture}>
       <MinervaThemeProvider>

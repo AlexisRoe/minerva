@@ -14,7 +14,7 @@ const invertOnHover = {
 } as CSSProperties;
 
 /** The box is the mark plus the room the hover fill needs around it. */
-function boxSize(iconSize: number | string) {
+function boxSize(iconSize: number | string): string {
   const icon = typeof iconSize === 'number' ? `${iconSize}px` : iconSize;
 
   return `calc(${icon} + 0.75rem)`;
@@ -56,7 +56,7 @@ export function SateliteButton({
   radius = '50%',
   style,
   ...rest
-}: SateliteButtonProps) {
+}: SateliteButtonProps): React.ReactElement {
   return (
     <ActionIcon
       variant="transparent"

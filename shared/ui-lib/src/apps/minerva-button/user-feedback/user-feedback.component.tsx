@@ -134,7 +134,7 @@ export function UserFeedback({
   mandatoryError = 'Pick at least one reason.',
   onChange,
   ...rest
-}: UserFeedbackProps) {
+}: UserFeedbackProps): React.ReactElement {
   const [ticked, setTicked] = useState<string[]>([]);
   const [comment, setComment] = useState('');
   const [touched, setTouched] = useState(false);
@@ -159,7 +159,7 @@ export function UserFeedback({
     onChange?.(value);
   }, [value, onChange]);
 
-  function handleReasons(next: string[]) {
+  function handleReasons(next: string[]): void {
     setTouched(true);
     setTicked(next);
   }

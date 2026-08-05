@@ -51,7 +51,7 @@ describe('MinervaError subclasses', () => {
   });
 
   it('are catchable as MinervaError', async () => {
-    const failing = async () => {
+    const failing = async (): Promise<never> => {
       throw new InvoiceNotFoundError('nope');
     };
 

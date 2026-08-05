@@ -21,7 +21,10 @@ const iconScale = 1.35;
  * block is given, and the colour left alone wherever a `variant` has already
  * decided it.
  */
-const indicatorVars: MantineEmptyStateProps['vars'] = (_theme, { size, variant }) => ({
+const indicatorVars: MantineEmptyStateProps['vars'] = (
+  _theme,
+  { size, variant },
+): { root: { '--empty-state-indicator-size': string; '--empty-state-indicator-color': string | undefined } } => ({
   root: {
     '--empty-state-indicator-size': `calc(${getSize(size, 'empty-state-indicator-size')} * ${iconScale})`,
     '--empty-state-indicator-color': variant ? undefined : 'var(--mantine-primary-color-filled)',
@@ -71,7 +74,7 @@ export function EmptyState({
   style,
   children,
   ...rest
-}: EmptyStateProps) {
+}: EmptyStateProps): React.ReactElement {
   return (
     <MantineEmptyState
       icon={<IconComponent stroke={iconStroke} aria-hidden />}

@@ -164,7 +164,7 @@ export interface ReportPageProps {
  * <ReportPage onReport={(variant, feedback) => console.log(variant, feedback)} />
  * ```
  */
-export function ReportPage({ onReport }: ReportPageProps) {
+export function ReportPage({ onReport }: ReportPageProps): React.ReactElement {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [opened, { open, close }] = useDisclosure(false);
   const [filing, setFiling] = useState<ReportButtonVariant | null>(null);
@@ -172,16 +172,16 @@ export function ReportPage({ onReport }: ReportPageProps) {
 
   const form = filing ? reportForms[filing] : null;
 
-  function startReport(variant: ReportButtonVariant) {
+  function startReport(variant: ReportButtonVariant): void {
     setFiling(variant);
   }
 
-  function cancelReport() {
+  function cancelReport(): void {
     setFiling(null);
     setFeedback(null);
   }
 
-  function sendReport() {
+  function sendReport(): void {
     if (!filing || !feedback) return;
 
     onReport?.(filing, feedback);

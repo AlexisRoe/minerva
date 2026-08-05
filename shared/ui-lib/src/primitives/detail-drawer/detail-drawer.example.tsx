@@ -20,7 +20,7 @@ export function DetailDrawer({
   container,
   children,
   ...props
-}: DetailDrawerProps) {
+}: DetailDrawerProps): React.ReactElement {
   return (
     <Drawer
       title={

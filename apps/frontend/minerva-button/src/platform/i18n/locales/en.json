@@ -1,0 +1,116 @@
+{
+  "product": "Minerva",
+  "general": {
+    "back": "Back",
+    "retry": "Try again",
+    "close": "Close",
+    "cancel": "Cancel"
+  },
+  "errors": {
+    "generic": {
+      "title": "$t(product) could not continue",
+      "message": "Something went wrong",
+      "tip": "Close the pane and open the message again. If it keeps happening, quote the code below to your IT team."
+    },
+    "tips": {
+      "network": "Check your connection and try again. If it keeps happening, quote the code below to your IT team.",
+      "auth": "$t(product) could not sign you in. Try again, and if you are asked to sign in, complete the prompt.",
+      "permission": "Your account is not allowed to use $t(product). Ask your IT team to give you access, and quote the code below.",
+      "deployment": "This is a problem with the $t(product) installation rather than with you. Quote the code below to your IT team."
+    },
+    "unsupported": {
+      "title": "$t(product) cannot run here",
+      "generic": "$t(product) could not start in this window. Try opening the message in Outlook again.",
+      "timeout": "$t(product) could not reach Outlook. Check your connection, then open the message again.",
+      "host": "$t(product) reports email, so it only runs in Outlook.",
+      "disabled": "$t(product) is switched off for your organisation. Your IT team can turn it back on.",
+      "requirement-set": "This version of Outlook is too old for $t(product). Update Outlook, or open the message in Outlook on the web."
+    }
+  },
+  "report": {
+    "title": "Report this mail",
+    "description": "Tell us what is wrong with the message you have open.",
+    "empty": {
+      "title": "No message open",
+      "description": "Open a message in Outlook to report it."
+    },
+    "variant": {
+      "suspicious": {
+        "title": "Suspicious",
+        "description": "Something about this message looks off.",
+        "drawer-title": "Report as suspicious"
+      },
+      "spam": {
+        "title": "Spam",
+        "description": "Bulk mail nobody asked for.",
+        "drawer-title": "Report as spam"
+      }
+    },
+    "reasons": {
+      "label": "What is wrong with it?",
+      "mandatory-error": "Pick at least one reason."
+    },
+    "comment": {
+      "label": "Anything else we should know?",
+      "placeholder": "Anything that would help someone reading this later"
+    },
+    "submit": "Send the report"
+  },
+  "details": {
+    "title": "Details",
+    "open": "Show details",
+    "section": {
+      "user": {
+        "title": "You",
+        "name": "Name",
+        "email": "Email"
+      },
+      "email": {
+        "title": "Email",
+        "subject": "Subject",
+        "from": "From",
+        "received": "Received",
+        "exchange-id": "Message ID"
+      },
+      "environment": {
+        "title": "Environment",
+        "host": "Host",
+        "platform": "Platform"
+      }
+    }
+  },
+  "confirmation": {
+    "title": "Sent to $t(product)",
+    "body": "$t(product) is processing the message. You can close this pane.",
+    "report-id": "Report ID: {{id}}",
+    "variant": {
+      "suspicious": {
+        "title": "Thanks for reporting",
+        "body": "The mail is on its way to the security team."
+      },
+      "spam": {
+        "title": "Reported as spam",
+        "body": "Mail like it should stop reaching your inbox."
+      }
+    },
+    "identified": {
+      "system": "$t(product) already knows this mail. The security team is on it.",
+      "simulation": "This was a phishing test from your own organisation. Reporting it was the right thing to do.",
+      "unknown": "$t(product) has not seen this mail before, so someone will take a look."
+    },
+    "notified": {
+      "title": "Who was told",
+      "ok": "Sent to {{address}}",
+      "failed": "Could not reach {{address}} — the report was still filed"
+    },
+    "contact": {
+      "title": "Need help?",
+      "more": "More about reporting mail"
+    },
+    "disposition": {
+      "move-failed": "The mail could not be moved. Your report was filed — you can move the mail yourself.",
+      "delete": "Delete the mail",
+      "spam": "Move to Junk Email"
+    }
+  }
+}

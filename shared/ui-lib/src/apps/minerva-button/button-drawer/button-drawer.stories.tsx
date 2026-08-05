@@ -40,7 +40,7 @@ interface DemoPaneProps {
  * over the whole mail window — which is where an add-in's drawer belongs, and what
  * keeps the story readable.
  */
-function DemoPane({ width = windowWidth, onOpen, children }: DemoPaneProps) {
+function DemoPane({ width = windowWidth, onOpen, children }: DemoPaneProps): React.ReactElement {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
 
   return (
@@ -62,7 +62,7 @@ function DemoPane({ width = windowWidth, onOpen, children }: DemoPaneProps) {
   );
 }
 
-function ButtonDrawerDemo({ children, width, footer, ...props }: ButtonDrawerDemoProps) {
+function ButtonDrawerDemo({ children, width, footer, ...props }: ButtonDrawerDemoProps): React.ReactElement {
   const [opened, { open, close }] = useDisclosure(false);
 
   return (
@@ -77,7 +77,7 @@ function ButtonDrawerDemo({ children, width, footer, ...props }: ButtonDrawerDem
 }
 
 /** The same panel as the props build, put together part by part instead. */
-function ComposedDrawerDemo() {
+function ComposedDrawerDemo(): React.ReactElement {
   const [opened, { open, close }] = useDisclosure(false);
 
   return (

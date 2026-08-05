@@ -2,7 +2,7 @@ import { MinervaError } from './minerva.error';
 
 export const REFERENCE = '5c2c98ee-4e18-4283-9b08-4774807c185a';
 
-export const makeError = () =>
+export const makeError = (): MinervaError =>
   new MinervaError({
     reference: REFERENCE,
     code: 'ERR_001',

@@ -13,6 +13,19 @@
   loaded plainly, not as a module, so its names share a namespace with Mantine's
   (`mantine-*`) and with anything the app ships.
 */
+/*
+  The page frame every screen is drawn in fills what it is mounted into, and a
+  percentage height resolves against nothing unless every ancestor has one. The
+  chain has to start here: without it the header sits at the top of the pane and
+  the footer floats up under the content instead of resting at the bottom.
+*/
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
 .minerva-boot {
   /* The step every measure below is a multiple of, so the whole thing scales
      off the one value. At 1px the box is 50px. */
@@ -23,17 +36,38 @@
   --minerva-boot-color-lead: #495057;
   --minerva-boot-color-trail: #dee2e6;
   --minerva-boot-color-text: #495057;
+  --minerva-boot-color-surface: #ffffff;
+
+  /*
+    Overlaid on the app rather than stacked above it. The splash is a sibling of
+    `#root` so that it outlives React's first commit -- `RootErrorBoundary` shows
+    it again when the tree fails too high up to draw a styled screen -- and in
+    normal flow that would push the app down the page instead of replacing it.
+    An opaque surface is part of the same job: whatever half-rendered tree was on
+    screen when it broke must not show through the message saying it broke.
+  */
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: var(--minerva-boot-color-surface);
 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  min-height: 100vh;
   font-family: system-ui, sans-serif;
   color: var(--minerva-boot-color-text);
   text-align: center;
   padding: 1rem;
+}
+
+/*
+  `display: flex` above out-specifies the `hidden` attribute's UA rule, so
+  hideBootSplash() would otherwise hide nothing at all.
+*/
+.minerva-boot[hidden] {
+  display: none;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -41,6 +75,7 @@
     --minerva-boot-color-lead: #dee2e6;
     --minerva-boot-color-trail: #495057;
     --minerva-boot-color-text: #dee2e6;
+    --minerva-boot-color-surface: #1a1b1e;
   }
 }
 
@@ -78,10 +113,39 @@
   display: none;
 }
 
+.minerva-boot__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.minerva-boot__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
 .minerva-boot__message {
   max-width: 32ch;
   font-size: 0.875rem;
   line-height: 1.5;
+  margin: 0;
+}
+
+/*
+  The code and the event id are things to be read back over a support call
+  rather than prose, so they are set monospaced and quieter than the advice
+  above them -- and allowed to break, because an event id is 32 characters and
+  the pane is narrow.
+*/
+.minerva-boot__detail {
+  max-width: 32ch;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  opacity: 0.75;
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 @keyframes minerva-boot-rotate {

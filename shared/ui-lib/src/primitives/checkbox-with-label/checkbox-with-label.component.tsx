@@ -32,7 +32,7 @@ export interface CheckboxWithLabelProps extends Omit<CheckboxProps, 'label'> {
  * <CheckboxWithLabel label="Block this sender" onChange={block} />
  * ```
  */
-export function CheckboxWithLabel({ label, size = 'sm', ...props }: CheckboxWithLabelProps) {
+export function CheckboxWithLabel({ label, size = 'sm', ...props }: CheckboxWithLabelProps): React.ReactElement {
   return <Checkbox label={label} size={size} styles={{ inner: innerStyle }} {...props} />;
 }
 
