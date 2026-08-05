@@ -14,11 +14,16 @@
  *
  * These are variable fonts, so one file covers the whole weight range and
  * `font-weight` is a range rather than a single value.
+ *
+ * They are stored as woff2 rather than as the upstream ttf: woff2 is Brotli
+ * over the same glyph data, which is 2.3 MB down to 0.9 MB for these four, and
+ * every Outlook client new enough for the Graph API supports it. `make fonts`
+ * regenerates them from a ttf dropped into ./fonts.
  */
 
 @font-face {
   font-family: "DM Sans";
-  src: url("/assets/fonts/DMSans-VariableFont.ttf") format("truetype-variations");
+  src: url("/assets/fonts/DMSans-VariableFont.woff2") format("woff2");
   font-weight: 100 1000;
   font-style: normal;
   font-display: swap;
@@ -26,7 +31,7 @@
 
 @font-face {
   font-family: "DM Sans";
-  src: url("/assets/fonts/DMSans-Italic-VariableFont.ttf") format("truetype-variations");
+  src: url("/assets/fonts/DMSans-Italic-VariableFont.woff2") format("woff2");
   font-weight: 100 1000;
   font-style: italic;
   font-display: swap;
@@ -34,7 +39,7 @@
 
 @font-face {
   font-family: "Inter";
-  src: url("/assets/fonts/Inter-VariableFont.ttf") format("truetype-variations");
+  src: url("/assets/fonts/Inter-VariableFont.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -42,7 +47,7 @@
 
 @font-face {
   font-family: "Inter";
-  src: url("/assets/fonts/Inter-Italic-VariableFont.ttf") format("truetype-variations");
+  src: url("/assets/fonts/Inter-Italic-VariableFont.woff2") format("woff2");
   font-weight: 100 900;
   font-style: italic;
   font-display: swap;

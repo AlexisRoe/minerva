@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup check-deps install build-libs certs copy-env icons dev dev-manager dev-button shutdown-fe build verify verify-i18n verify-i18n-verbose test typecheck lint format storybook
+.PHONY: help setup check-deps install build-libs certs copy-env icons fonts dev dev-manager dev-button shutdown-fe build verify verify-i18n verify-i18n-verbose test typecheck lint format storybook
 
 # Defaults for `make icons` (override on the command line)
 OUT ?= ./icons
@@ -92,3 +92,6 @@ icons: ## Generate PWA/Outlook PNG icon sizes from a source image (SRC=path/to/s
 		exit 1; \
 	fi
 	@bash scripts/generate-icons.sh "$(SRC)" "$(OUT)"
+
+fonts: ## Convert any .ttf/.otf in shared/assets/fonts to woff2 and drop the original
+	@bash scripts/convert-fonts.sh
