@@ -7,7 +7,16 @@ vi.mock('@/auth-dialog/utils/acquire-token.util', () => ({
   acquireToken: vi.fn(),
 }));
 
+// Kept real, and only spied on: the timeout it is handed is what this file is
+// about, but every other case still needs it to read the stubbed host.
+vi.mock('@/adapters/office/utils/wait-for-office.util', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/adapters/office/utils/wait-for-office.util')>();
+
+  return { waitForOffice: vi.fn(actual.waitForOffice) };
+});
+
 const { acquireToken } = await import('@/auth-dialog/utils/acquire-token.util');
+const { waitForOffice } = await import('@/adapters/office/utils/wait-for-office.util');
 
 const config = { ...configFixture, entraClientId: 'client-id' };
 
@@ -28,6 +37,14 @@ describe('createOfficeLiveAdapter', () => {
     expect(host.environment).toMatchObject({ host: 'Outlook', naaSupported: true });
     expect(host.message).toMatchObject({ id: 'item-1', subject: 'Invoice' });
     expect(host.user).toMatchObject({ name: 'Ada', email: 'ada@contoso.example' });
+  });
+
+  it('waits for Office.js for as long as the configuration says', async () => {
+    stubOffice();
+
+    await createOfficeLiveAdapter({ ...config, officeReadyTimeoutMs: 12_000 }).readHost();
+
+    expect(waitForOffice).toHaveBeenCalledWith(12_000);
   });
 
   it('signs in with the environment it read', async () => {

@@ -220,7 +220,7 @@ export interface OfficeAdapter {
   /**
    * A Microsoft Graph access token for the signed-in user.
    *
-   * Requires {@link OfficeAdapter.readHost} to have run: which sign-in flow is
+   * Requires {@link OfficeAdapter#readHost} to have run: which sign-in flow is
    * available depends on what that reported about the client.
    *
    * @returns The bearer token, or an empty string in demo mode.

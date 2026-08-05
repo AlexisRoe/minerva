@@ -21,7 +21,9 @@ import type { AppConfig } from '@/platform/config/config.types';
  *
  * The client id comes from the configuration because the same artefact is
  * deployed against different tenants; it is read once here so nothing
- * downstream has to hold the configuration just to sign in.
+ * downstream has to hold the configuration just to sign in. The Office.js
+ * readiness deadline is read from the same place, for the same reason: how long
+ * the CDN takes is a property of the deployment, not of the code.
  *
  * @param config The configuration the app booted with.
  * @returns An adapter bound to the host this page is running in.
@@ -39,7 +41,7 @@ export function createOfficeLiveAdapter(config: AppConfig): OfficeAdapter {
 
   return {
     async readHost(): Promise<OfficeHost> {
-      const info = await waitForOffice();
+      const info = await waitForOffice(config.officeReadyTimeoutMs);
 
       environment = readEnvironment(info);
 

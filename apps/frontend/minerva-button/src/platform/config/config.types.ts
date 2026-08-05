@@ -55,6 +55,17 @@ export interface RuntimeConfig {
    * @see {@link https://learn.microsoft.com/office/dev/add-ins/develop/enable-nested-app-authentication-in-your-add-in}
    */
   readonly entraClientId: string | null;
+  /**
+   * How long start-up waits for Office.js to be ready, in milliseconds.
+   *
+   * Runtime configuration rather than a constant because what counts as "too
+   * long" is a property of the deployment: a tenant whose clients reach
+   * `appsforoffice.microsoft.com` through a slow proxy needs more than the five
+   * seconds that are right elsewhere, and the alternative is a rebuild per
+   * tenant. Unset falls back to `OFFICE_READY_TIMEOUT_MS`, which is the same
+   * five seconds `waitForOffice` uses on its own.
+   */
+  readonly officeReadyTimeoutMs: number;
 }
 
 /**
@@ -113,6 +124,7 @@ export function isRuntimeConfig(value: unknown): value is RuntimeConfig {
     typeof candidate.sentryTracesSampleRate === 'number' &&
     (typeof candidate.appDomain === 'string' || candidate.appDomain === null) &&
     typeof candidate.allowDemo === 'boolean' &&
-    (typeof candidate.entraClientId === 'string' || candidate.entraClientId === null)
+    (typeof candidate.entraClientId === 'string' || candidate.entraClientId === null) &&
+    typeof candidate.officeReadyTimeoutMs === 'number'
   );
 }

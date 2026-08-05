@@ -88,8 +88,7 @@ There is no `.env` in this directory. [`vite.config.ts`](./vite.config.ts) sets
 (`make copy-env`) that the backends also use.
 
 Settings are **not** baked into the bundle. [`config.entries.ts`](./config.entries.ts) lists the
-variables the browser is allowed to see — the Sentry DSN and traces sample rate, the app domain,
-the demo-mode switch and the Entra client id — and the `runtimeConfig()` plugin in
+variables the browser is allowed to see, and the `runtimeConfig()` plugin in
 [`vite.runtime-config.ts`](../../../vite.runtime-config.ts) publishes just those as `/config.json`
 next to the build, adding the app name, version, build time and mode itself. Anything not listed
 there stays out of the browser, which is what makes one shared `.env` safe — and it means the same
@@ -97,6 +96,23 @@ artefact can be promoted between environments, since a new DSN is a new `config.
 build. Adding a setting means a line in `config.entries.ts` and a line in `.env.template`.
 Dropping a `.env` in *this* directory would override the root one for this app only — usually not
 what you want.
+
+### What is configurable
+
+Every one of these is read from the root `.env` (or the pipeline's environment) at build time and
+published into `/config.json`; the `config.json` key is what `useConfig()` returns.
+
+| Variable | `config.json` key | Default | What it does |
+| --- | --- | --- | --- |
+| `APP_FE_RB_SENTRY_DSN` | `sentryDsn` | *(empty)* | Sentry project to report to. Empty leaves Sentry uninitialised. |
+| `APP_FE_RB_SENTRY_TRACES_SAMPLE_RATE` | `sentryTracesSampleRate` | `0` | Share of transactions traced, `0` to `1`. |
+| `APP_FE_RB_APP_DOMAIN` | `appDomain` | *(empty)* | Host the pane may be served from, e.g. `button.minerva.example`. Empty skips the check, which is what local development and the Office dialog sandboxes rely on. |
+| `APP_FE_RB_ALLOW_DEMO` | `allowDemo` | `false` | Whether this deployment honours `?demo=true`. Both halves have to agree, so nobody reaches the mock pane on a real deployment by editing the URL. |
+| `APP_FE_RB_ENTRA_CLIENT_ID` | `entraClientId` | *(empty)* | Entra application (client) id the token is brokered for. Must match the manifest `<Id>`. Empty disables sign-in, which is the state demo mode runs in. |
+| `APP_FE_RB_OFFICE_READY_TIMEOUT_MS` | `officeReadyTimeoutMs` | `5000` | How long start-up waits for Office.js to become ready. Raise it where clients reach `appsforoffice.microsoft.com` through a slow proxy; past the deadline the pane shows the "cannot run here" screen instead of a spinner. |
+
+`APP_FE_RB_PORT` is the one exception to the table: it is read by
+[`vite.config.ts`](./vite.config.ts) for the dev server and never published to the browser.
 
 Nothing here is required to run locally. Every variable has a working default and Sentry stays
 inert while its DSN is empty, so the dev server boots on a checkout with no `.env` at all. The dev

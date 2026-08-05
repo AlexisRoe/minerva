@@ -63,8 +63,6 @@ export function createBootstrapLoader({ office, minerva }: Adapters): () => Prom
       throw new ButtonDisabledError();
     }
 
-    // The one write, and the last thing the sequence does: everything above has
-    // to have succeeded for the pane to hold any of it.
     useSessionStore.getState().setSession({
       office: { environment, message, user },
       auth: { authorization, flow: environment.naaSupported ? 'naa' : 'dialog' },

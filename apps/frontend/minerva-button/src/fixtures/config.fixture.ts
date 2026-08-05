@@ -1,3 +1,4 @@
+import { OFFICE_READY_TIMEOUT_MS } from '@/constants/office-js.constants';
 import type { AppConfig } from '@/platform/config/config.types';
 
 /**
@@ -23,6 +24,7 @@ export const configFixture: AppConfig = {
   appDomain: null,
   allowDemo: false,
   entraClientId: null,
+  officeReadyTimeoutMs: OFFICE_READY_TIMEOUT_MS,
   host: 'localhost',
   retry: 0,
   demo: false,
