@@ -1,6 +1,14 @@
 import type { ReportingResponse } from '@minerva/typescript-lib';
 
-import type { ReportVariant } from '@/stores/settings/settings.types';
+/**
+ * What the user is reporting an email as.
+ *
+ * The same two values `ReportingFormData.reportedAs` carries, named here because
+ * the report page picks one per button, the confirmation page branches on it,
+ * and the disposition hook maps it to a mailbox folder -- so it belongs to the
+ * reporting domain rather than to whichever store happened to hold it.
+ */
+export type ReportVariant = 'suspicious' | 'spam';
 
 /** How one of the tenant's reporting methods fared. */
 export interface MethodOutcome {

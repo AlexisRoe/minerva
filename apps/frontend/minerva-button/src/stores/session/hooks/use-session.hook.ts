@@ -16,12 +16,15 @@ export interface UseSession {
 }
 
 /**
- * Reads the current session, for the views.
+ * Reads the current sign-in, for the views.
  *
- * The read side of {@link useSessionStore}. `isAuthorized` is deliberately the
- * backend's own answer rather than "is there an authorization object": the
- * backend can accept a token as valid and still refuse the user, and a pane that
- * treated the two as the same would go on to make calls that all fail.
+ * The `auth` slice of {@link useSessionStore}, unpacked. `isAuthorized` is
+ * deliberately the backend's own answer rather than "is there an authorization
+ * object": the backend can accept a token as valid and still refuse the user,
+ * and a pane that treated the two as the same would go on to make calls that all
+ * fail. The start-up loader refuses to store a refused session at all, so inside
+ * the pane this is always `true` -- it is kept because a caller outside that
+ * gate has no such guarantee.
  *
  * @returns The profile, the flow, the session id and whether the API may be called.
  *
@@ -33,13 +36,12 @@ export interface UseSession {
  * ```
  */
 export function useSession(): UseSession {
-  const authorization = useSessionStore((state) => state.authorization);
-  const flow = useSessionStore((state) => state.flow);
+  const auth = useSessionStore((state) => state.auth);
 
   return {
-    userProfile: authorization?.userProfile ?? null,
-    flow,
-    sessionId: authorization?.sessionId ?? null,
-    isAuthorized: authorization?.isAuthorized ?? false,
+    userProfile: auth?.authorization.userProfile ?? null,
+    flow: auth?.flow ?? null,
+    sessionId: auth?.authorization.sessionId ?? null,
+    isAuthorized: auth?.authorization.isAuthorized ?? false,
   };
 }

@@ -2,7 +2,8 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
-import { useOfficeStore } from '@/stores/office/office.store';
+import { fillSession } from '@/fixtures/session.fixture';
+import { useSessionStore } from '@/stores/session/session.store';
 import { useMessageDisposition } from './use-message-disposition.hook';
 
 const { moveMessage, closePane, captureError } = vi.hoisted(() => ({
@@ -23,11 +24,11 @@ vi.mock('@/platform/sentry/utils/capture-error.util', () => ({ captureError }));
 describe('useMessageDisposition', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useOfficeStore.getState().setOffice({ environment: demoEnvironment, message: demoMessage, user: demoUser });
+    fillSession({ office: { environment: demoEnvironment, message: demoMessage, user: demoUser } });
   });
 
   afterEach(() => {
-    useOfficeStore.getState().reset();
+    useSessionStore.getState().reset();
   });
 
   it.each([
@@ -110,7 +111,7 @@ describe('useMessageDisposition', () => {
   });
 
   it('does nothing outside a host, where there is no mail to move', () => {
-    useOfficeStore.getState().reset();
+    useSessionStore.getState().reset();
 
     const { result } = renderHook(() => useMessageDisposition('spam'));
 

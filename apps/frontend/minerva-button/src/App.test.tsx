@@ -5,10 +5,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { adaptersFixture } from '@/fixtures/adapters.fixture';
 import { configFixture } from '@/fixtures/config.fixture';
 import { ConfigProvider } from '@/platform/config/provider/config.provider';
-import { useOfficeStore } from '@/stores/office/office.store';
 import { useReportStore } from '@/stores/report/report.store';
 import { useSessionStore } from '@/stores/session/session.store';
-import { useSettingsStore } from '@/stores/settings/settings.store';
 import { App } from './App';
 
 /**
@@ -45,9 +43,7 @@ function renderApp(): RenderResult {
 
 describe('App', () => {
   afterEach(() => {
-    useOfficeStore.getState().reset();
     useSessionStore.getState().reset();
-    useSettingsStore.getState().reset();
     useReportStore.getState().reset();
   });
 
@@ -61,14 +57,18 @@ describe('App', () => {
     expect(await findReportButton()).toBeInTheDocument();
   });
 
-  it('fills the stores from what the start-up sequence read', async () => {
+  it('fills the session store from what the start-up sequence read', async () => {
     renderApp();
 
     await findReportButton();
 
-    expect(useOfficeStore.getState().user?.name).toBe('Ada Lovelace');
-    expect(useSessionStore.getState().authorization?.isAuthorized).toBe(true);
-    expect(useSettingsStore.getState().settings).not.toBeNull();
+    const { office, auth, settings } = useSessionStore.getState();
+
+    // One store, one write: the report page is on screen, so all three slices
+    // are there.
+    expect(office?.user.name).toBe('Ada Lovelace');
+    expect(auth?.authorization.isAuthorized).toBe(true);
+    expect(settings).not.toBeNull();
   });
 
   it('walks a report through the drawer to the confirmation screen', async () => {

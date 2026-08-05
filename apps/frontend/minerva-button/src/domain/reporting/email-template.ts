@@ -2,7 +2,7 @@ import type { ReportingMethod, ReportingReasons } from '@minerva/typescript-lib'
 
 import type { NotificationMail } from '@/adapters/graph/graph.types';
 import type { OutlookMessage, OutlookUser } from '@/adapters/office/office.types';
-import type { ReportVariant } from '@/stores/settings/settings.types';
+import type { ReportVariant } from '@/domain/reporting/reporting.types';
 import { ATTACHMENT_NAME, REPORT_ID_HEADER, REPORTED_BY, REPORTED_BY_HEADER } from './reporting.types';
 
 /** Everything the template needs to describe one report. */

@@ -2,14 +2,15 @@ import type { MinervaButtonSettings } from '@minerva/typescript-lib';
 import { renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { demoSettings } from '@/fixtures/demo/minerva.fixture';
-import type { UseSettings } from '@/stores/settings/hooks/use-settings.hook';
-import { useSettingsStore } from '@/stores/settings/settings.store';
+import { fillSession } from '@/fixtures/session.fixture';
+import type { UseSettings } from '@/stores/session/hooks/use-settings.hook';
+import { useSessionStore } from '@/stores/session/session.store';
 import { useSettings } from './use-settings.hook';
 
 /** Loads a configuration and renders the hook against it. */
 function withSettings(settings?: MinervaButtonSettings): { current: UseSettings } {
   if (settings !== undefined) {
-    useSettingsStore.getState().setSettings(settings);
+    fillSession({ settings });
   }
 
   return renderHook(() => useSettings()).result;
@@ -17,7 +18,7 @@ function withSettings(settings?: MinervaButtonSettings): { current: UseSettings 
 
 describe('useSettings', () => {
   afterEach(() => {
-    useSettingsStore.getState().reset();
+    useSessionStore.getState().reset();
   });
 
   it('answers every flag false before the settings land', () => {

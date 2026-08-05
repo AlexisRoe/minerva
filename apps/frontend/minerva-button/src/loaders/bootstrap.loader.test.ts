@@ -1,20 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Adapters } from '@/adapters/create-adapters.util';
+import type { OfficeHost } from '@/adapters/office/office.types';
 import { OfficeHostUnsupportedError } from '@/domain/errors/office.errors';
 import { adaptersFixture } from '@/fixtures/adapters.fixture';
 import { demoAuthorization, demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
-import { useOfficeStore } from '@/stores/office/office.store';
 import { useSessionStore } from '@/stores/session/session.store';
-import { useSettingsStore } from '@/stores/settings/settings.store';
 import { createBootstrapLoader } from './bootstrap.loader';
 
 /** The four calls the sequence makes, spied so their order can be asserted. */
 function spies(order: string[] = []) {
   return {
     order,
-    readHost: vi.fn(() => {
+    readHost: vi.fn((): Promise<OfficeHost> => {
       order.push('host');
 
       return Promise.resolve({ environment: demoEnvironment, message: demoMessage, user: demoUser });
@@ -54,21 +53,17 @@ describe('createBootstrapLoader', () => {
   });
 
   afterEach(() => {
-    useOfficeStore.getState().reset();
     useSessionStore.getState().reset();
-    useSettingsStore.getState().reset();
   });
 
-  it('fills all three stores on the happy path', async () => {
+  it('fills the whole session on the happy path', async () => {
     await createBootstrapLoader(withSpies(spies()))();
 
-    expect(useOfficeStore.getState()).toMatchObject({
-      environment: demoEnvironment,
-      message: demoMessage,
-      user: demoUser,
+    expect(useSessionStore.getState()).toMatchObject({
+      office: { environment: demoEnvironment, message: demoMessage, user: demoUser },
+      auth: { authorization: demoAuthorization, flow: 'naa' },
+      settings: demoSettings,
     });
-    expect(useSessionStore.getState()).toMatchObject({ authorization: demoAuthorization, flow: 'naa' });
-    expect(useSettingsStore.getState().settings).toEqual(demoSettings);
   });
 
   it('runs the sequence in order, because each stage needs the last', async () => {
@@ -107,7 +102,18 @@ describe('createBootstrapLoader', () => {
 
     await createBootstrapLoader(withSpies(spied))();
 
-    expect(useSessionStore.getState().flow).toBe('dialog');
+    expect(useSessionStore.getState().auth?.flow).toBe('dialog');
+  });
+
+  it('starts a pane opened on no message, which is not a failure', async () => {
+    const spied = spies();
+    spied.readHost.mockResolvedValueOnce({ environment: demoEnvironment, message: null, user: demoUser });
+
+    await createBootstrapLoader(withSpies(spied))();
+
+    // The report page says "no message open" for itself; there is nothing here
+    // to stop for.
+    expect(useSessionStore.getState().office).toMatchObject({ message: null, user: demoUser });
   });
 
   it('throws rather than redirecting when the pane cannot run here', async () => {
@@ -122,16 +128,49 @@ describe('createBootstrapLoader', () => {
     expect(spied.acquireToken).not.toHaveBeenCalled();
   });
 
-  it('keeps what did succeed when a later stage fails', async () => {
+  it('stops on a user the backend declined, before fetching any settings', async () => {
+    const spied = spies();
+    spied.authorize.mockResolvedValueOnce({ ...demoAuthorization, isAuthorized: false });
+
+    await expect(createBootstrapLoader(withSpies(spied))()).rejects.toThrow(
+      expect.objectContaining({ code: 'ERR_018' }),
+    );
+
+    // Every later call would be refused one at a time; the pane says so once.
+    expect(spied.getSettings).not.toHaveBeenCalled();
+  });
+
+  it('stops where the tenant has switched the button off', async () => {
+    const spied = spies();
+    spied.getSettings.mockResolvedValueOnce({ ...demoSettings, enabled: false });
+
+    // A successful call whose content means the pane must not run: the registry
+    // sends it to the no-content screen rather than the error one.
+    await expect(createBootstrapLoader(withSpies(spied))()).rejects.toThrow(
+      expect.objectContaining({ code: 'ERR_017' }),
+    );
+    expect(useSessionStore.getState().settings).toBeNull();
+  });
+
+  it('writes nothing at all when a later stage fails', async () => {
     const spied = spies();
     spied.getSettings.mockRejectedValueOnce(new Error('backend down'));
 
     await expect(createBootstrapLoader(withSpies(spied))()).rejects.toThrow('backend down');
 
-    // Written as they land rather than rolled back, so the error screen can still
-    // say who the user was.
-    expect(useOfficeStore.getState().user).toEqual(demoUser);
-    expect(useSessionStore.getState().authorization).toEqual(demoAuthorization);
-    expect(useSettingsStore.getState().settings).toBeNull();
+    // The single write is the last thing the sequence does, so a pane that never
+    // finished starting holds nothing -- rather than a half-session the report
+    // page would have to defend itself against.
+    expect(useSessionStore.getState()).toMatchObject({ office: null, auth: null, settings: null });
+  });
+
+  it('writes once, so nothing can render against a partial session', async () => {
+    const seen: unknown[] = [];
+    const unsubscribe = useSessionStore.subscribe((state) => seen.push(state.office));
+
+    await createBootstrapLoader(withSpies(spies()))();
+    unsubscribe();
+
+    expect(seen).toHaveLength(1);
   });
 });

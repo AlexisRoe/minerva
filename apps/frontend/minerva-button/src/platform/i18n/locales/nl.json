@@ -6,6 +6,7 @@
   "tip-generic": "Sluit het deelvenster en open het bericht opnieuw. Blijft dit gebeuren, geef dan de onderstaande code door aan uw IT-afdeling.",
   "tip-network": "Controleer uw verbinding en probeer het opnieuw. Blijft dit gebeuren, geef dan de onderstaande code door aan uw IT-afdeling.",
   "tip-auth": "Minerva kon u niet aanmelden. Probeer het opnieuw en rond een eventuele aanmeldvraag af.",
+  "tip-permission": "Uw account mag Minerva niet gebruiken. Vraag uw IT-afdeling om toegang en vermeld de code hieronder.",
   "tip-deployment": "Dit ligt aan de Minerva-installatie en niet aan u. Geef de onderstaande code door aan uw IT-afdeling.",
   "close": "Sluiten",
   "cancel": "Annuleren",
@@ -59,5 +60,6 @@
   "unsupported-generic": "Minerva kon niet starten in dit venster. Open het bericht opnieuw in Outlook.",
   "unsupported-timeout": "Minerva kon Outlook niet bereiken. Controleer uw verbinding en open het bericht opnieuw.",
   "unsupported-host": "Minerva rapporteert e-mail en werkt daarom alleen in Outlook.",
+  "unsupported-disabled": "Minerva is uitgeschakeld voor uw organisatie. Uw IT-afdeling kan het weer inschakelen.",
   "unsupported-requirement-set": "Deze versie van Outlook is te oud voor Minerva. Werk Outlook bij of open het bericht in Outlook op het web."
 }

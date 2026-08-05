@@ -5,10 +5,10 @@ import { REPORT_ID_HEADER } from '@/domain/reporting/reporting.types';
 import { adaptersFixture } from '@/fixtures/adapters.fixture';
 import { demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
-import { useOfficeStore } from '@/stores/office/office.store';
+import { fillSession } from '@/fixtures/session.fixture';
 import { useReportStore } from '@/stores/report/report.store';
 import type { ReportDraft } from '@/stores/report/report.types';
-import { useSettingsStore } from '@/stores/settings/settings.store';
+import { useSessionStore } from '@/stores/session/session.store';
 import { createReportLoader } from './report.loader';
 
 // The parameters are declared even though the bodies ignore them: without them
@@ -60,13 +60,11 @@ describe('createReportLoader', () => {
     getMimeMessage.mockResolvedValue(new Blob(['raw'], { type: 'message/rfc822' }));
     sendMail.mockResolvedValue(undefined);
 
-    useOfficeStore.getState().setOffice({ environment: demoEnvironment, message: demoMessage, user: demoUser });
-    useSettingsStore.getState().setSettings(demoSettings);
+    fillSession({ office: { environment: demoEnvironment, message: demoMessage, user: demoUser } });
   });
 
   afterEach(() => {
-    useOfficeStore.getState().reset();
-    useSettingsStore.getState().reset();
+    useSessionStore.getState().reset();
     useReportStore.getState().reset();
   });
 
@@ -265,9 +263,18 @@ describe('createReportLoader', () => {
   });
 
   it('refuses to run before the pane has finished starting up', async () => {
-    useSettingsStore.getState().reset();
+    useSessionStore.getState().reset();
     draft();
 
-    await expect(file()).rejects.toThrow(/finished starting up/);
+    // A wiring fault rather than a state a user can reach: the drawer only
+    // exists behind the start-up gate.
+    await expect(file()).rejects.toThrow(expect.objectContaining({ code: 'ERR_019' }));
+  });
+
+  it('refuses to file a report for a pane that was opened on no message', async () => {
+    fillSession({ office: { environment: demoEnvironment, message: null, user: demoUser } });
+    draft();
+
+    await expect(file()).rejects.toThrow(expect.objectContaining({ code: 'ERR_019' }));
   });
 });

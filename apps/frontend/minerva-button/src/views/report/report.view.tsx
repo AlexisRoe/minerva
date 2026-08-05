@@ -18,8 +18,8 @@ import { FeatureGuard } from '@/components/feature-guard/feature-guard.component
 import { LOGO_SIZE } from '@/constants/icon-sizes.constants';
 import { useReportSubmission } from '@/hooks/use-report-submission.hook';
 import { useTranslations } from '@/platform/i18n/hooks/use-translations.hook';
-import { useOffice } from '@/stores/office/hooks/use-office.hook';
-import { useSettings } from '@/stores/settings/hooks/use-settings.hook';
+import { useOffice } from '@/stores/session/hooks/use-office.hook';
+import { useSettings } from '@/stores/session/hooks/use-settings.hook';
 
 /** The list takes what the description leaves, which is what lets the buttons grow. */
 const listStyle = { flex: '1 1 auto', minHeight: 0 } as const;

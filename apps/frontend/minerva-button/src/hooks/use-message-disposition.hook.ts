@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
 import type { WellKnownFolder } from '@/adapters/graph/graph.types';
+import type { ReportVariant } from '@/domain/reporting/reporting.types';
 import { useAdapters } from '@/platform/config/hooks/use-adapters.hook';
 import type { TranslationKey } from '@/platform/i18n/utils/translate.util';
 import { captureError } from '@/platform/sentry/utils/capture-error.util';
-import { useOffice } from '@/stores/office/hooks/use-office.hook';
-import type { ReportVariant } from '@/stores/settings/settings.types';
+import { useOffice } from '@/stores/session/hooks/use-office.hook';
 
 /**
  * Where each report sends the mail, and what the button offering it says.

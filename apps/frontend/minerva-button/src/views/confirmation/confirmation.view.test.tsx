@@ -4,15 +4,14 @@ import { type RenderResult, render, screen, waitFor } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AsyncLoading } from '@/components/async-loading/async-loading.component';
-import type { ReportResult } from '@/domain/reporting/reporting.types';
+import type { ReportResult, ReportVariant } from '@/domain/reporting/reporting.types';
 import { adaptersFixture } from '@/fixtures/adapters.fixture';
 import { configFixture } from '@/fixtures/config.fixture';
 import { demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
+import { fillSession } from '@/fixtures/session.fixture';
 import { ConfigProvider } from '@/platform/config/provider/config.provider';
-import { useOfficeStore } from '@/stores/office/office.store';
-import { useSettingsStore } from '@/stores/settings/settings.store';
-import type { ReportVariant } from '@/stores/settings/settings.types';
+import { useSessionStore } from '@/stores/session/session.store';
 import { ConfirmationView } from './confirmation.view';
 
 const { moveMessage, closePane, captureError } = vi.hoisted(() => ({
@@ -82,13 +81,11 @@ async function file(): Promise<void> {
 describe('ConfirmationView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useOfficeStore.getState().setOffice({ environment: demoEnvironment, message: demoMessage, user: demoUser });
-    useSettingsStore.getState().setSettings(demoSettings);
+    fillSession({ office: { environment: demoEnvironment, message: demoMessage, user: demoUser } });
   });
 
   afterEach(() => {
-    useOfficeStore.getState().reset();
-    useSettingsStore.getState().reset();
+    useSessionStore.getState().reset();
   });
 
   it('says what was filed, keyed on the variant', async () => {
@@ -169,7 +166,7 @@ describe('ConfirmationView', () => {
   });
 
   it('hides the contact block where it is switched off', async () => {
-    useSettingsStore.getState().setSettings({ ...demoSettings, contact: { ...demoSettings.contact, enable: false } });
+    fillSession({ settings: { ...demoSettings, contact: { ...demoSettings.contact, enable: false } } });
 
     renderView(result());
     await file();

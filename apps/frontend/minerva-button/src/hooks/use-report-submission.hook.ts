@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 
 import { ROUTES } from '@/constants/routes.constants';
 import { useReportStore } from '@/stores/report/report.store';
-import { useSettings } from '@/stores/settings/hooks/use-settings.hook';
+import { useSettings } from '@/stores/session/hooks/use-settings.hook';
 
 /** One tickable reason, as the feedback block wants it. */
 export interface ReportReasonOption {

@@ -6,6 +6,7 @@
   "tip-generic": "请关闭此窗格并重新打开该邮件。如果问题持续出现，请将下方的代码告知您的 IT 团队。",
   "tip-network": "请检查网络连接后重试。如果问题持续出现，请将下方的代码告知您的 IT 团队。",
   "tip-auth": "Minerva 无法为您登录。请重试；如果出现登录提示，请完成登录。",
+  "tip-permission": "您的帐户无权使用 Minerva。请向 IT 团队申请访问权限，并提供下方的代码。",
   "tip-deployment": "这是 Minerva 安装配置的问题，与您无关。请将下方的代码告知您的 IT 团队。",
   "close": "关闭",
   "cancel": "取消",
@@ -59,5 +60,6 @@
   "unsupported-generic": "Minerva 无法在此窗口中启动。请在 Outlook 中重新打开该邮件。",
   "unsupported-timeout": "Minerva 无法连接到 Outlook。请检查网络连接，然后重新打开该邮件。",
   "unsupported-host": "Minerva 用于举报邮件，因此仅能在 Outlook 中运行。",
+  "unsupported-disabled": "贵组织已停用 Minerva。您的 IT 团队可以重新启用它。",
   "unsupported-requirement-set": "此 Outlook 版本过旧，无法运行 Minerva。请更新 Outlook，或在 Outlook 网页版中打开该邮件。"
 }

@@ -9,7 +9,7 @@ import type { ReportResult } from '@/domain/reporting/reporting.types';
 import { useMessageDisposition } from '@/hooks/use-message-disposition.hook';
 import { useTranslations } from '@/platform/i18n/hooks/use-translations.hook';
 import type { TranslationKey } from '@/platform/i18n/utils/translate.util';
-import { useSettings } from '@/stores/settings/hooks/use-settings.hook';
+import { useSettings } from '@/stores/session/hooks/use-settings.hook';
 
 /** What is said about an email the backend recognised. */
 const IDENTIFIED_KEYS = {

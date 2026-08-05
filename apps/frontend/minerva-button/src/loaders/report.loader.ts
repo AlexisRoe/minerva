@@ -3,12 +3,12 @@ import type { ReportingMethod, ReportingReasons } from '@minerva/typescript-lib'
 import type { Adapters } from '@/adapters/create-adapters.util';
 import type { GraphAdapter } from '@/adapters/graph/graph.types';
 import { ReportNotificationFailedError } from '@/domain/errors/reporting.errors';
+import { SessionIncompleteError } from '@/domain/errors/session.errors';
 import { buildNotificationMail } from '@/domain/reporting/email-template';
 import type { MethodOutcome, ReportResult } from '@/domain/reporting/reporting.types';
 import { captureError } from '@/platform/sentry/utils/capture-error.util';
-import { useOfficeStore } from '@/stores/office/office.store';
 import { useReportStore } from '@/stores/report/report.store';
-import { useSettingsStore } from '@/stores/settings/settings.store';
+import { useSessionStore } from '@/stores/session/session.store';
 
 /**
  * Sends one notification per reporting method, in parallel.
@@ -91,13 +91,23 @@ export function createReportLoader({ graph, minerva }: Adapters): () => Promise<
       return undefined;
     }
 
-    const { message, user } = useOfficeStore.getState();
-    const { settings } = useSettingsStore.getState();
+    const { office, settings } = useSessionStore.getState();
 
-    if (message === null || user === null || settings === null) {
-      // The start-up loader fills all three before the drawer can be opened, so
-      // this is a wiring fault rather than a state a user can get into.
-      throw new Error('A report was submitted before the pane had finished starting up.');
+    if (office === null || settings === null) {
+      // The start-up loader writes the whole session in one go before the drawer
+      // can be opened, so this is a wiring fault rather than a state a user can
+      // get into.
+      throw new SessionIncompleteError('reportLoader', [
+        ...(office === null ? ['office'] : []),
+        ...(settings === null ? ['settings'] : []),
+      ]);
+    }
+
+    const { message, user } = office;
+
+    if (message === null) {
+      // Same gate: the report buttons only exist on a pane opened on a message.
+      throw new SessionIncompleteError('reportLoader', ['office.message']);
     }
 
     const mime = await graph.getMimeMessage(message.exchangeId);

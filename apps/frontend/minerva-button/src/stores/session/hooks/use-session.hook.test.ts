@@ -2,6 +2,7 @@ import { renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { demoAuthorization } from '@/fixtures/demo/minerva.fixture';
+import { fillSession } from '@/fixtures/session.fixture';
 import { useSessionStore } from '@/stores/session/session.store';
 import { useSession } from './use-session.hook';
 
@@ -10,7 +11,7 @@ describe('useSession', () => {
     useSessionStore.getState().reset();
   });
 
-  it('reports nobody signed in before the loader has run', () => {
+  it('reports nobody signed in before the start-up sequence has run', () => {
     const { result } = renderHook(() => useSession());
 
     expect(result.current).toEqual({
@@ -22,7 +23,7 @@ describe('useSession', () => {
   });
 
   it('unpacks the profile and session id once signed in', () => {
-    useSessionStore.getState().setSession({ authorization: demoAuthorization, flow: 'naa' });
+    fillSession();
 
     const { result } = renderHook(() => useSession());
 
@@ -34,16 +35,24 @@ describe('useSession', () => {
     });
   });
 
+  it('records the dialog flow where the client had no NAA', () => {
+    fillSession({ auth: { authorization: demoAuthorization, flow: 'dialog' } });
+
+    const { result } = renderHook(() => useSession());
+
+    expect(result.current.flow).toBe('dialog');
+  });
+
   it('trusts the backend on authorisation rather than inferring it', () => {
-    useSessionStore.getState().setSession({
-      authorization: { ...demoAuthorization, isAuthorized: false },
-      flow: 'naa',
+    fillSession({
+      auth: { authorization: { ...demoAuthorization, isAuthorized: false }, flow: 'naa' },
     });
 
     const { result } = renderHook(() => useSession());
 
-    // The backend can validate a token and still refuse the user. Treating "we
-    // got an answer" as "we are allowed in" would make every later call fail.
+    // The start-up loader refuses such a session outright, so this can only be
+    // written by hand -- but "we got an answer" must still never read as "we are
+    // allowed in".
     expect(result.current.isAuthorized).toBe(false);
     expect(result.current.userProfile).toEqual(demoAuthorization.userProfile);
   });

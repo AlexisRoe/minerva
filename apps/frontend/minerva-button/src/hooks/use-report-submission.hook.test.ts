@@ -2,9 +2,10 @@ import type { UserFeedbackValue } from '@minerva/ui-lib';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { demoSettings } from '@/fixtures/demo/minerva.fixture';
+import { fillSession } from '@/fixtures/session.fixture';
 import type { ReportSubmission } from '@/hooks/use-report-submission.hook';
 import { useReportStore } from '@/stores/report/report.store';
-import { useSettingsStore } from '@/stores/settings/settings.store';
+import { useSessionStore } from '@/stores/session/session.store';
 import { useReportSubmission } from './use-report-submission.hook';
 
 const navigate = vi.fn();
@@ -22,14 +23,14 @@ const validFeedback: UserFeedbackValue = {
 
 /** Loads the demo settings, so `reasonsFor` has something to answer with. */
 function renderWithSettings(): { current: ReportSubmission } {
-  useSettingsStore.getState().setSettings(demoSettings);
+  fillSession({ settings: demoSettings });
 
   return renderHook(() => useReportSubmission()).result;
 }
 
 describe('useReportSubmission', () => {
   afterEach(() => {
-    useSettingsStore.getState().reset();
+    useSessionStore.getState().reset();
     useReportStore.getState().reset();
     navigate.mockClear();
   });

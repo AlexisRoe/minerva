@@ -6,6 +6,7 @@
   "tip-generic": "Close the pane and open the message again. If it keeps happening, quote the code below to your IT team.",
   "tip-network": "Check your connection and try again. If it keeps happening, quote the code below to your IT team.",
   "tip-auth": "Minerva could not sign you in. Try again, and if you are asked to sign in, complete the prompt.",
+  "tip-permission": "Your account is not allowed to use Minerva. Ask your IT team to give you access, and quote the code below.",
   "tip-deployment": "This is a problem with the Minerva installation rather than with you. Quote the code below to your IT team.",
   "close": "Close",
   "cancel": "Cancel",
@@ -59,5 +60,6 @@
   "unsupported-generic": "Minerva could not start in this window. Try opening the message in Outlook again.",
   "unsupported-timeout": "Minerva could not reach Outlook. Check your connection, then open the message again.",
   "unsupported-host": "Minerva reports email, so it only runs in Outlook.",
+  "unsupported-disabled": "Minerva is switched off for your organisation. Your IT team can turn it back on.",
   "unsupported-requirement-set": "This version of Outlook is too old for Minerva. Update Outlook, or open the message in Outlook on the web."
 }

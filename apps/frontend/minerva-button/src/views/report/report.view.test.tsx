@@ -7,9 +7,9 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { ROUTES } from '@/constants/routes.constants';
 import { demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
-import { useOfficeStore } from '@/stores/office/office.store';
+import { fillSession } from '@/fixtures/session.fixture';
 import { useReportStore } from '@/stores/report/report.store';
-import { useSettingsStore } from '@/stores/settings/settings.store';
+import { useSessionStore } from '@/stores/session/session.store';
 import { ReportView } from './report.view';
 
 /**
@@ -19,16 +19,13 @@ import { ReportView } from './report.view';
  * asserted here is *what* the drawer records and that it leaves for the next
  * screen -- filing it is the reporting loader's job and has its own tests.
  */
-function renderView(settings: MinervaButtonSettings | null = demoSettings, message = demoMessage): RenderResult {
-  useOfficeStore.getState().setOffice({
-    environment: demoEnvironment,
-    message,
-    user: demoUser,
+function renderView(settings: MinervaButtonSettings = demoSettings, message = demoMessage): RenderResult {
+  // One write, as the start-up sequence does it: the view only ever renders
+  // behind a session that has all of this.
+  fillSession({
+    office: { environment: demoEnvironment, message, user: demoUser },
+    settings,
   });
-
-  if (settings !== null) {
-    useSettingsStore.getState().setSettings(settings);
-  }
 
   return render(
     <MinervaThemeProvider>
@@ -54,8 +51,7 @@ async function openSuspiciousDrawer(): Promise<void> {
 describe('ReportView', () => {
   afterEach(() => {
     useReportStore.getState().reset();
-    useOfficeStore.getState().reset();
-    useSettingsStore.getState().reset();
+    useSessionStore.getState().reset();
   });
 
   it('offers both reports where the tenant allows both', async () => {
@@ -141,7 +137,7 @@ describe('ReportView', () => {
     expect(await screen.findByRole('button', { name: /show details/i })).toBeInTheDocument();
 
     unmount();
-    useSettingsStore.getState().reset();
+    useSessionStore.getState().reset();
 
     renderView({
       ...demoSettings,

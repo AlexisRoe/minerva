@@ -6,6 +6,7 @@
   "tip-generic": "Feche o painel e abra a mensagem novamente. Se continuar a acontecer, indique o código abaixo à sua equipa de TI.",
   "tip-network": "Verifique a sua ligação e tente novamente. Se continuar a acontecer, indique o código abaixo à sua equipa de TI.",
   "tip-auth": "O Minerva não conseguiu iniciar a sua sessão. Tente novamente e, se lhe for pedido para iniciar sessão, conclua o processo.",
+  "tip-permission": "A sua conta não tem permissão para utilizar o Minerva. Peça acesso à sua equipa de TI e indique o código abaixo.",
   "tip-deployment": "Isto é um problema da instalação do Minerva e não seu. Indique o código abaixo à sua equipa de TI.",
   "close": "Fechar",
   "cancel": "Cancelar",
@@ -59,5 +60,6 @@
   "unsupported-generic": "O Minerva não conseguiu iniciar nesta janela. Abra a mensagem novamente no Outlook.",
   "unsupported-timeout": "O Minerva não conseguiu contactar o Outlook. Verifique a sua ligação e abra a mensagem novamente.",
   "unsupported-host": "O Minerva comunica e-mails, por isso só funciona no Outlook.",
+  "unsupported-disabled": "O Minerva está desativado na sua organização. A sua equipa de TI pode voltar a ativá-lo.",
   "unsupported-requirement-set": "Esta versão do Outlook é demasiado antiga para o Minerva. Atualize o Outlook ou abra a mensagem no Outlook na Web."
 }

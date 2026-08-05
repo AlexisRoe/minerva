@@ -19,6 +19,7 @@ import {
 } from './office.errors';
 import { ReportNotificationFailedError } from './reporting.errors';
 import { GraphRequestFailedError, MinervaRequestFailedError } from './request.errors';
+import { ButtonDisabledError, SessionIncompleteError, SessionNotAuthorizedError } from './session.errors';
 
 /** What one entry of {@link errorRegistry} records about an error. */
 export interface ErrorRegistryEntry {
@@ -195,6 +196,30 @@ export const errorRegistry = {
     screen: ErrorScreenKind.Error,
     canRetry: false,
     message: 'tip-network',
+  },
+  ERR_017: {
+    error: ButtonDisabledError,
+    description: 'The tenant configuration was fetched and says the button is switched off.',
+    // Nothing has broken -- the tenant turned it off -- so this is the same
+    // statement as "not in Outlook": the pane cannot run here, and no button the
+    // user could press would change that.
+    screen: ErrorScreenKind.NoContent,
+    canRetry: false,
+    message: 'unsupported-disabled',
+  },
+  ERR_018: {
+    error: SessionNotAuthorizedError,
+    description: 'The backend validated the token but refused the user.',
+    screen: ErrorScreenKind.Error,
+    canRetry: false,
+    message: 'tip-permission',
+  },
+  ERR_019: {
+    error: SessionIncompleteError,
+    description: 'The pane session was read before the start-up sequence had filled it.',
+    screen: ErrorScreenKind.Error,
+    canRetry: false,
+    message: 'tip-deployment',
   },
 } as const satisfies Partial<Record<ErrorCode, ErrorRegistryEntry>>;
 

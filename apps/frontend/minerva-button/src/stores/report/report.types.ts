@@ -1,4 +1,4 @@
-import type { ReportVariant } from '@/stores/settings/settings.types';
+import type { ReportVariant } from '@/domain/reporting/reporting.types';
 
 /**
  * What the report drawer collected, once the user pressed send.

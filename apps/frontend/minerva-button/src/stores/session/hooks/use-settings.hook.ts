@@ -1,11 +1,11 @@
 import type { Contact, MinervaButtonSettings, ReportingMethod, ReportingReasons } from '@minerva/typescript-lib';
 
-import { useSettingsStore } from '@/stores/settings/settings.store';
-import type { ReportVariant } from '@/stores/settings/settings.types';
+import type { ReportVariant } from '@/domain/reporting/reporting.types';
+import { useSessionStore } from '@/stores/session/session.store';
 
 /** What {@link useSettings} returns. */
 export interface UseSettings {
-  /** The whole configuration, or `null` before the loader has fetched it. */
+  /** The whole configuration, or `null` before the start-up sequence has finished. */
   readonly settings: MinervaButtonSettings | null;
   /** Whether the button is switched on for this tenant at all. */
   readonly isEnabled: boolean;
@@ -40,7 +40,7 @@ const NO_METHODS: readonly ReportingMethod[] = [];
 /**
  * Reads the tenant configuration, already reduced to the questions views ask.
  *
- * The read side of {@link useSettingsStore}, and deliberately more than a
+ * The `settings` slice of {@link useSessionStore}, and deliberately more than a
  * passthrough. Views ask "should the spam button exist?", not "is
  * `features.enableSpamReporting` true, and are the settings loaded yet?" -- so
  * the nesting and the `null` are collapsed here rather than at a dozen call
@@ -49,6 +49,9 @@ const NO_METHODS: readonly ReportingMethod[] = [];
  * Every flag answers `false` and every list answers empty before the settings
  * land. That is the safe direction: a pane that briefly showed nothing is
  * recoverable, a pane that briefly offered a button the tenant disabled is not.
+ * `isEnabled` is the same answer twice over -- the start-up loader refuses to
+ * store a configuration that is switched off, so a rendered pane always reads
+ * `true` here.
  *
  * @returns The configuration and the derived answers the two screens need.
  *
@@ -62,7 +65,7 @@ const NO_METHODS: readonly ReportingMethod[] = [];
  * ```
  */
 export function useSettings(): UseSettings {
-  const settings = useSettingsStore((state) => state.settings);
+  const settings = useSessionStore((state) => state.settings);
 
   const contact = settings?.contact.enable === true ? settings.contact : null;
 

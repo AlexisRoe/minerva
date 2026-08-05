@@ -1,7 +1,6 @@
 import type { Adapters } from '@/adapters/create-adapters.util';
-import { useOfficeStore } from '@/stores/office/office.store';
+import { ButtonDisabledError, SessionNotAuthorizedError } from '@/domain/errors/session.errors';
 import { useSessionStore } from '@/stores/session/session.store';
-import { useSettingsStore } from '@/stores/settings/settings.store';
 
 /**
  * Runs the pane's start-up sequence, in order, before the report page renders.
@@ -14,15 +13,25 @@ import { useSettingsStore } from '@/stores/settings/settings.store';
  * in stages and reflow under them.
  *
  * The order is: read the host, sign in, trade the token for a session, fetch the
- * tenant's settings. Each result is written to its store as it lands, so a
- * failure half way leaves what did succeed readable rather than rolling back --
- * the error screen can then say who the user was.
+ * tenant's settings. Nothing reaches {@link useSessionStore} until all of it has
+ * landed *and* been checked, in a single write at the end. That is the point of
+ * this file: the report page can be rendered on the strength of the store being
+ * filled, without asking which half of it arrived. A failure half way therefore
+ * leaves the store empty rather than partly filled, which is the honest
+ * description of a pane that never started.
+ *
+ * Two of the checks are of answers rather than of failures. The backend can
+ * validate a token and still decline the user, and a tenant can have the button
+ * switched off; both are successful calls whose content means the pane must
+ * stop, so each gets its own error rather than a page whose every action fails
+ * one at a time. `enabled: false` is not a fault, and lands on the no-content
+ * screen accordingly.
  *
  * Nothing is caught here. A failure propagates out of the promise, `AsyncLoading`
  * rethrows it during render, and `MinervaErrorBoundary` turns it into
  * `ErrorScreen` -- which reads the error registry and shows the "cannot run
- * here" wording, with no retry, for the three environment failures. One path,
- * whatever broke.
+ * here" wording, with no retry, for the environment failures and for a tenant
+ * that has switched the button off. One path, whatever broke.
  *
  * Demo mode does not appear in this file at all: the adapters were chosen once
  * in `main.tsx`, so a demo run walks exactly these steps against fixtures.
@@ -41,15 +50,25 @@ export function createBootstrapLoader({ office, minerva }: Adapters): () => Prom
   return async function bootstrapLoader(): Promise<void> {
     const { environment, message, user } = await office.readHost();
 
-    useOfficeStore.getState().setOffice({ environment, message, user });
-
     const authToken = await office.acquireToken();
     const authorization = await minerva.authorize({ authToken });
 
-    useSessionStore.getState().setSession({ authorization, flow: environment.naaSupported ? 'naa' : 'dialog' });
+    if (!authorization.isAuthorized) {
+      throw new SessionNotAuthorizedError(authorization.sessionId);
+    }
 
     const settings = await minerva.getSettings({ userLanguage: user.language });
 
-    useSettingsStore.getState().setSettings(settings);
+    if (!settings.enabled) {
+      throw new ButtonDisabledError();
+    }
+
+    // The one write, and the last thing the sequence does: everything above has
+    // to have succeeded for the pane to hold any of it.
+    useSessionStore.getState().setSession({
+      office: { environment, message, user },
+      auth: { authorization, flow: environment.naaSupported ? 'naa' : 'dialog' },
+      settings,
+    });
   };
 }

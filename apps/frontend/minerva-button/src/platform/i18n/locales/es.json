@@ -6,6 +6,7 @@
   "tip-generic": "Cierre el panel y vuelva a abrir el mensaje. Si sigue ocurriendo, indique el código de abajo a su equipo de TI.",
   "tip-network": "Compruebe su conexión y vuelva a intentarlo. Si sigue ocurriendo, indique el código de abajo a su equipo de TI.",
   "tip-auth": "Minerva no pudo iniciar su sesión. Inténtelo de nuevo y, si se le pide iniciar sesión, complete el proceso.",
+  "tip-permission": "Su cuenta no tiene permiso para usar Minerva. Pida acceso a su equipo de TI e indique el código de abajo.",
   "tip-deployment": "Es un problema de la instalación de Minerva, no suyo. Indique el código de abajo a su equipo de TI.",
   "close": "Cerrar",
   "cancel": "Cancelar",
@@ -59,5 +60,6 @@
   "unsupported-generic": "Minerva no pudo iniciarse en esta ventana. Vuelva a abrir el mensaje en Outlook.",
   "unsupported-timeout": "Minerva no pudo conectar con Outlook. Compruebe su conexión y vuelva a abrir el mensaje.",
   "unsupported-host": "Minerva informa sobre correos, por lo que solo funciona en Outlook.",
+  "unsupported-disabled": "Minerva está desactivado para su organización. Su equipo de TI puede volver a activarlo.",
   "unsupported-requirement-set": "Esta versión de Outlook es demasiado antigua para Minerva. Actualice Outlook o abra el mensaje en Outlook en la web."
 }
