@@ -27,12 +27,18 @@ import { setBuildTags } from './sentry-tags.util';
  * are not production signal, and letting them into the project would mean
  * alerting on a mock. Demo mode makes no outbound calls, and Sentry is one.
  *
+ * No `browserTracingIntegration`, and so no `tracesSampleRate`: it pulls
+ * `@sentry/browser-utils` and the performance instrumentation into the first
+ * chunk the pane loads, and the pane wants error reporting, not spans. The
+ * default integrations -- global handlers, breadcrumbs -- are left alone, which
+ * is what actually catches the errors.
+ *
  * @param config - The configuration loaded at start-up.
  * @returns Whether Sentry was initialised.
  *
  * @see {@link https://docs.sentry.io/platforms/javascript/guides/react/} -- the SDK
  * @see {@link https://docs.sentry.io/platforms/javascript/guides/react/configuration/options/} -- every `init` option
- * @see {@link https://docs.sentry.io/platforms/javascript/guides/react/tracing/} -- `browserTracingIntegration` and `tracesSampleRate`
+ * @see {@link https://docs.sentry.io/platforms/javascript/guides/react/tracing/} -- the tracing this deliberately leaves off
  * @see {@link https://docs.sentry.io/platforms/javascript/guides/react/configuration/releases/} -- the `release` format
  *
  * @example
@@ -53,8 +59,6 @@ export function initSentry(config: AppConfig): boolean {
     dsn: config.sentryDsn,
     environment: config.mode,
     release: `${config.name}@${config.version}`,
-    integrations: [Sentry.browserTracingIntegration()],
-    tracesSampleRate: config.sentryTracesSampleRate,
   });
 
   setBuildTags(config);

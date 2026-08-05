@@ -7,7 +7,6 @@ import { initSentry } from './init-sentry.util';
 vi.mock('@sentry/react', () => ({
   init: vi.fn(),
   setTags: vi.fn(),
-  browserTracingIntegration: vi.fn(() => ({ name: 'BrowserTracing' })),
 }));
 
 const dsn = 'https://key@example.ingest.sentry.io/1';
@@ -44,7 +43,6 @@ describe('initSentry', () => {
       ...configFixture,
       mode: 'production',
       sentryDsn: dsn,
-      sentryTracesSampleRate: 0.2,
     };
 
     expect(initSentry(config)).toBe(true);
@@ -54,16 +52,17 @@ describe('initSentry', () => {
         dsn,
         environment: 'production',
         release: '@minerva/button@0.1.0',
-        tracesSampleRate: 0.2,
       }),
     );
   });
 
-  it('enables tracing', () => {
+  it('leaves tracing off, so no spans and no performance instrumentation ship', () => {
     initSentry({ ...configFixture, sentryDsn: dsn });
 
-    expect(Sentry.browserTracingIntegration).toHaveBeenCalled();
-    expect(Sentry.init).toHaveBeenCalledWith(expect.objectContaining({ integrations: [{ name: 'BrowserTracing' }] }));
+    const options = vi.mocked(Sentry.init).mock.calls[0]?.[0];
+
+    expect(options).not.toHaveProperty('integrations');
+    expect(options).not.toHaveProperty('tracesSampleRate');
   });
 
   it('tags the session with the build, after starting the SDK', () => {
