@@ -3,9 +3,9 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { fillSession } from '@/fixtures/session.fixture';
+import { resetStores } from '@/fixtures/stores.fixture';
 import type { ReportSubmission } from '@/hooks/use-report-submission.hook';
 import { useReportStore } from '@/stores/report/report.store';
-import { useSessionStore } from '@/stores/session/session.store';
 import { useReportSubmission } from './use-report-submission.hook';
 
 const navigate = vi.fn();
@@ -30,8 +30,7 @@ function renderWithSettings(): { current: ReportSubmission } {
 
 describe('useReportSubmission', () => {
   afterEach(() => {
-    useSessionStore.getState().reset();
-    useReportStore.getState().reset();
+    resetStores();
     navigate.mockClear();
   });
 
@@ -64,8 +63,6 @@ describe('useReportSubmission', () => {
       result.current.setFeedback({ ...validFeedback, isValid: false });
     });
 
-    // The mandatory-reason rule lives in the feedback block; this asserts the
-    // hook defers to it rather than deciding for itself.
     expect(result.current.canSend).toBe(false);
   });
 
@@ -81,7 +78,6 @@ describe('useReportSubmission', () => {
       result.current.sendReport();
     });
 
-    // The reporting loader runs outside React and reads exactly this.
     expect(useReportStore.getState().draft).toEqual({
       variant: 'spam',
       reasons: ['phishing', 'attachment'],
@@ -117,7 +113,6 @@ describe('useReportSubmission', () => {
       result.current.sendReport();
     });
 
-    // Reachable if a caller wires the send button without the disabled state.
     expect(useReportStore.getState().draft).toBeNull();
     expect(navigate).not.toHaveBeenCalled();
     expect(result.current.filing).toBe('spam');
@@ -139,8 +134,6 @@ describe('useReportSubmission', () => {
       result.current.startReport('spam');
     });
 
-    // A reopened drawer that still held the last report's note would attach it
-    // to a different mail.
     expect(result.current.canSend).toBe(false);
     expect(navigate).not.toHaveBeenCalled();
   });

@@ -3,8 +3,8 @@ import { renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { fillSession } from '@/fixtures/session.fixture';
+import { resetStores } from '@/fixtures/stores.fixture';
 import type { UseSettings } from '@/stores/session/hooks/use-settings.hook';
-import { useSessionStore } from '@/stores/session/session.store';
 import { useSettings } from './use-settings.hook';
 
 /** Loads a configuration and renders the hook against it. */
@@ -17,15 +17,11 @@ function withSettings(settings?: MinervaButtonSettings): { current: UseSettings 
 }
 
 describe('useSettings', () => {
-  afterEach(() => {
-    useSessionStore.getState().reset();
-  });
+  afterEach(resetStores);
 
   it('answers every flag false before the settings land', () => {
     const result = withSettings();
 
-    // The safe direction: a pane that briefly showed nothing is recoverable, one
-    // that briefly offered a disabled button is not.
     expect(result.current).toMatchObject({
       settings: null,
       isEnabled: false,
@@ -70,8 +66,6 @@ describe('useSettings', () => {
       contact: { ...demoSettings.contact, enable: false },
     });
 
-    // The block carries an address and a person even when disabled, so returning
-    // the object would have the confirmation screen render it anyway.
     expect(result.current.hasContact).toBe(false);
     expect(result.current.contact).toBeNull();
   });
@@ -98,8 +92,6 @@ describe('useSettings', () => {
       userFeedback: { ...demoSettings.userFeedback, enabled: false },
     });
 
-    // `enabled: false` turns the whole drawer off; the reasons underneath it must
-    // not leak out through a flag that is still true.
     expect(result.current.reasonsFor('spam')).toEqual([]);
   });
 });

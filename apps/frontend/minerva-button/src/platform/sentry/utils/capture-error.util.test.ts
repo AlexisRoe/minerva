@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { CONSOLE_METHOD } from '@/constants/errors.constants';
 import { ConfigRequestFailedError, MissingRootElementError } from '@/domain/errors/config.errors';
 import { OfficeHostUnsupportedError } from '@/domain/errors/office.errors';
 import { useErrorLogStore } from '@/stores/error-log/error-log.store';
@@ -12,7 +13,11 @@ vi.mock('@sentry/react', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+  for (const method of new Set(Object.values(CONSOLE_METHOD))) {
+    vi.spyOn(console, method).mockImplementation(() => undefined);
+  }
+
   localStorage.clear();
   useErrorLogStore.setState({ entries: [] });
 });
@@ -58,7 +63,6 @@ describe('captureError', () => {
   });
 
   it("reports at the error's own level", () => {
-    // `MissingRootElementError` asks for 'fatal', which Sentry spells the same.
     captureError(new MissingRootElementError());
 
     expect(Sentry.captureException).toHaveBeenCalledWith(
@@ -106,8 +110,6 @@ describe('captureError', () => {
 
     captureError(error);
 
-    // A warning in Sentry and a red line in the console would be two different
-    // stories about one event.
     expect(console.warn).toHaveBeenCalledWith(JSON.stringify(error));
     expect(console.error).not.toHaveBeenCalled();
   });

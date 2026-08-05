@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
 import { fillSession } from '@/fixtures/session.fixture';
+import { resetStores } from '@/fixtures/stores.fixture';
 import { useSessionStore } from '@/stores/session/session.store';
 import { useMessageDisposition } from './use-message-disposition.hook';
 
@@ -27,9 +28,7 @@ describe('useMessageDisposition', () => {
     fillSession({ office: { environment: demoEnvironment, message: demoMessage, user: demoUser } });
   });
 
-  afterEach(() => {
-    useSessionStore.getState().reset();
-  });
+  afterEach(resetStores);
 
   it.each([
     ['suspicious', 'deleteditems', 'confirmation.disposition.delete'],
@@ -39,7 +38,7 @@ describe('useMessageDisposition', () => {
 
     expect(result.current.labelKey).toBe(labelKey);
 
-    act(() => {
+    await act(async () => {
       result.current.dispose();
     });
 
@@ -51,7 +50,7 @@ describe('useMessageDisposition', () => {
   it('closes the pane only once the mail has actually moved', async () => {
     const { result } = renderHook(() => useMessageDisposition('spam'));
 
-    act(() => {
+    await act(async () => {
       result.current.dispose();
     });
 
@@ -66,11 +65,10 @@ describe('useMessageDisposition', () => {
 
     const { result } = renderHook(() => useMessageDisposition('suspicious'));
 
-    act(() => {
+    await act(async () => {
       result.current.dispose();
     });
 
-    // Closing here would let the user believe the mail had gone.
     await waitFor(() => {
       expect(result.current.moveFailed).toBe(true);
     });
@@ -84,14 +82,14 @@ describe('useMessageDisposition', () => {
 
     const { result } = renderHook(() => useMessageDisposition('spam'));
 
-    act(() => {
+    await act(async () => {
       result.current.dispose();
     });
     await waitFor(() => {
       expect(result.current.moveFailed).toBe(true);
     });
 
-    act(() => {
+    await act(async () => {
       result.current.dispose();
     });
     await waitFor(() => {
@@ -110,12 +108,12 @@ describe('useMessageDisposition', () => {
     expect(moveMessage).not.toHaveBeenCalled();
   });
 
-  it('does nothing outside a host, where there is no mail to move', () => {
+  it('does nothing outside a host, where there is no mail to move', async () => {
     useSessionStore.getState().reset();
 
     const { result } = renderHook(() => useMessageDisposition('spam'));
 
-    act(() => {
+    await act(async () => {
       result.current.dispose();
     });
 

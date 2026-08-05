@@ -3,13 +3,11 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { demoAuthorization } from '@/fixtures/demo/minerva.fixture';
 import { fillSession } from '@/fixtures/session.fixture';
-import { useSessionStore } from '@/stores/session/session.store';
+import { resetStores } from '@/fixtures/stores.fixture';
 import { useSession } from './use-session.hook';
 
 describe('useSession', () => {
-  afterEach(() => {
-    useSessionStore.getState().reset();
-  });
+  afterEach(resetStores);
 
   it('reports nobody signed in before the start-up sequence has run', () => {
     const { result } = renderHook(() => useSession());
@@ -50,9 +48,6 @@ describe('useSession', () => {
 
     const { result } = renderHook(() => useSession());
 
-    // The start-up loader refuses such a session outright, so this can only be
-    // written by hand -- but "we got an answer" must still never read as "we are
-    // allowed in".
     expect(result.current.isAuthorized).toBe(false);
     expect(result.current.userProfile).toEqual(demoAuthorization.userProfile);
   });

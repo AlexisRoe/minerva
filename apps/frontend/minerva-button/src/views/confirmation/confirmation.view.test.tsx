@@ -10,8 +10,8 @@ import { configFixture } from '@/fixtures/config.fixture';
 import { demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
 import { fillSession } from '@/fixtures/session.fixture';
+import { resetStores } from '@/fixtures/stores.fixture';
 import { ConfigProvider } from '@/platform/config/provider/config.provider';
-import { useSessionStore } from '@/stores/session/session.store';
 import { ConfirmationView } from './confirmation.view';
 
 const { moveMessage, closePane, captureError } = vi.hoisted(() => ({
@@ -84,9 +84,7 @@ describe('ConfirmationView', () => {
     fillSession({ office: { environment: demoEnvironment, message: demoMessage, user: demoUser } });
   });
 
-  afterEach(() => {
-    useSessionStore.getState().reset();
-  });
+  afterEach(resetStores);
 
   it('says what was filed, keyed on the variant', async () => {
     renderView(result({ reportedAs: 'spam' }));
@@ -113,7 +111,6 @@ describe('ConfirmationView', () => {
     renderView(result({ outcomes }));
     await file();
 
-    // The report is filed either way; the user must not be told to try again.
     expect(await screen.findByText(/could not reach/i)).toBeInTheDocument();
     expect(await screen.findByText(/thanks for reporting/i)).toBeInTheDocument();
   });
@@ -150,8 +147,6 @@ describe('ConfirmationView', () => {
       renderView(result({ response: { reportId: 'r', isIdentified: false, identifiedAs } }));
       await file();
 
-      // Telling someone a real phishing mail was "only a test" is the one mistake
-      // this screen must never make, so both halves have to agree.
       expect(await screen.findByText(/has not seen this mail before/i)).toBeInTheDocument();
       expect(screen.queryByText(/phishing test/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/already knows/i)).not.toBeInTheDocument();
@@ -197,7 +192,6 @@ describe('ConfirmationView', () => {
     await file();
     await userEvent.click(await screen.findByRole('button', { name: /delete the mail/i }));
 
-    // Closing here would let the user believe the mail had gone.
     expect(await screen.findByText(/could not be moved/i)).toBeInTheDocument();
     expect(closePane).not.toHaveBeenCalled();
     expect(captureError).toHaveBeenCalled();
@@ -217,8 +211,6 @@ describe('ConfirmationView', () => {
     renderView(undefined);
     await file();
 
-    // A reload, or the pane reopened. There is nothing to confirm, so it must not
-    // claim a report was filed.
     expect(await screen.findByText(/sent to minerva/i)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /delete the mail/i })).not.toBeInTheDocument();
   });

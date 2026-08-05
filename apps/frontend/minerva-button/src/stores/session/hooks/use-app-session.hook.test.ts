@@ -4,13 +4,11 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { demoAuthorization, demoSettings } from '@/fixtures/demo/minerva.fixture';
 import { demoEnvironment, demoMessage, demoUser } from '@/fixtures/demo/office.fixture';
 import { fillSession } from '@/fixtures/session.fixture';
-import { useSessionStore } from '@/stores/session/session.store';
+import { resetStores } from '@/fixtures/stores.fixture';
 import { useAppSession } from './use-app-session.hook';
 
 describe('useAppSession', () => {
-  afterEach(() => {
-    useSessionStore.getState().reset();
-  });
+  afterEach(resetStores);
 
   it('hands back all three slices at once', () => {
     fillSession();
@@ -36,8 +34,6 @@ describe('useAppSession', () => {
 
     const { result } = renderHook(() => useAppSession());
 
-    // Composed rather than reimplemented, so the derived answers cannot drift
-    // from the hooks a component reaching for one slice would have used.
     expect(result.current.settings.canReportSpam).toBe(true);
     expect(result.current.office.hasMessage).toBe(true);
   });
@@ -55,8 +51,6 @@ describe('useAppSession', () => {
 
     const { result } = renderHook(() => useAppSession());
 
-    // The mailbox owner Outlook reports and the profile the backend confirmed
-    // are different objects; a flattened bag would have to drop one of them.
     expect(result.current.office.user).toEqual(demoUser);
     expect(result.current.session.userProfile).toEqual(demoAuthorization.userProfile);
   });

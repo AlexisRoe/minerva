@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 import { adaptersFixture } from '@/fixtures/adapters.fixture';
 import { configFixture } from '@/fixtures/config.fixture';
+import { resetStores } from '@/fixtures/stores.fixture';
 import { ConfigProvider } from '@/platform/config/provider/config.provider';
 import { useReportStore } from '@/stores/report/report.store';
 import { useSessionStore } from '@/stores/session/session.store';
@@ -42,16 +43,11 @@ function renderApp(): RenderResult {
 }
 
 describe('App', () => {
-  afterEach(() => {
-    useSessionStore.getState().reset();
-    useReportStore.getState().reset();
-  });
+  afterEach(resetStores);
 
   it('runs the start-up sequence behind the reel, then shows the report page', async () => {
     renderApp();
 
-    // The reel is on screen for as long as the loader runs -- there is no
-    // half-rendered report page in between.
     expect(screen.getByRole('status')).toBeInTheDocument();
 
     expect(await findReportButton()).toBeInTheDocument();
@@ -64,8 +60,6 @@ describe('App', () => {
 
     const { office, auth, settings } = useSessionStore.getState();
 
-    // One store, one write: the report page is on screen, so all three slices
-    // are there.
     expect(office?.user.name).toBe('Ada Lovelace');
     expect(auth?.authorization.isAuthorized).toBe(true);
     expect(settings).not.toBeNull();
@@ -77,13 +71,10 @@ describe('App', () => {
 
     await user.click(await findReportButton());
 
-    // The tenant fixture makes a reason compulsory, so sending is impossible
     // until one is ticked.
     await user.click(await screen.findByRole('checkbox', { name: /Sender address looks wrong/i }));
     await user.click(screen.getByRole('button', { name: /send/i }));
 
-    // The report id only exists because the reporting loader ran and the
-    // backend answered -- proof the flow reached the far side.
     expect(await screen.findByText(/[0-9a-f-]{8}/i, undefined, { timeout: FLOW_TIMEOUT_MS })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
   });
