@@ -1,26 +1,10 @@
 import { useState } from 'react';
-
-import type { WellKnownFolder } from '@/adapters/graph/graph.types';
+import { DISPOSITION } from '@/constants/email.constants';
 import type { ReportVariant } from '@/domain/reporting/reporting.types';
 import { useAdapters } from '@/platform/config/hooks/use-adapters.hook';
 import type { TranslationKey } from '@/platform/i18n/utils/translate.util';
 import { captureError } from '@/platform/sentry/utils/capture-error.util';
 import { useOffice } from '@/stores/session/hooks/use-office.hook';
-
-/**
- * Where each report sends the mail, and what the button offering it says.
- *
- * Suspicious mail is deleted and spam is filed under junk, which is what the two
- * reports mean to a mailbox: one is a threat to be rid of, the other is noise to
- * be trained on. Both names are Graph's well-known folders, which is the only
- * form that works for every user without a lookup.
- *
- * @see {@link https://learn.microsoft.com/graph/api/resources/mailfolder}
- */
-export const DISPOSITION = Object.freeze({
-  suspicious: { folder: 'deleteditems', labelKey: 'confirmation.disposition.delete' },
-  spam: { folder: 'junkemail', labelKey: 'confirmation.disposition.spam' },
-} as const satisfies Record<ReportVariant, { folder: WellKnownFolder; labelKey: TranslationKey }>);
 
 /** The last thing the pane can do, and what it is doing about it right now. */
 export interface MessageDisposition {
@@ -76,8 +60,6 @@ export function useMessageDisposition(reportedAs: ReportVariant): MessageDisposi
   const { folder, labelKey } = DISPOSITION[reportedAs];
 
   async function move(): Promise<void> {
-    // Neither exists outside a real host, and there is nothing to move without
-    // them -- the button is a no-op rather than an error the user cannot act on.
     if (environment === null || message === null) {
       return;
     }
@@ -99,8 +81,6 @@ export function useMessageDisposition(reportedAs: ReportVariant): MessageDisposi
     labelKey,
     isMoving,
     moveFailed,
-    // Wrapped rather than handed over directly, so the caller can pass this to
-    // `onClick` without a floating promise.
     dispose: () => void move(),
     dismiss: () => office.closePane(),
   };

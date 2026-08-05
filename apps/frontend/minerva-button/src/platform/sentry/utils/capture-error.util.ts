@@ -1,28 +1,7 @@
-import { convertToSentryLevel, type ErrorLogLevel, MinervaError } from '@minerva/typescript-lib';
+import { convertToSentryLevel, MinervaError } from '@minerva/typescript-lib';
 import * as Sentry from '@sentry/react';
-
+import { CONSOLE_METHOD, DEFAULT_LEVEL } from '@/constants/errors.constants';
 import { useErrorLogStore } from '@/stores/error-log/error-log.store';
-
-/** Severity for anything that does not carry one of its own. */
-const DEFAULT_LEVEL = 'error';
-
-/**
- * Which console method each {@link ErrorLogLevel} is written with.
- *
- * The same `logLevel` that picks the Sentry severity picks this, so an error is
- * exactly as loud in both places. `'fatal'` has no console method of its own and
- * shares `error`, which is already the loudest one there is.
- *
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/console}
- */
-const CONSOLE_METHOD: Record<ErrorLogLevel, 'log' | 'info' | 'debug' | 'warn' | 'error'> = {
-  log: 'log',
-  info: 'info',
-  debug: 'debug',
-  warn: 'warn',
-  error: 'error',
-  fatal: 'error',
-};
 
 /**
  * Reports an error to Sentry and to the console, as loudly as it asks for.

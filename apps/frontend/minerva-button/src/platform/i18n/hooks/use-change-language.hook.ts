@@ -63,8 +63,6 @@ export function useChangeLanguage(): UseChangeLanguage {
 
   const applyMicrosoftLanguage = useCallback(async (tag: unknown) => applyMicrosoftLanguageTag(tag), []);
 
-  // Read off the subscribed instance rather than the module-level util, so the
-  // value is the one this render was triggered by.
   return {
     language: convertLanguageTagToInternalLanguage(i18n.resolvedLanguage ?? i18n.language),
     changeLanguage,

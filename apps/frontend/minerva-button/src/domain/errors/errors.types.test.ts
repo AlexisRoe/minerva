@@ -19,8 +19,6 @@ describe('ErrorScreenKind', () => {
   });
 
   it('cannot be reassigned by a caller that gets hold of it', () => {
-    // Frozen because it is a module-level shared object: without this, one
-    // stray assignment would repoint every comparison in the app at once.
     expect(Object.isFrozen(ErrorScreenKind)).toBe(true);
   });
 });

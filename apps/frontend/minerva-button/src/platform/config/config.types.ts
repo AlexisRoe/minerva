@@ -58,15 +58,6 @@ export interface RuntimeConfig {
 }
 
 /**
- * The path the plugin publishes the document at.
- *
- * Deliberately duplicated from `CONFIG_PATH` in `vite.runtime-config.ts` rather
- * than imported: that module pulls in `node:fs` and `vite`, neither of which
- * belongs in a browser bundle.
- */
-export const CONFIG_PATH = '/config.json';
-
-/**
  * The configuration the app actually runs on: the deployed document plus what
  * the URL it was opened with says.
  *
@@ -98,22 +89,6 @@ export interface AppConfig extends RuntimeConfig {
    */
   readonly demo: boolean;
 }
-
-/** The `retry` query parameter. */
-export const RETRY_PARAM = 'retry';
-
-/** The `demo` query parameter. */
-export const DEMO_PARAM = 'demo';
-
-/**
- * The highest `retry` the app will ever report.
- *
- * A second attempt is worth making because the failures this covers are
- * start-up ones -- a token that had just expired, a dialog that closed early.
- * A third would only repeat the first two, so anything above this is clamped
- * rather than trusted; the value reaches us from a URL a user can edit.
- */
-export const MAX_RETRY = 1;
 
 /**
  * Narrows a parsed JSON document to a {@link RuntimeConfig}.

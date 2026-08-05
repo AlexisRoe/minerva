@@ -1,7 +1,12 @@
 import { afterEach, describe, expect, it, type Mock, vi } from 'vitest';
 
-import { createGraphHttpAdapter, MAX_CUSTOM_HEADERS } from './graph.http';
-import { GRAPH_BASE_URL, type NotificationMail } from './graph.types';
+import { GRAPH_BASE_URL, MAX_CUSTOM_HEADERS } from '@/constants/graph-api.constants';
+import {
+  DEFAULT_REQUEST_TIMEOUT_IN_MILLISECONDS,
+  MESSAGE_TRANSFER_TIMEOUT_IN_MILLISECONDS,
+} from '@/constants/request.constants';
+import { createGraphHttpAdapter } from './graph.http';
+import type { GraphAdapter, NotificationMail } from './graph.types';
 
 const getToken = (): Promise<string> => Promise.resolve('graph-token');
 
@@ -185,6 +190,66 @@ describe('createGraphHttpAdapter', () => {
       await expect(createGraphHttpAdapter(getToken).moveMessage('AAMkAD==', 'deleteditems')).rejects.toMatchObject({
         code: 'ERR_012',
         payload: { status: 404 },
+      });
+    });
+  });
+
+  describe('timeouts', () => {
+    /** Stubs a `fetch` that only ever settles when its signal aborts. */
+    function stubHangingFetch(): void {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(
+          (_input: RequestInfo | URL, init?: RequestInit) =>
+            new Promise<Response>((_resolve, reject) => {
+              init?.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')));
+            }),
+        ),
+      );
+    }
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it.each([
+      ['getMimeMessage', (adapter: GraphAdapter): Promise<unknown> => adapter.getMimeMessage('AAMkAD==')],
+      ['sendMail', (adapter: GraphAdapter): Promise<unknown> => adapter.sendMail(mail)],
+    ])('gives %s the message-transfer timeout rather than the default', async (_name, call) => {
+      vi.useFakeTimers();
+      stubHangingFetch();
+
+      const pending = call(createGraphHttpAdapter(getToken)).catch((thrown) => thrown);
+
+      // Still in flight where a short call would already have been aborted --
+      // these two move the whole mail, so the default would cut off exactly the
+      // large reports that matter.
+      await vi.advanceTimersByTimeAsync(DEFAULT_REQUEST_TIMEOUT_IN_MILLISECONDS);
+      expect(vi.getTimerCount()).toBe(1);
+
+      await vi.advanceTimersByTimeAsync(
+        MESSAGE_TRANSFER_TIMEOUT_IN_MILLISECONDS - DEFAULT_REQUEST_TIMEOUT_IN_MILLISECONDS,
+      );
+
+      await expect(pending).resolves.toMatchObject({
+        code: 'ERR_020',
+        payload: { timeoutInMilliseconds: MESSAGE_TRANSFER_TIMEOUT_IN_MILLISECONDS },
+      });
+    });
+
+    it('leaves moveMessage on the default timeout, since it only sends a folder name', async () => {
+      vi.useFakeTimers();
+      stubHangingFetch();
+
+      const pending = createGraphHttpAdapter(getToken)
+        .moveMessage('AAMkAD==', 'junkemail')
+        .catch((thrown) => thrown);
+
+      await vi.advanceTimersByTimeAsync(DEFAULT_REQUEST_TIMEOUT_IN_MILLISECONDS);
+
+      await expect(pending).resolves.toMatchObject({
+        code: 'ERR_020',
+        payload: { timeoutInMilliseconds: DEFAULT_REQUEST_TIMEOUT_IN_MILLISECONDS },
       });
     });
   });

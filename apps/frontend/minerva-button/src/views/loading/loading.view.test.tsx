@@ -4,7 +4,6 @@ import { describe, expect, it } from 'vitest';
 
 import { LoadingView } from './loading.view';
 
-/** Mounts the view on its own: it has no store, no router and no data of its own. */
 function renderView(steps: string[]): RenderResult {
   return render(
     <MinervaThemeProvider>
@@ -17,8 +16,6 @@ describe('LoadingView', () => {
   it('keeps the pane frame while it waits', () => {
     renderView(['Connecting to Outlook']);
 
-    // The wait happens inside the pane, not instead of it, so the mark stays put
-    // and the screen does not jump once the content arrives.
     expect(screen.getByText('Minerva')).toBeInTheDocument();
   });
 
@@ -38,7 +35,6 @@ describe('LoadingView', () => {
   it('still renders the pane when there is nothing to say', () => {
     renderView([]);
 
-    // A caller with no steps to hand must not be left with a blank pane.
     expect(screen.getByText('Minerva')).toBeInTheDocument();
   });
 });

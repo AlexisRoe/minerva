@@ -7,8 +7,9 @@ import type {
   ReportingResponse,
 } from '@minerva/typescript-lib';
 import { request } from '@/adapters/utils/request.util';
+import { MINERVA_ENDPOINTS } from '@/constants/request.constants';
 import { MinervaRequestFailedError } from '@/domain/errors/request.errors';
-import { MINERVA_ENDPOINTS, type MinervaAdapter } from './minerva.types';
+import type { MinervaAdapter } from './minerva.types';
 
 /** Builds the multipart body for {@link MinervaAdapter.submitReport}. */
 function toFormData(form: ReportingFormData): FormData {
@@ -67,8 +68,6 @@ export function createMinervaHttpAdapter(): MinervaAdapter {
     },
 
     async getSettings(payload: MinervaSettingsRequest): Promise<MinervaButtonSettings> {
-      // A GET with the language as a query parameter: the settings are cacheable
-      // per language, and a body on a GET is not reliably forwarded by proxies.
       const query = new URLSearchParams({ userLanguage: payload.userLanguage });
 
       const response = await request(
@@ -83,9 +82,6 @@ export function createMinervaHttpAdapter(): MinervaAdapter {
     async submitReport(form: ReportingFormData): Promise<ReportingResponse> {
       const response = await request(
         MINERVA_ENDPOINTS.report,
-        // No Content-Type header on purpose: the browser has to set it itself so
-        // that it can append the multipart boundary. Setting it by hand produces
-        // a body the server cannot parse.
         { method: 'POST', body: toFormData(form) },
         (path, status, cause) => new MinervaRequestFailedError(path, status, cause),
       );

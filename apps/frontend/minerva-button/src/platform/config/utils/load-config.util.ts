@@ -1,18 +1,11 @@
+import { CONFIG_PATH, DEMO_PARAM, MAX_RETRY, RETRY_PARAM } from '@/constants/config.constants';
 import {
   ConfigDomainMismatchError,
   ConfigInvalidError,
   ConfigParseError,
   ConfigRequestFailedError,
 } from '@/domain/errors/config.errors';
-import {
-  type AppConfig,
-  CONFIG_PATH,
-  DEMO_PARAM,
-  isRuntimeConfig,
-  MAX_RETRY,
-  RETRY_PARAM,
-  type RuntimeConfig,
-} from '@/platform/config/config.types';
+import { type AppConfig, isRuntimeConfig, type RuntimeConfig } from '@/platform/config/config.types';
 
 /**
  * Reduces a configured domain or a whole URL to a bare, comparable host.

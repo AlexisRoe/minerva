@@ -31,7 +31,6 @@ export class AuthClientIdMissingError extends MinervaError {
       code: 'ERR_013',
       message: 'Minerva is not configured to sign you in.',
       logLevel: 'fatal',
-      payload: {},
       cause,
     });
   }

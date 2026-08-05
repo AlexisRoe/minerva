@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { ROUTES } from '@/constants/routes.constants';
-import { useReportStore } from '@/stores/report/report.store';
+import { useReportStore, useSaveDraft } from '@/stores/report/report.store';
 import { useSettings } from '@/stores/session/hooks/use-settings.hook';
 
 /** One tickable reason, as the feedback block wants it. */
@@ -76,8 +76,8 @@ export function useReportSubmission(): ReportSubmission {
 
   const [filing, setFiling] = useState<ReportButtonVariant | null>(null);
   const [feedback, setFeedback] = useState<UserFeedbackValue | null>(null);
+  const saveDraft = useSaveDraft();
 
-  /** Drops both pieces of drawer state, so the next report opens blank. */
   function cancelReport(): void {
     setFiling(null);
     setFeedback(null);
@@ -88,7 +88,7 @@ export function useReportSubmission(): ReportSubmission {
       return;
     }
 
-    useReportStore.getState().setDraft({
+    saveDraft({
       variant: filing,
       reasons: [...feedback.reasons],
       comment: feedback.comment,
@@ -98,9 +98,17 @@ export function useReportSubmission(): ReportSubmission {
     cancelReport();
   }
 
+  const transformReasons = (): ReportReasonOption[] => {
+    if (filing === null) {
+      return [];
+    }
+
+    return reasonsFor(filing).map(({ value, label }) => ({ value, label }));
+  };
+
   return {
     filing,
-    reasons: filing === null ? [] : reasonsFor(filing).map(({ value, label }) => ({ value, label })),
+    reasons: transformReasons(),
     canSend: feedback?.isValid === true,
     startReport: setFiling,
     setFeedback,

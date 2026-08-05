@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import type { ReportState } from './report.types';
+import type { ReportDraft, ReportState } from './report.types';
 
 /**
  * The report the user is filing, between the drawer and the confirmation screen.
@@ -28,3 +28,6 @@ export const useReportStore = create<ReportState>()((set) => ({
 
   reset: () => set({ draft: null }),
 }));
+
+/** Storing an email draft for handling rerendering */
+export const useSaveDraft = (): ((draft: ReportDraft) => void) => useReportStore((state) => state.setDraft);

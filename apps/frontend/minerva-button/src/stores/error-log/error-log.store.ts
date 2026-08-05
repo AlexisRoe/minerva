@@ -1,15 +1,9 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-
+import { ERROR_LOG_LIMIT, ERROR_LOG_STORAGE_KEY } from '@/constants/errors.constants';
 import { getErrorLogStorage } from './error-log.storage';
 import type { ErrorLogState } from './error-log.types';
 import { toLoggedError } from './error-log.util';
-
-/** How many errors the log keeps before the oldest is dropped. */
-export const ERROR_LOG_LIMIT = 25;
-
-/** The `localStorage` key the log is persisted under. */
-export const ERROR_LOG_STORAGE_KEY = 'minerva.button.error-log';
 
 /**
  * A ring of the last {@link ERROR_LOG_LIMIT} errors, kept in `localStorage`.

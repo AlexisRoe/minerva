@@ -1,6 +1,3 @@
-/** The base URL every Graph call in this adapter is built from. */
-export const GRAPH_BASE_URL = 'https://graph.microsoft.com/v1.0';
-
 /**
  * Hands over a Microsoft Graph access token, refreshing it if need be.
  *

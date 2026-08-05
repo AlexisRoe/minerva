@@ -1,7 +1,6 @@
 import { convertLanguageTagToInternalLanguage, type Languages } from '@minerva/typescript-lib';
+import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
-
-import type { Translator } from '@/platform/i18n/utils/translate.util';
 
 /**
  * The task pane's translation hook.
@@ -24,8 +23,10 @@ import type { Translator } from '@/platform/i18n/utils/translate.util';
  * }
  * ```
  */
-export function useTranslations(): { t: Translator; language: Languages } {
+export function useTranslations(): { t: TFunction<'app', undefined>; language: Languages } {
   const { t, i18n } = useTranslation();
 
-  return { t, language: convertLanguageTagToInternalLanguage(i18n.resolvedLanguage ?? i18n.language) };
+  const convertedLanguage = convertLanguageTagToInternalLanguage(i18n.resolvedLanguage ?? i18n.language);
+
+  return { t, language: convertedLanguage };
 }

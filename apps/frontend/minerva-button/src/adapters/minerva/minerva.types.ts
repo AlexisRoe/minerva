@@ -8,35 +8,6 @@ import type {
 } from '@minerva/typescript-lib';
 
 /**
- * Where the Minerva API is reached, relative to the deployed pane.
- *
- * A same-origin path rather than an absolute URL: the pane and the API are
- * served from the configured `appDomain`, so the browser sends no preflight and
- * the same artefact works in every environment. It also keeps the httpOnly
- * session cookie first-party, which is what makes it survive the browsers that
- * block third-party cookies outright. If they ever diverge, this becomes an
- * entry in `config.entries.ts` and moves into `AppConfig`.
- */
-export const MINERVA_API_PATH = '/api';
-
-/**
- * The three endpoints the task pane calls, in the order it calls them.
- *
- * None of them exists on the API yet -- the backend is a scaffold, and they are
- * planned separately -- which is why each has a demo implementation standing in.
- * Written out here rather than inline at the call sites so the eventual backend
- * work has one list to satisfy.
- */
-export const MINERVA_ENDPOINTS = {
-  /** Trades a Graph token for the session cookie. */
-  authorize: `${MINERVA_API_PATH}/button/authorize`,
-  /** The tenant's button configuration, in the user's language. */
-  settings: `${MINERVA_API_PATH}/button/settings`,
-  /** The multipart report upload. */
-  report: `${MINERVA_API_PATH}/button/report`,
-} as const;
-
-/**
  * Everything the task pane asks of Minerva's own API.
  *
  * An interface rather than three loose functions because this is the seam demo

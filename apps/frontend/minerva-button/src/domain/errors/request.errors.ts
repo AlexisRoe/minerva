@@ -38,6 +38,32 @@ export class MinervaRequestFailedError extends MinervaError {
 }
 
 /**
+ * A call was aborted because it outlived its timeout.
+ *
+ * Distinct from {@link MinervaRequestFailedError} and
+ * {@link GraphRequestFailedError} on purpose: those say a service answered
+ * badly, this says none of them answered in time. The pane sits in a task pane
+ * beside a mailbox, so a call that hangs is worse than one that fails -- the
+ * user is left with a spinner and no way to tell whether pressing again would
+ * help. One code for both services is enough here because the remedy does not
+ * differ, and the service is recoverable from `path`.
+ *
+ * @see {@link https://developer.mozilla.org/docs/Web/API/AbortController}
+ */
+export class RequestTimedOutError extends MinervaError {
+  constructor(path: string, timeoutInMilliseconds: number, cause?: Error) {
+    super({
+      reference: '48732d3d-da62-4a7b-82c7-f89716b9ce5d',
+      code: 'ERR_020',
+      message: 'The request took too long to answer.',
+      logLevel: 'error',
+      payload: { path, timeoutInMilliseconds },
+      cause,
+    });
+  }
+}
+
+/**
  * Microsoft Graph answered with a non-2xx status, or could not be reached.
  *
  * The common causes are all authorisation rather than availability: a token

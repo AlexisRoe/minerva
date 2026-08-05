@@ -1,10 +1,10 @@
 import { MinervaError } from '@minerva/typescript-lib';
 import { BrandLogo, ErrorView as ErrorPanel, NoContentView, ReportButtonPage } from '@minerva/ui-lib';
 import type { ReactElement } from 'react';
+import { MAX_RETRY, RETRY_PARAM } from '@/constants/config.constants';
 import { LOGO_SIZE } from '@/constants/icon-sizes.constants';
 import { lookupErrorPolicy } from '@/domain/errors/errors.registry';
 import { ErrorScreenKind } from '@/domain/errors/errors.types';
-import { MAX_RETRY, RETRY_PARAM } from '@/platform/config/config.types';
 import { useConfig } from '@/platform/config/hooks/use-config.hook';
 import { useTranslations } from '@/platform/i18n/hooks/use-translations.hook';
 
@@ -68,7 +68,7 @@ export function ErrorScreen({ error, errorId }: ErrorScreenProps): ReactElement 
   const config = useConfig();
 
   const isMinerva = MinervaError.is(error);
-  const policy = isMinerva ? lookupErrorPolicy(error.code) : undefined;
+  const policy = lookupErrorPolicy(isMinerva ? error.code : null);
 
   const canRetry = (policy?.canRetry ?? true) && config.retry < MAX_RETRY;
 

@@ -66,18 +66,12 @@ export function showBootError(error: unknown, errorId?: string): void {
   const splash = document.getElementById(BOOT_ELEMENT_ID);
 
   splash?.setAttribute('data-failed', 'true');
-  // It may already be hidden: `RootErrorBoundary` calls this long after
-  // `hideBootSplash()` has put the splash away, and then the point of the call
-  // is to bring it back over whatever the app had managed to draw.
   splash?.removeAttribute('hidden');
 
   document.getElementById(BOOT_ERROR_ELEMENT_ID)?.removeAttribute('hidden');
 
   const isMinerva = MinervaError.is(error);
 
-  // Only ours is shown. Anything else is a message written for whoever wrote the
-  // throw -- a stack frame, a bundler path, a `TypeError` about `undefined` --
-  // and putting that in front of a user says nothing they can act on.
   fill(BOOT_ERROR_MESSAGE_ELEMENT_ID, '', isMinerva ? error.message : undefined);
   fill(BOOT_ERROR_CODE_ELEMENT_ID, 'Code:', isMinerva ? error.code : undefined);
   fill(BOOT_ERROR_ID_ELEMENT_ID, 'Reference:', errorId);

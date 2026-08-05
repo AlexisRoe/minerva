@@ -40,6 +40,7 @@ export type { FailureResult, SuccessResult } from './result-type/result.class';
 export { Result } from './result-type/result.class';
 export type { SerializedResult } from './result-type/result.util';
 export { hasResultBrand, isSerializedResult, reviveError } from './result-type/result.util';
+export { ONE_DAY, ONE_HOUR, ONE_MINUTE, ONE_MONTH, ONE_SECOND, ONE_WEEK, ONE_YEAR } from './time/time-units.constants';
 export type { UseCaseArgs, UseCaseOutput } from './use-case/use-case.class';
 export { UseCase } from './use-case/use-case.class';
 export { isNonEmptyString, isObjectLike, isValidPort } from './validators/validator.utils';

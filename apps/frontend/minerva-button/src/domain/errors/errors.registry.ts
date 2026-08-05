@@ -18,7 +18,7 @@ import {
   OfficeRequirementSetError,
 } from './office.errors';
 import { ReportNotificationFailedError } from './reporting.errors';
-import { GraphRequestFailedError, MinervaRequestFailedError } from './request.errors';
+import { GraphRequestFailedError, MinervaRequestFailedError, RequestTimedOutError } from './request.errors';
 import { ButtonDisabledError, SessionIncompleteError, SessionNotAuthorizedError } from './session.errors';
 
 /** What one entry of {@link errorRegistry} records about an error. */
@@ -190,9 +190,6 @@ export const errorRegistry = {
   ERR_016: {
     error: ReportNotificationFailedError,
     description: 'A tenant reporting method could not be notified after a report was filed.',
-    // Listed for completeness rather than for a screen: this one is reported and
-    // dropped, never thrown, so nothing ever looks its policy up. The
-    // confirmation screen says what happened, per address.
     screen: ErrorScreenKind.Error,
     canRetry: false,
     message: 'errors.tips.network',
@@ -200,9 +197,6 @@ export const errorRegistry = {
   ERR_017: {
     error: ButtonDisabledError,
     description: 'The tenant configuration was fetched and says the button is switched off.',
-    // Nothing has broken -- the tenant turned it off -- so this is the same
-    // statement as "not in Outlook": the pane cannot run here, and no button the
-    // user could press would change that.
     screen: ErrorScreenKind.NoContent,
     canRetry: false,
     message: 'errors.unsupported.disabled',
@@ -220,6 +214,13 @@ export const errorRegistry = {
     screen: ErrorScreenKind.Error,
     canRetry: false,
     message: 'errors.tips.deployment',
+  },
+  ERR_020: {
+    error: RequestTimedOutError,
+    description: 'A call left the browser but was aborted before any service answered in time.',
+    screen: ErrorScreenKind.Error,
+    canRetry: true,
+    message: 'errors.tips.network',
   },
 } as const satisfies Partial<Record<ErrorCode, ErrorRegistryEntry>>;
 
@@ -257,6 +258,10 @@ export const UNKNOWN_ERROR_POLICY = {
  * const { screen, canRetry, message } = lookupErrorPolicy(error.code);
  * ```
  */
-export function lookupErrorPolicy(code: string): Pick<ErrorRegistryEntry, 'screen' | 'canRetry' | 'message'> {
+export function lookupErrorPolicy(code: string | null): Pick<ErrorRegistryEntry, 'screen' | 'canRetry' | 'message'> {
+  if (code === null) {
+    return UNKNOWN_ERROR_POLICY;
+  }
+
   return errorRegistry[code as UsedErrorCode] ?? UNKNOWN_ERROR_POLICY;
 }

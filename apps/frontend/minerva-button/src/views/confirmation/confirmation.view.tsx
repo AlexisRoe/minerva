@@ -49,8 +49,6 @@ export function ConfirmationView(): ReactElement {
   const isReportedAs = result?.reportedAs ?? 'suspicious';
   const { labelKey, isMoving, moveFailed, dispose, dismiss } = useMessageDisposition(isReportedAs);
 
-  // Reached directly rather than through a report -- a reload, or the pane being
-  // reopened. There is nothing to confirm, so it says the neutral thing.
   if (result === undefined) {
     return (
       <ReportButtonPage>
@@ -71,11 +69,6 @@ export function ConfirmationView(): ReactElement {
 
   const { response, reportedAs, outcomes } = result;
 
-  // Both halves have to agree before a claim is made. `isIdentified` is what says
-  // the backend recognised anything at all, so a payload that leaves it false
-  // while naming a kind must not be reported as a simulation or a known threat --
-  // telling someone a real phishing mail was "only a test" is the one mistake
-  // this screen must never make.
   const identified =
     response.isIdentified && response.identifiedAs !== 'unknown'
       ? IDENTIFIED_KEYS[response.identifiedAs]

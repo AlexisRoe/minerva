@@ -11,7 +11,7 @@ import i18next from '../i18next.instance';
  *
  * @see {@link https://www.i18next.com/overview/typescript} -- key typing and `CustomTypeOptions`
  */
-export type TranslationKey = ParseKeys;
+export type TranslationKey = ParseKeys<'app'>;
 
 /**
  * The values interpolated into a string's `{{placeholders}}`.

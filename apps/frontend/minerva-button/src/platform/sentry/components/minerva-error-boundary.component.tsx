@@ -78,8 +78,6 @@ export class MinervaErrorBoundary extends Component<MinervaErrorBoundaryProps, M
   }
 
   override render(): ReactNode {
-    // `null` is the healthy state; anything else is a caught error, including the
-    // falsy values a `throw 0` or `throw ''` would produce.
     return this.state.error === null ? this.props.children : this.props.fallback(this.state.error, this.state.errorId);
   }
 }

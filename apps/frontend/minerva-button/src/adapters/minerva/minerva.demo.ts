@@ -1,17 +1,7 @@
 import type { AuthorizationResult, MinervaButtonSettings, ReportingResponse } from '@minerva/typescript-lib';
-
+import { DEMO_LATENCY_MS } from '@/constants/request.constants';
 import { demoAuthorization, demoReportingResponse, demoSettings } from '@/fixtures/demo/minerva.fixture';
 import type { MinervaAdapter } from './minerva.types';
-
-/**
- * How long a demo call pretends to take, in milliseconds.
- *
- * Not zero on purpose. The loading screens are a real part of this product --
- * the boot sequence and the reporting flow each have a six-step reel -- and an
- * adapter that answered instantly would make them flash past unread, which is
- * the opposite of what a demo is for.
- */
-export const DEMO_LATENCY_MS = 600;
 
 /** Resolves after {@link DEMO_LATENCY_MS}, so the loading screens are legible. */
 function pause(): Promise<void> {

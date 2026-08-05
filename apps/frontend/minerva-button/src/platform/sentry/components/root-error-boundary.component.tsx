@@ -66,7 +66,6 @@ export class RootErrorBoundary extends Component<RootErrorBoundaryProps, RootErr
   }
 
   override render(): ReactNode {
-    // `null`, not a fallback: the screen for this is the document's, not React's.
     return this.state.failed ? null : this.props.children;
   }
 }

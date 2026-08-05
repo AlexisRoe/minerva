@@ -1,4 +1,6 @@
 import type { MinervaError } from '@minerva/typescript-lib';
+import { DEFAULT_REQUEST_TIMEOUT_IN_MILLISECONDS, NO_RESPONSE_STATUS } from '@/constants/request.constants';
+import { RequestTimedOutError } from '@/domain/errors/request.errors';
 
 /**
  * Builds the error a failed call should raise.
@@ -9,16 +11,6 @@ import type { MinervaError } from '@minerva/typescript-lib';
  * interchangeable at this seam.
  */
 export type RequestFailure = (path: string, status: number, cause?: Error) => MinervaError;
-
-/**
- * The status recorded when a request never got a response at all.
- *
- * `fetch` rejects rather than resolving for DNS failures, refused connections,
- * CORS rejections and offline devices, so there is no real status to record.
- * `0` is the same sentinel `XMLHttpRequest` uses for this, and it cannot
- * collide with an HTTP status.
- */
-export const NO_RESPONSE_STATUS = 0;
 
 /**
  * Performs one HTTP call and turns anything other than success into a
@@ -35,28 +27,60 @@ export const NO_RESPONSE_STATUS = 0;
  * body: settings are JSON, a MIME download is a `Blob`, and `sendMail` answers
  * `202` with nothing at all.
  *
+ * A call that never answers is aborted rather than awaited forever. `fetch` has
+ * no timeout of its own, and the pane cannot afford one: it is a task pane beside
+ * an open mailbox, so a hung call leaves a spinner the user can neither cancel
+ * nor interpret. The abort raises a {@link RequestTimedOutError} rather than the
+ * caller's `failure`, because "nobody answered in time" is a different event from
+ * "the service answered badly" and only the first is worth waiting on again.
+ *
  * @param path The absolute URL, or a same-origin path for Minerva's API.
  * @param init Whatever `fetch` should be given beyond the credentials mode.
  * @param failure Builds the error to throw; see {@link RequestFailure}.
+ * @param timeoutInMilliseconds How long to wait before aborting; defaults to
+ *   {@link DEFAULT_REQUEST_TIMEOUT_IN_MILLISECONDS}.
  * @returns The successful response, undecoded.
  * @throws {MinervaError} Whatever `failure` builds, for a non-2xx status or an unreachable host.
+ * @throws {RequestTimedOutError} When the call outlives `timeoutInMilliseconds`.
  *
  * @see {@link https://developer.mozilla.org/docs/Web/API/Window/fetch}
  * @see {@link https://developer.mozilla.org/docs/Web/API/RequestInit#credentials} -- why `include` is needed for the session cookie
+ * @see {@link https://developer.mozilla.org/docs/Web/API/AbortController}
  *
  * @example
  * ```ts
  * const response = await request('/api/button/settings', { method: 'GET' }, minervaFailure);
  * const settings = (await response.json()) as MinervaButtonSettings;
  * ```
+ *
+ * @example Giving a slow call more room
+ * ```ts
+ * await request('/api/button/report', { method: 'POST', body }, minervaFailure, 10 * ONE_SECOND);
+ * ```
  */
-export async function request(path: string, init: RequestInit, failure: RequestFailure): Promise<Response> {
+export async function request(
+  path: string,
+  init: RequestInit,
+  failure: RequestFailure,
+  timeoutInMilliseconds: number = DEFAULT_REQUEST_TIMEOUT_IN_MILLISECONDS,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutInMilliseconds);
+
   let response: Response;
 
   try {
-    response = await fetch(path, { ...init, credentials: 'include' });
+    response = await fetch(path, { ...init, credentials: 'include', signal: controller.signal });
   } catch (cause) {
-    throw failure(path, NO_RESPONSE_STATUS, cause instanceof Error ? cause : new Error(String(cause)));
+    const error = cause instanceof Error ? cause : new Error(String(cause));
+
+    if (controller.signal.aborted) {
+      throw new RequestTimedOutError(path, timeoutInMilliseconds, error);
+    }
+
+    throw failure(path, NO_RESPONSE_STATUS, error);
+  } finally {
+    clearTimeout(timer);
   }
 
   if (!response.ok) {

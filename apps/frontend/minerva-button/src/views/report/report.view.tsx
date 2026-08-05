@@ -2,7 +2,6 @@ import {
   BrandLogo,
   ButtonDrawer,
   ButtonInfoContent,
-  type ButtonInfoSection,
   NoContentView,
   PageDescription,
   ReportButton,
@@ -20,9 +19,7 @@ import { useReportSubmission } from '@/hooks/use-report-submission.hook';
 import { useTranslations } from '@/platform/i18n/hooks/use-translations.hook';
 import { useOffice } from '@/stores/session/hooks/use-office.hook';
 import { useSettings } from '@/stores/session/hooks/use-settings.hook';
-
-/** The list takes what the description leaves, which is what lets the buttons grow. */
-const listStyle = { flex: '1 1 auto', minHeight: 0 } as const;
+import { buildSections } from './build-sections-for-satelite-drawer.util';
 
 /**
  * The pane's first screen: what this message is, and the two ways to report it.
@@ -62,6 +59,7 @@ export function ReportView(): React.JSX.Element {
   const { filing, reasons, canSend, startReport, setFeedback, cancelReport, sendReport } = useReportSubmission();
 
   const showMessage = hasMessage && message !== null;
+  const sections = buildSections(t, { message, user, environment });
 
   return (
     <ReportButtonPage>
@@ -75,7 +73,7 @@ export function ReportView(): React.JSX.Element {
       <ReportButtonPage.Content>
         <FeatureGuard feature={showMessage}>
           <PageDescription description={t('report.description')} title={t('report.title')} />
-          <ReportButtonList style={listStyle}>
+          <ReportButtonList>
             <ReportButton
               description={t('report.variant.suspicious.description')}
               onReport={startReport}
@@ -109,7 +107,7 @@ export function ReportView(): React.JSX.Element {
           opened={detailsOpened}
           title={t('details.title')}
         >
-          <ButtonInfoContent sections={buildSections(t, { message, user, environment })} />
+          <ButtonInfoContent sections={sections} />
         </ButtonDrawer>
       </FeatureGuard>
 
@@ -143,55 +141,4 @@ export function ReportView(): React.JSX.Element {
       </ButtonDrawer>
     </ReportButtonPage>
   );
-}
-
-/**
- * Builds the details drawer's blocks from what the host reported.
- *
- * A free function rather than inline JSX because it is data: the drawer renders
- * whatever sections it is handed, so this is the only place that decides what is
- * worth showing a user who is about to report something -- and what a support
- * call would want quoted back.
- */
-function buildSections(
-  t: ReturnType<typeof useTranslations>['t'],
-  office: Pick<ReturnType<typeof useOffice>, 'message' | 'user' | 'environment'>,
-): ButtonInfoSection[] {
-  const { message, user, environment } = office;
-
-  const sections: ButtonInfoSection[] = [];
-
-  if (user !== null) {
-    sections.push({
-      title: t('details.section.user.title'),
-      entries: [
-        { label: t('details.section.user.name'), value: user.name },
-        { label: t('details.section.user.email'), value: user.email },
-      ],
-    });
-  }
-
-  if (message !== null) {
-    sections.push({
-      title: t('details.section.email.title'),
-      entries: [
-        { label: t('details.section.email.subject'), value: message.subject },
-        { label: t('details.section.email.from'), value: message.from },
-        { label: t('details.section.email.received'), value: message.receivedAt },
-        { label: t('details.section.email.exchange-id'), value: message.exchangeId },
-      ],
-    });
-  }
-
-  if (environment !== null) {
-    sections.push({
-      title: t('details.section.environment.title'),
-      entries: [
-        { label: t('details.section.environment.host'), value: environment.host },
-        { label: t('details.section.environment.platform'), value: environment.platform },
-      ],
-    });
-  }
-
-  return sections;
 }
