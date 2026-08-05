@@ -13,9 +13,9 @@ import { useSettings } from '@/stores/session/hooks/use-settings.hook';
 
 /** What is said about an email the backend recognised. */
 const IDENTIFIED_KEYS = {
-  system: 'identified-system',
-  simulation: 'identified-simulation',
-  unknown: 'identified-unknown',
+  system: 'confirmation.identified.system',
+  simulation: 'confirmation.identified.simulation',
+  unknown: 'confirmation.identified.unknown',
 } as const satisfies Record<EmailType, TranslationKey>;
 
 /**
@@ -58,11 +58,11 @@ export function ConfirmationView(): ReactElement {
           <BrandLogo size={LOGO_SIZE} />
         </ReportButtonPage.Header>
         <ReportButtonPage.Content>
-          <ConfirmationPanel description={t('confirmation-body')} title={t('confirmation-title')} />
+          <ConfirmationPanel description={t('confirmation.body')} title={t('confirmation.title')} />
         </ReportButtonPage.Content>
         <ReportButtonPage.Footer>
           <Button onClick={dismiss} variant="outline">
-            {t('close')}
+            {t('general.close')}
           </Button>
         </ReportButtonPage.Footer>
       </ReportButtonPage>
@@ -82,11 +82,11 @@ export function ConfirmationView(): ReactElement {
       : IDENTIFIED_KEYS.unknown;
 
   const details = [
-    t('detail-report-id', { id: response.reportId }),
+    t('confirmation.report-id', { id: response.reportId }),
     ...outcomes.map((outcome) =>
       outcome.delivered
-        ? t('notified-ok', { address: outcome.address })
-        : t('notified-failed', { address: outcome.address }),
+        ? t('confirmation.notified.ok', { address: outcome.address })
+        : t('confirmation.notified.failed', { address: outcome.address }),
     ),
   ];
 
@@ -98,17 +98,19 @@ export function ConfirmationView(): ReactElement {
 
       <ReportButtonPage.Content>
         <ConfirmationPanel
-          description={t(reportedAs === 'spam' ? 'confirmation-spam-body' : 'confirmation-suspicious-body')}
+          description={t(
+            reportedAs === 'spam' ? 'confirmation.variant.spam.body' : 'confirmation.variant.suspicious.body',
+          )}
           details={details}
-          detailsTitle={t('notified-title')}
+          detailsTitle={t('confirmation.notified.title')}
           statusMessage={t(identified)}
-          title={t(reportedAs === 'spam' ? 'confirmation-spam-title' : 'confirmation-suspicious-title')}
+          title={t(reportedAs === 'spam' ? 'confirmation.variant.spam.title' : 'confirmation.variant.suspicious.title')}
         />
 
         <FeatureGuard feature={hasContact}>
           <Stack gap="xs">
             <Title order={2} size="h5">
-              {t('contact-title')}
+              {t('confirmation.contact.title')}
             </Title>
 
             <FeatureGuard feature={Boolean(contact?.contactPerson)}>
@@ -123,7 +125,7 @@ export function ConfirmationView(): ReactElement {
 
             <FeatureGuard feature={Boolean(contact?.informationUrl)}>
               <Anchor href={contact?.informationUrl} rel="noreferrer" size="sm" target="_blank">
-                {t('contact-more')}
+                {t('confirmation.contact.more')}
               </Anchor>
             </FeatureGuard>
           </Stack>
@@ -131,7 +133,7 @@ export function ConfirmationView(): ReactElement {
 
         <FeatureGuard feature={moveFailed}>
           <Text c="red" size="sm">
-            {t('move-failed')}
+            {t('confirmation.disposition.move-failed')}
           </Text>
         </FeatureGuard>
       </ReportButtonPage.Content>
@@ -141,7 +143,7 @@ export function ConfirmationView(): ReactElement {
           {t(labelKey)}
         </Button>
         <Button disabled={isMoving} onClick={dismiss} variant="outline">
-          {t('close')}
+          {t('general.close')}
         </Button>
       </ReportButtonPage.Footer>
     </ReportButtonPage>

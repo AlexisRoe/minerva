@@ -10,18 +10,18 @@ afterEach(async () => {
 
 describe('translate', () => {
   it('reads the active catalogue', async () => {
-    expect(translate('back')).toBe('Back');
+    expect(translate('general.back')).toBe('Back');
 
     await changeLanguage(Languages.German);
 
-    expect(translate('back')).toBe('Zurück');
+    expect(translate('general.back')).toBe('Zurück');
   });
 
   it('serves every catalogue, not just the Latin-script ones', async () => {
     await changeLanguage(Languages.Arabic);
-    expect(translate('back')).toBe('رجوع');
+    expect(translate('general.back')).toBe('رجوع');
 
     await changeLanguage(Languages.Mandarin);
-    expect(translate('back')).toBe('返回');
+    expect(translate('general.back')).toBe('返回');
   });
 });

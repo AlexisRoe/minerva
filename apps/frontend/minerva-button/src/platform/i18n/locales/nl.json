@@ -1,65 +1,116 @@
 {
-  "error": "Er is iets misgegaan.",
-  "error-title": "Minerva kon niet verdergaan.",
-  "back": "Terug",
-  "retry": "Opnieuw proberen",
-  "tip-generic": "Sluit het deelvenster en open het bericht opnieuw. Blijft dit gebeuren, geef dan de onderstaande code door aan uw IT-afdeling.",
-  "tip-network": "Controleer uw verbinding en probeer het opnieuw. Blijft dit gebeuren, geef dan de onderstaande code door aan uw IT-afdeling.",
-  "tip-auth": "Minerva kon u niet aanmelden. Probeer het opnieuw en rond een eventuele aanmeldvraag af.",
-  "tip-permission": "Uw account mag Minerva niet gebruiken. Vraag uw IT-afdeling om toegang en vermeld de code hieronder.",
-  "tip-deployment": "Dit ligt aan de Minerva-installatie en niet aan u. Geef de onderstaande code door aan uw IT-afdeling.",
-  "close": "Sluiten",
-  "cancel": "Annuleren",
-  "no-message": "Geen bericht geopend",
-  "no-message-description": "Open een bericht in Outlook om het te melden.",
-  "report-title": "Dit bericht melden",
-  "report-description": "Vertel ons wat er mis is met het geopende bericht.",
-  "report-suspicious-title": "Verdacht",
-  "report-suspicious-description": "Er klopt iets niet aan dit bericht.",
-  "report-spam-title": "Spam",
-  "report-spam-description": "Bulkmail waar niemand om heeft gevraagd.",
-  "drawer-suspicious-title": "Melden als verdacht",
-  "drawer-spam-title": "Melden als spam",
-  "reasons-label": "Wat is er mis mee?",
-  "reasons-mandatory-error": "Kies ten minste één reden.",
-  "comment-label": "Nog iets wat we moeten weten?",
-  "comment-placeholder": "Alles wat iemand die dit later leest kan helpen",
-  "send-report": "Melding versturen",
-  "details-title": "Details",
-  "details-open": "Details tonen",
-  "details-user": "U",
-  "details-email": "Bericht",
-  "details-environment": "Omgeving",
-  "detail-name": "Naam",
-  "detail-email": "E-mail",
-  "detail-subject": "Onderwerp",
-  "detail-from": "Van",
-  "detail-received": "Ontvangen",
-  "detail-exchange-id": "Bericht-ID",
-  "detail-host": "Host",
-  "detail-platform": "Platform",
-  "confirmation-title": "Naar Minerva verzonden",
-  "confirmation-body": "Minerva verwerkt het bericht. U kunt dit deelvenster sluiten.",
-  "confirmation-suspicious-title": "Bedankt voor het melden",
-  "confirmation-suspicious-body": "Het bericht is onderweg naar het beveiligingsteam.",
-  "confirmation-spam-title": "Gemeld als spam",
-  "confirmation-spam-body": "Dit soort mail zou uw postvak niet meer moeten bereiken.",
-  "identified-system": "Minerva kent dit bericht al. Het beveiligingsteam is ermee bezig.",
-  "identified-simulation": "Dit was een phishingtest van uw eigen organisatie. U deed er goed aan het te melden.",
-  "identified-unknown": "Minerva heeft dit bericht nog niet eerder gezien, dus iemand gaat ernaar kijken.",
-  "notified-title": "Wie is ingelicht",
-  "notified-ok": "Verzonden naar {{address}}",
-  "notified-failed": "{{address}} was niet bereikbaar — de melding is wel vastgelegd",
-  "detail-report-id": "Meldings-ID: {{id}}",
-  "contact-title": "Hulp nodig?",
-  "contact-more": "Meer over het melden van e-mail",
-  "move-failed": "Het bericht kon niet worden verplaatst. Uw melding is vastgelegd — u kunt het bericht zelf verplaatsen.",
-  "footer-delete": "Bericht verwijderen",
-  "footer-spam": "Verplaatsen naar Ongewenste e-mail",
-  "unsupported-title": "Minerva kan hier niet werken",
-  "unsupported-generic": "Minerva kon niet starten in dit venster. Open het bericht opnieuw in Outlook.",
-  "unsupported-timeout": "Minerva kon Outlook niet bereiken. Controleer uw verbinding en open het bericht opnieuw.",
-  "unsupported-host": "Minerva rapporteert e-mail en werkt daarom alleen in Outlook.",
-  "unsupported-disabled": "Minerva is uitgeschakeld voor uw organisatie. Uw IT-afdeling kan het weer inschakelen.",
-  "unsupported-requirement-set": "Deze versie van Outlook is te oud voor Minerva. Werk Outlook bij of open het bericht in Outlook op het web."
+  "product": "Minerva",
+  "general": {
+    "back": "Terug",
+    "retry": "Opnieuw proberen",
+    "close": "Sluiten",
+    "cancel": "Annuleren"
+  },
+  "errors": {
+    "generic": {
+      "title": "Minerva kon niet verdergaan.",
+      "message": "Er is iets misgegaan.",
+      "tip": "Sluit het deelvenster en open het bericht opnieuw. Blijft dit gebeuren, geef dan de onderstaande code door aan uw IT-afdeling."
+    },
+    "tips": {
+      "network": "Controleer uw verbinding en probeer het opnieuw. Blijft dit gebeuren, geef dan de onderstaande code door aan uw IT-afdeling.",
+      "auth": "Minerva kon u niet aanmelden. Probeer het opnieuw en rond een eventuele aanmeldvraag af.",
+      "permission": "Uw account mag Minerva niet gebruiken. Vraag uw IT-afdeling om toegang en vermeld de code hieronder.",
+      "deployment": "Dit ligt aan de Minerva-installatie en niet aan u. Geef de onderstaande code door aan uw IT-afdeling."
+    },
+    "unsupported": {
+      "title": "Minerva kan hier niet werken",
+      "generic": "Minerva kon niet starten in dit venster. Open het bericht opnieuw in Outlook.",
+      "timeout": "Minerva kon Outlook niet bereiken. Controleer uw verbinding en open het bericht opnieuw.",
+      "host": "Minerva rapporteert e-mail en werkt daarom alleen in Outlook.",
+      "disabled": "Minerva is uitgeschakeld voor uw organisatie. Uw IT-afdeling kan het weer inschakelen.",
+      "requirement-set": "Deze versie van Outlook is te oud voor Minerva. Werk Outlook bij of open het bericht in Outlook op het web."
+    }
+  },
+  "report": {
+    "title": "Dit bericht melden",
+    "description": "Vertel ons wat er mis is met het geopende bericht.",
+    "empty": {
+      "title": "Geen bericht geopend",
+      "description": "Open een bericht in Outlook om het te melden."
+    },
+    "variant": {
+      "suspicious": {
+        "title": "Verdacht",
+        "description": "Er klopt iets niet aan dit bericht.",
+        "drawer-title": "Melden als verdacht"
+      },
+      "spam": {
+        "title": "Spam",
+        "description": "Bulkmail waar niemand om heeft gevraagd.",
+        "drawer-title": "Melden als spam"
+      }
+    },
+    "reasons": {
+      "label": "Wat is er mis mee?",
+      "mandatory-error": "Kies ten minste één reden."
+    },
+    "comment": {
+      "label": "Nog iets wat we moeten weten?",
+      "placeholder": "Alles wat iemand die dit later leest kan helpen"
+    },
+    "submit": "Melding versturen"
+  },
+  "details": {
+    "title": "Details",
+    "open": "Details tonen",
+    "section": {
+      "user": {
+        "title": "U",
+        "name": "Naam",
+        "email": "E-mail"
+      },
+      "email": {
+        "title": "Bericht",
+        "subject": "Onderwerp",
+        "from": "Van",
+        "received": "Ontvangen",
+        "exchange-id": "Bericht-ID"
+      },
+      "environment": {
+        "title": "Omgeving",
+        "host": "Host",
+        "platform": "Platform"
+      }
+    }
+  },
+  "confirmation": {
+    "title": "Naar Minerva verzonden",
+    "body": "Minerva verwerkt het bericht. U kunt dit deelvenster sluiten.",
+    "report-id": "Meldings-ID: {{id}}",
+    "variant": {
+      "suspicious": {
+        "title": "Bedankt voor het melden",
+        "body": "Het bericht is onderweg naar het beveiligingsteam."
+      },
+      "spam": {
+        "title": "Gemeld als spam",
+        "body": "Dit soort mail zou uw postvak niet meer moeten bereiken."
+      }
+    },
+    "identified": {
+      "system": "Minerva kent dit bericht al. Het beveiligingsteam is ermee bezig.",
+      "simulation": "Dit was een phishingtest van uw eigen organisatie. U deed er goed aan het te melden.",
+      "unknown": "Minerva heeft dit bericht nog niet eerder gezien, dus iemand gaat ernaar kijken."
+    },
+    "notified": {
+      "title": "Wie is ingelicht",
+      "ok": "Verzonden naar {{address}}",
+      "failed": "{{address}} was niet bereikbaar — de melding is wel vastgelegd"
+    },
+    "contact": {
+      "title": "Hulp nodig?",
+      "more": "Meer over het melden van e-mail"
+    },
+    "disposition": {
+      "move-failed": "Het bericht kon niet worden verplaatst. Uw melding is vastgelegd — u kunt het bericht zelf verplaatsen.",
+      "delete": "Bericht verwijderen",
+      "spam": "Verplaatsen naar Ongewenste e-mail"
+    }
+  }
 }

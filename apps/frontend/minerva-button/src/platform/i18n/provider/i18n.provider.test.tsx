@@ -10,7 +10,7 @@ import { I18nProvider } from './i18n.provider';
 function Probe(): ReactElement {
   const { t } = useTranslations();
 
-  return <span>{t('back')}</span>;
+  return <span>{t('general.back')}</span>;
 }
 
 // This runs before Testing Library's auto-cleanup, so the tree rendered by the

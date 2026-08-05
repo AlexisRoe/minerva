@@ -43,7 +43,7 @@ export interface FeatureGuardProps {
  * const { canReportSpam } = useSettings();
  *
  * <FeatureGuard feature={canReportSpam}>
- *   <ReportButton variant="spam" title={t('report-spam-title')} />
+ *   <ReportButton variant="spam" title={t('report.variant.spam.title')} />
  * </FeatureGuard>
  * ```
  */

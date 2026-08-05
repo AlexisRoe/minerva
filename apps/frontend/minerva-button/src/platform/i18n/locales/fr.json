@@ -1,65 +1,116 @@
 {
-  "error": "Une erreur s'est produite.",
-  "error-title": "Minerva n'a pas pu continuer.",
-  "back": "Retour",
-  "retry": "Réessayer",
-  "tip-generic": "Fermez le volet et rouvrez le message. Si cela se reproduit, communiquez le code ci-dessous à votre service informatique.",
-  "tip-network": "Vérifiez votre connexion et réessayez. Si cela se reproduit, communiquez le code ci-dessous à votre service informatique.",
-  "tip-auth": "Minerva n'a pas pu vous connecter. Réessayez et, si une connexion vous est demandée, allez au bout de la démarche.",
-  "tip-permission": "Votre compte n'est pas autorisé à utiliser Minerva. Demandez l'accès à votre service informatique en indiquant le code ci-dessous.",
-  "tip-deployment": "Le problème vient de l'installation de Minerva, pas de vous. Communiquez le code ci-dessous à votre service informatique.",
-  "close": "Fermer",
-  "cancel": "Annuler",
-  "no-message": "Aucun message ouvert",
-  "no-message-description": "Ouvrez un message dans Outlook pour le signaler.",
-  "report-title": "Signaler ce message",
-  "report-description": "Dites-nous ce qui ne va pas avec le message ouvert.",
-  "report-suspicious-title": "Suspect",
-  "report-suspicious-description": "Quelque chose cloche dans ce message.",
-  "report-spam-title": "Spam",
-  "report-spam-description": "Courrier de masse que personne n'a demandé.",
-  "drawer-suspicious-title": "Signaler comme suspect",
-  "drawer-spam-title": "Signaler comme spam",
-  "reasons-label": "Qu'est-ce qui ne va pas ?",
-  "reasons-mandatory-error": "Choisissez au moins une raison.",
-  "comment-label": "Autre chose à nous signaler ?",
-  "comment-placeholder": "Tout ce qui pourrait aider une personne qui lira ceci plus tard",
-  "send-report": "Envoyer le signalement",
-  "details-title": "Détails",
-  "details-open": "Afficher les détails",
-  "details-user": "Vous",
-  "details-email": "Message",
-  "details-environment": "Environnement",
-  "detail-name": "Nom",
-  "detail-email": "E-mail",
-  "detail-subject": "Objet",
-  "detail-from": "De",
-  "detail-received": "Reçu",
-  "detail-exchange-id": "ID du message",
-  "detail-host": "Hôte",
-  "detail-platform": "Plateforme",
-  "confirmation-title": "Envoyé à Minerva",
-  "confirmation-body": "Minerva traite le message. Vous pouvez fermer ce volet.",
-  "confirmation-suspicious-title": "Merci de votre signalement",
-  "confirmation-suspicious-body": "Le message est en route vers l'équipe de sécurité.",
-  "confirmation-spam-title": "Signalé comme spam",
-  "confirmation-spam-body": "Ce type de courrier ne devrait plus atteindre votre boîte de réception.",
-  "identified-system": "Minerva connaît déjà ce message. L'équipe de sécurité s'en occupe.",
-  "identified-simulation": "C'était un test d'hameçonnage de votre organisation. Vous avez bien fait de le signaler.",
-  "identified-unknown": "Minerva n'a encore jamais vu ce message ; quelqu'un va l'examiner.",
-  "notified-title": "Qui a été prévenu",
-  "notified-ok": "Envoyé à {{address}}",
-  "notified-failed": "Impossible de joindre {{address}} — le signalement a bien été enregistré",
-  "detail-report-id": "ID du signalement : {{id}}",
-  "contact-title": "Besoin d'aide ?",
-  "contact-more": "En savoir plus sur le signalement",
-  "move-failed": "Le message n'a pas pu être déplacé. Votre signalement a été enregistré — vous pouvez le déplacer vous-même.",
-  "footer-delete": "Supprimer le message",
-  "footer-spam": "Déplacer vers Courrier indésirable",
-  "unsupported-title": "Minerva ne peut pas fonctionner ici",
-  "unsupported-generic": "Minerva n'a pas pu démarrer dans cette fenêtre. Rouvrez le message dans Outlook.",
-  "unsupported-timeout": "Minerva n'a pas pu joindre Outlook. Vérifiez votre connexion, puis rouvrez le message.",
-  "unsupported-host": "Minerva signale les e-mails et fonctionne donc uniquement dans Outlook.",
-  "unsupported-disabled": "Minerva est désactivé pour votre organisation. Votre service informatique peut le réactiver.",
-  "unsupported-requirement-set": "Cette version d'Outlook est trop ancienne pour Minerva. Mettez Outlook à jour ou ouvrez le message dans Outlook sur le web."
+  "product": "Minerva",
+  "general": {
+    "back": "Retour",
+    "retry": "Réessayer",
+    "close": "Fermer",
+    "cancel": "Annuler"
+  },
+  "errors": {
+    "generic": {
+      "title": "Minerva n'a pas pu continuer.",
+      "message": "Une erreur s'est produite.",
+      "tip": "Fermez le volet et rouvrez le message. Si cela se reproduit, communiquez le code ci-dessous à votre service informatique."
+    },
+    "tips": {
+      "network": "Vérifiez votre connexion et réessayez. Si cela se reproduit, communiquez le code ci-dessous à votre service informatique.",
+      "auth": "Minerva n'a pas pu vous connecter. Réessayez et, si une connexion vous est demandée, allez au bout de la démarche.",
+      "permission": "Votre compte n'est pas autorisé à utiliser Minerva. Demandez l'accès à votre service informatique en indiquant le code ci-dessous.",
+      "deployment": "Le problème vient de l'installation de Minerva, pas de vous. Communiquez le code ci-dessous à votre service informatique."
+    },
+    "unsupported": {
+      "title": "Minerva ne peut pas fonctionner ici",
+      "generic": "Minerva n'a pas pu démarrer dans cette fenêtre. Rouvrez le message dans Outlook.",
+      "timeout": "Minerva n'a pas pu joindre Outlook. Vérifiez votre connexion, puis rouvrez le message.",
+      "host": "Minerva signale les e-mails et fonctionne donc uniquement dans Outlook.",
+      "disabled": "Minerva est désactivé pour votre organisation. Votre service informatique peut le réactiver.",
+      "requirement-set": "Cette version d'Outlook est trop ancienne pour Minerva. Mettez Outlook à jour ou ouvrez le message dans Outlook sur le web."
+    }
+  },
+  "report": {
+    "title": "Signaler ce message",
+    "description": "Dites-nous ce qui ne va pas avec le message ouvert.",
+    "empty": {
+      "title": "Aucun message ouvert",
+      "description": "Ouvrez un message dans Outlook pour le signaler."
+    },
+    "variant": {
+      "suspicious": {
+        "title": "Suspect",
+        "description": "Quelque chose cloche dans ce message.",
+        "drawer-title": "Signaler comme suspect"
+      },
+      "spam": {
+        "title": "Spam",
+        "description": "Courrier de masse que personne n'a demandé.",
+        "drawer-title": "Signaler comme spam"
+      }
+    },
+    "reasons": {
+      "label": "Qu'est-ce qui ne va pas ?",
+      "mandatory-error": "Choisissez au moins une raison."
+    },
+    "comment": {
+      "label": "Autre chose à nous signaler ?",
+      "placeholder": "Tout ce qui pourrait aider une personne qui lira ceci plus tard"
+    },
+    "submit": "Envoyer le signalement"
+  },
+  "details": {
+    "title": "Détails",
+    "open": "Afficher les détails",
+    "section": {
+      "user": {
+        "title": "Vous",
+        "name": "Nom",
+        "email": "E-mail"
+      },
+      "email": {
+        "title": "Message",
+        "subject": "Objet",
+        "from": "De",
+        "received": "Reçu",
+        "exchange-id": "ID du message"
+      },
+      "environment": {
+        "title": "Environnement",
+        "host": "Hôte",
+        "platform": "Plateforme"
+      }
+    }
+  },
+  "confirmation": {
+    "title": "Envoyé à Minerva",
+    "body": "Minerva traite le message. Vous pouvez fermer ce volet.",
+    "report-id": "ID du signalement : {{id}}",
+    "variant": {
+      "suspicious": {
+        "title": "Merci de votre signalement",
+        "body": "Le message est en route vers l'équipe de sécurité."
+      },
+      "spam": {
+        "title": "Signalé comme spam",
+        "body": "Ce type de courrier ne devrait plus atteindre votre boîte de réception."
+      }
+    },
+    "identified": {
+      "system": "Minerva connaît déjà ce message. L'équipe de sécurité s'en occupe.",
+      "simulation": "C'était un test d'hameçonnage de votre organisation. Vous avez bien fait de le signaler.",
+      "unknown": "Minerva n'a encore jamais vu ce message ; quelqu'un va l'examiner."
+    },
+    "notified": {
+      "title": "Qui a été prévenu",
+      "ok": "Envoyé à {{address}}",
+      "failed": "Impossible de joindre {{address}} — le signalement a bien été enregistré"
+    },
+    "contact": {
+      "title": "Besoin d'aide ?",
+      "more": "En savoir plus sur le signalement"
+    },
+    "disposition": {
+      "move-failed": "Le message n'a pas pu être déplacé. Votre signalement a été enregistré — vous pouvez le déplacer vous-même.",
+      "delete": "Supprimer le message",
+      "spam": "Déplacer vers Courrier indésirable"
+    }
+  }
 }

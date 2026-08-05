@@ -32,8 +32,8 @@ describe('useMessageDisposition', () => {
   });
 
   it.each([
-    ['suspicious', 'deleteditems', 'footer-delete'],
-    ['spam', 'junkemail', 'footer-spam'],
+    ['suspicious', 'deleteditems', 'confirmation.disposition.delete'],
+    ['spam', 'junkemail', 'confirmation.disposition.spam'],
   ] as const)('sends a %s report to %s', async (reportedAs, folder, labelKey) => {
     const { result } = renderHook(() => useMessageDisposition(reportedAs));
 

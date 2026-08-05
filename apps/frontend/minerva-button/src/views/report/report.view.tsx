@@ -68,25 +68,25 @@ export function ReportView(): React.JSX.Element {
       <ReportButtonPage.Header>
         <BrandLogo size={LOGO_SIZE} />
         <FeatureGuard feature={canShowDetails}>
-          <SateliteButton label={t('details-open')} onClick={details.open} />
+          <SateliteButton label={t('details.open')} onClick={details.open} />
         </FeatureGuard>
       </ReportButtonPage.Header>
 
       <ReportButtonPage.Content>
         <FeatureGuard feature={showMessage}>
-          <PageDescription description={t('report-description')} title={t('report-title')} />
+          <PageDescription description={t('report.description')} title={t('report.title')} />
           <ReportButtonList style={listStyle}>
             <ReportButton
-              description={t('report-suspicious-description')}
+              description={t('report.variant.suspicious.description')}
               onReport={startReport}
-              title={t('report-suspicious-title')}
+              title={t('report.variant.suspicious.title')}
               variant="suspicious"
             />
             <FeatureGuard feature={canReportSpam}>
               <ReportButton
-                description={t('report-spam-description')}
+                description={t('report.variant.spam.description')}
                 onReport={startReport}
-                title={t('report-spam-title')}
+                title={t('report.variant.spam.title')}
                 variant="spam"
               />
             </FeatureGuard>
@@ -94,7 +94,7 @@ export function ReportView(): React.JSX.Element {
         </FeatureGuard>
 
         <FeatureGuard feature={!showMessage}>
-          <NoContentView description={t('no-message-description')} title={t('no-message')} />
+          <NoContentView description={t('report.empty.description')} title={t('report.empty.title')} />
         </FeatureGuard>
       </ReportButtonPage.Content>
 
@@ -102,12 +102,12 @@ export function ReportView(): React.JSX.Element {
         <ButtonDrawer
           footer={
             <Button onClick={details.close} variant="outline">
-              {t('close')}
+              {t('general.close')}
             </Button>
           }
           onClose={details.close}
           opened={detailsOpened}
-          title={t('details-title')}
+          title={t('details.title')}
         >
           <ButtonInfoContent sections={buildSections(t, { message, user, environment })} />
         </ButtonDrawer>
@@ -117,27 +117,27 @@ export function ReportView(): React.JSX.Element {
         footer={
           <>
             <Button disabled={!canSend} onClick={sendReport}>
-              {t('send-report')}
+              {t('report.submit')}
             </Button>
             <Button onClick={cancelReport} variant="outline">
-              {t('cancel')}
+              {t('general.cancel')}
             </Button>
           </>
         }
         onClose={cancelReport}
         opened={filing !== null}
-        title={filing === 'spam' ? t('drawer-spam-title') : t('drawer-suspicious-title')}
+        title={filing === 'spam' ? t('report.variant.spam.drawer-title') : t('report.variant.suspicious.drawer-title')}
       >
         <FeatureGuard feature={filing !== null}>
           <UserFeedback
             hasUserInput={hasFreetextField}
-            inputLabel={t('comment-label')}
-            inputPlaceholder={t('comment-placeholder')}
+            inputLabel={t('report.comment.label')}
+            inputPlaceholder={t('report.comment.placeholder')}
             isMandatory={isReasonMandatory}
-            mandatoryError={t('reasons-mandatory-error')}
+            mandatoryError={t('report.reasons.mandatory-error')}
             onChange={setFeedback}
             reasons={reasons}
-            reasonsLabel={t('reasons-label')}
+            reasonsLabel={t('report.reasons.label')}
           />
         </FeatureGuard>
       </ButtonDrawer>
@@ -163,32 +163,32 @@ function buildSections(
 
   if (user !== null) {
     sections.push({
-      title: t('details-user'),
+      title: t('details.section.user.title'),
       entries: [
-        { label: t('detail-name'), value: user.name },
-        { label: t('detail-email'), value: user.email },
+        { label: t('details.section.user.name'), value: user.name },
+        { label: t('details.section.user.email'), value: user.email },
       ],
     });
   }
 
   if (message !== null) {
     sections.push({
-      title: t('details-email'),
+      title: t('details.section.email.title'),
       entries: [
-        { label: t('detail-subject'), value: message.subject },
-        { label: t('detail-from'), value: message.from },
-        { label: t('detail-received'), value: message.receivedAt },
-        { label: t('detail-exchange-id'), value: message.exchangeId },
+        { label: t('details.section.email.subject'), value: message.subject },
+        { label: t('details.section.email.from'), value: message.from },
+        { label: t('details.section.email.received'), value: message.receivedAt },
+        { label: t('details.section.email.exchange-id'), value: message.exchangeId },
       ],
     });
   }
 
   if (environment !== null) {
     sections.push({
-      title: t('details-environment'),
+      title: t('details.section.environment.title'),
       entries: [
-        { label: t('detail-host'), value: environment.host },
-        { label: t('detail-platform'), value: environment.platform },
+        { label: t('details.section.environment.host'), value: environment.host },
+        { label: t('details.section.environment.platform'), value: environment.platform },
       ],
     });
   }

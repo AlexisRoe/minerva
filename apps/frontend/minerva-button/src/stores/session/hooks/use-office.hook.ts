@@ -37,7 +37,7 @@ export interface UseOffice {
  * ```tsx
  * const { message, hasMessage } = useOffice();
  *
- * if (!hasMessage) return <NoContentView title={t('no-message')} />;
+ * if (!hasMessage) return <NoContentView title={t('report.empty.title')} />;
  * return <Text>{message.subject}</Text>;
  * ```
  */

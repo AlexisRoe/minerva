@@ -7,6 +7,16 @@ import { ErrorScreenKind } from './errors.types';
 
 const entries = Object.entries(errorRegistry);
 
+/** Resolves a dotted catalogue path, so a nested key can be checked like a flat one. */
+function catalogueHas(path: string): boolean {
+  const leaf = path.split('.').reduce<unknown>((node, part) => {
+    if (typeof node !== 'object' || node === null) return undefined;
+    return (node as Record<string, unknown>)[part];
+  }, en);
+
+  return typeof leaf === 'string';
+}
+
 /**
  * Guards the two properties the registry exists to provide: codes and
  * references are unique, and the class filed under a code is the class that
@@ -65,16 +75,16 @@ describe('errorRegistry', () => {
       expect(message.length, code).toBeGreaterThan(0);
       // The type already pins this to a TranslationKey; this catches a key that
       // was renamed in the catalogue and left behind here.
-      expect(Object.keys(en), code).toContain(message);
+      expect(catalogueHas(message), code).toBe(true);
     }
   });
 
   it('explains a no-content failure rather than advising about it', () => {
     for (const [code, { screen, message }] of entries) {
       if (screen === ErrorScreenKind.NoContent) {
-        // These screens say what is wrong with the environment; a `tip-` string
-        // would be advice for a screen that offers nothing to act on.
-        expect(message.startsWith('unsupported-'), code).toBe(true);
+        // These screens say what is wrong with the environment; an `errors.tips.`
+        // string would be advice for a screen that offers nothing to act on.
+        expect(message.startsWith('errors.unsupported.'), code).toBe(true);
       }
     }
   });

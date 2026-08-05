@@ -87,7 +87,7 @@ export function ErrorScreen({ error, errorId }: ErrorScreenProps): ReactElement 
         </ReportButtonPage.Header>
 
         <ReportButtonPage.Content>
-          <NoContentView description={t(policy.message)} title={t('unsupported-title')} />
+          <NoContentView description={t(policy.message)} title={t('errors.unsupported.title')} />
         </ReportButtonPage.Content>
       </ReportButtonPage>
     );
@@ -102,11 +102,11 @@ export function ErrorScreen({ error, errorId }: ErrorScreenProps): ReactElement 
       <ReportButtonPage.Content>
         <ErrorPanel
           buttonAction={canRetry ? retry : undefined}
-          buttonLabel={canRetry ? t('retry') : undefined}
-          description={policy === undefined ? t('error') : t(policy.message)}
+          buttonLabel={canRetry ? t('general.retry') : undefined}
+          description={policy === undefined ? t('errors.generic.message') : t(policy.message)}
           errorCode={isMinerva ? error.code : undefined}
           errorId={errorId}
-          title={t('error-title')}
+          title={t('errors.generic.title')}
         />
       </ReportButtonPage.Content>
     </ReportButtonPage>

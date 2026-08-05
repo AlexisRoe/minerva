@@ -18,7 +18,7 @@ describe('useTranslations', () => {
   it('translates in the active language and reports it', () => {
     const { result } = renderHook(() => useTranslations());
 
-    expect(result.current.t('back')).toBe('Back');
+    expect(result.current.t('general.back')).toBe('Back');
     expect(result.current.language).toBe(Languages.English);
   });
 
@@ -29,7 +29,7 @@ describe('useTranslations', () => {
       await changeLanguage(Languages.German);
     });
 
-    expect(result.current.t('back')).toBe('Zurück');
+    expect(result.current.t('general.back')).toBe('Zurück');
     expect(result.current.language).toBe(Languages.German);
   });
 });

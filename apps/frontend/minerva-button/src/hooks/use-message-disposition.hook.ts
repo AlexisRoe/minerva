@@ -18,8 +18,8 @@ import { useOffice } from '@/stores/session/hooks/use-office.hook';
  * @see {@link https://learn.microsoft.com/graph/api/resources/mailfolder}
  */
 export const DISPOSITION = Object.freeze({
-  suspicious: { folder: 'deleteditems', labelKey: 'footer-delete' },
-  spam: { folder: 'junkemail', labelKey: 'footer-spam' },
+  suspicious: { folder: 'deleteditems', labelKey: 'confirmation.disposition.delete' },
+  spam: { folder: 'junkemail', labelKey: 'confirmation.disposition.spam' },
 } as const satisfies Record<ReportVariant, { folder: WellKnownFolder; labelKey: TranslationKey }>);
 
 /** The last thing the pane can do, and what it is doing about it right now. */
@@ -62,7 +62,7 @@ export interface MessageDisposition {
  * ```tsx
  * const { labelKey, isMoving, dispose, dismiss } = useMessageDisposition('spam');
  *
- * <Button onClick={dismiss} variant="outline">{t('close')}</Button>
+ * <Button onClick={dismiss} variant="outline">{t('general.close')}</Button>
  * <Button loading={isMoving} onClick={dispose}>{t(labelKey)}</Button>
  * ```
  */

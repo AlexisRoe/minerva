@@ -1,65 +1,116 @@
 {
-  "error": "Algo correu mal.",
-  "error-title": "O Minerva não conseguiu continuar.",
-  "back": "Voltar",
-  "retry": "Tentar novamente",
-  "tip-generic": "Feche o painel e abra a mensagem novamente. Se continuar a acontecer, indique o código abaixo à sua equipa de TI.",
-  "tip-network": "Verifique a sua ligação e tente novamente. Se continuar a acontecer, indique o código abaixo à sua equipa de TI.",
-  "tip-auth": "O Minerva não conseguiu iniciar a sua sessão. Tente novamente e, se lhe for pedido para iniciar sessão, conclua o processo.",
-  "tip-permission": "A sua conta não tem permissão para utilizar o Minerva. Peça acesso à sua equipa de TI e indique o código abaixo.",
-  "tip-deployment": "Isto é um problema da instalação do Minerva e não seu. Indique o código abaixo à sua equipa de TI.",
-  "close": "Fechar",
-  "cancel": "Cancelar",
-  "no-message": "Nenhuma mensagem aberta",
-  "no-message-description": "Abra uma mensagem no Outlook para a comunicar.",
-  "report-title": "Comunicar esta mensagem",
-  "report-description": "Diga-nos o que se passa com a mensagem que tem aberta.",
-  "report-suspicious-title": "Suspeita",
-  "report-suspicious-description": "Há algo estranho nesta mensagem.",
-  "report-spam-title": "Spam",
-  "report-spam-description": "Correio em massa que ninguém pediu.",
-  "drawer-suspicious-title": "Comunicar como suspeita",
-  "drawer-spam-title": "Comunicar como spam",
-  "reasons-label": "O que está errado?",
-  "reasons-mandatory-error": "Escolha pelo menos um motivo.",
-  "comment-label": "Mais alguma coisa que devamos saber?",
-  "comment-placeholder": "Tudo o que possa ajudar quem ler isto mais tarde",
-  "send-report": "Enviar a comunicação",
-  "details-title": "Detalhes",
-  "details-open": "Mostrar detalhes",
-  "details-user": "Você",
-  "details-email": "Mensagem",
-  "details-environment": "Ambiente",
-  "detail-name": "Nome",
-  "detail-email": "E-mail",
-  "detail-subject": "Assunto",
-  "detail-from": "De",
-  "detail-received": "Recebida",
-  "detail-exchange-id": "ID da mensagem",
-  "detail-host": "Anfitrião",
-  "detail-platform": "Plataforma",
-  "confirmation-title": "Enviada ao Minerva",
-  "confirmation-body": "O Minerva está a processar a mensagem. Pode fechar este painel.",
-  "confirmation-suspicious-title": "Obrigado por comunicar",
-  "confirmation-suspicious-body": "A mensagem está a caminho da equipa de segurança.",
-  "confirmation-spam-title": "Comunicada como spam",
-  "confirmation-spam-body": "Mensagens deste tipo não deverão voltar a chegar à sua caixa de entrada.",
-  "identified-system": "O Minerva já conhece esta mensagem. A equipa de segurança está a tratar do assunto.",
-  "identified-simulation": "Isto foi um teste de phishing da sua própria organização. Fez bem em comunicá-lo.",
-  "identified-unknown": "O Minerva ainda não tinha visto esta mensagem, por isso alguém vai analisá-la.",
-  "notified-title": "Quem foi avisado",
-  "notified-ok": "Enviada para {{address}}",
-  "notified-failed": "Não foi possível contactar {{address}} — a comunicação ficou registada à mesma",
-  "detail-report-id": "ID da comunicação: {{id}}",
-  "contact-title": "Precisa de ajuda?",
-  "contact-more": "Saber mais sobre comunicar mensagens",
-  "move-failed": "Não foi possível mover a mensagem. A sua comunicação ficou registada — pode movê-la você mesmo.",
-  "footer-delete": "Eliminar a mensagem",
-  "footer-spam": "Mover para Correio Eletrónico Não Solicitado",
-  "unsupported-title": "O Minerva não pode ser executado aqui",
-  "unsupported-generic": "O Minerva não conseguiu iniciar nesta janela. Abra a mensagem novamente no Outlook.",
-  "unsupported-timeout": "O Minerva não conseguiu contactar o Outlook. Verifique a sua ligação e abra a mensagem novamente.",
-  "unsupported-host": "O Minerva comunica e-mails, por isso só funciona no Outlook.",
-  "unsupported-disabled": "O Minerva está desativado na sua organização. A sua equipa de TI pode voltar a ativá-lo.",
-  "unsupported-requirement-set": "Esta versão do Outlook é demasiado antiga para o Minerva. Atualize o Outlook ou abra a mensagem no Outlook na Web."
+  "product": "Minerva",
+  "general": {
+    "back": "Voltar",
+    "retry": "Tentar novamente",
+    "close": "Fechar",
+    "cancel": "Cancelar"
+  },
+  "errors": {
+    "generic": {
+      "title": "O Minerva não conseguiu continuar.",
+      "message": "Algo correu mal.",
+      "tip": "Feche o painel e abra a mensagem novamente. Se continuar a acontecer, indique o código abaixo à sua equipa de TI."
+    },
+    "tips": {
+      "network": "Verifique a sua ligação e tente novamente. Se continuar a acontecer, indique o código abaixo à sua equipa de TI.",
+      "auth": "O Minerva não conseguiu iniciar a sua sessão. Tente novamente e, se lhe for pedido para iniciar sessão, conclua o processo.",
+      "permission": "A sua conta não tem permissão para utilizar o Minerva. Peça acesso à sua equipa de TI e indique o código abaixo.",
+      "deployment": "Isto é um problema da instalação do Minerva e não seu. Indique o código abaixo à sua equipa de TI."
+    },
+    "unsupported": {
+      "title": "O Minerva não pode ser executado aqui",
+      "generic": "O Minerva não conseguiu iniciar nesta janela. Abra a mensagem novamente no Outlook.",
+      "timeout": "O Minerva não conseguiu contactar o Outlook. Verifique a sua ligação e abra a mensagem novamente.",
+      "host": "O Minerva comunica e-mails, por isso só funciona no Outlook.",
+      "disabled": "O Minerva está desativado na sua organização. A sua equipa de TI pode voltar a ativá-lo.",
+      "requirement-set": "Esta versão do Outlook é demasiado antiga para o Minerva. Atualize o Outlook ou abra a mensagem no Outlook na Web."
+    }
+  },
+  "report": {
+    "title": "Comunicar esta mensagem",
+    "description": "Diga-nos o que se passa com a mensagem que tem aberta.",
+    "empty": {
+      "title": "Nenhuma mensagem aberta",
+      "description": "Abra uma mensagem no Outlook para a comunicar."
+    },
+    "variant": {
+      "suspicious": {
+        "title": "Suspeita",
+        "description": "Há algo estranho nesta mensagem.",
+        "drawer-title": "Comunicar como suspeita"
+      },
+      "spam": {
+        "title": "Spam",
+        "description": "Correio em massa que ninguém pediu.",
+        "drawer-title": "Comunicar como spam"
+      }
+    },
+    "reasons": {
+      "label": "O que está errado?",
+      "mandatory-error": "Escolha pelo menos um motivo."
+    },
+    "comment": {
+      "label": "Mais alguma coisa que devamos saber?",
+      "placeholder": "Tudo o que possa ajudar quem ler isto mais tarde"
+    },
+    "submit": "Enviar a comunicação"
+  },
+  "details": {
+    "title": "Detalhes",
+    "open": "Mostrar detalhes",
+    "section": {
+      "user": {
+        "title": "Você",
+        "name": "Nome",
+        "email": "E-mail"
+      },
+      "email": {
+        "title": "Mensagem",
+        "subject": "Assunto",
+        "from": "De",
+        "received": "Recebida",
+        "exchange-id": "ID da mensagem"
+      },
+      "environment": {
+        "title": "Ambiente",
+        "host": "Anfitrião",
+        "platform": "Plataforma"
+      }
+    }
+  },
+  "confirmation": {
+    "title": "Enviada ao Minerva",
+    "body": "O Minerva está a processar a mensagem. Pode fechar este painel.",
+    "report-id": "ID da comunicação: {{id}}",
+    "variant": {
+      "suspicious": {
+        "title": "Obrigado por comunicar",
+        "body": "A mensagem está a caminho da equipa de segurança."
+      },
+      "spam": {
+        "title": "Comunicada como spam",
+        "body": "Mensagens deste tipo não deverão voltar a chegar à sua caixa de entrada."
+      }
+    },
+    "identified": {
+      "system": "O Minerva já conhece esta mensagem. A equipa de segurança está a tratar do assunto.",
+      "simulation": "Isto foi um teste de phishing da sua própria organização. Fez bem em comunicá-lo.",
+      "unknown": "O Minerva ainda não tinha visto esta mensagem, por isso alguém vai analisá-la."
+    },
+    "notified": {
+      "title": "Quem foi avisado",
+      "ok": "Enviada para {{address}}",
+      "failed": "Não foi possível contactar {{address}} — a comunicação ficou registada à mesma"
+    },
+    "contact": {
+      "title": "Precisa de ajuda?",
+      "more": "Saber mais sobre comunicar mensagens"
+    },
+    "disposition": {
+      "move-failed": "Não foi possível mover a mensagem. A sua comunicação ficou registada — pode movê-la você mesmo.",
+      "delete": "Eliminar a mensagem",
+      "spam": "Mover para Correio Eletrónico Não Solicitado"
+    }
+  }
 }

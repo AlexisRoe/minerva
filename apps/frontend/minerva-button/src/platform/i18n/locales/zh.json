@@ -1,65 +1,116 @@
 {
-  "error": "出错了。",
-  "error-title": "Minerva 无法继续。",
-  "back": "返回",
-  "retry": "重试",
-  "tip-generic": "请关闭此窗格并重新打开该邮件。如果问题持续出现，请将下方的代码告知您的 IT 团队。",
-  "tip-network": "请检查网络连接后重试。如果问题持续出现，请将下方的代码告知您的 IT 团队。",
-  "tip-auth": "Minerva 无法为您登录。请重试；如果出现登录提示，请完成登录。",
-  "tip-permission": "您的帐户无权使用 Minerva。请向 IT 团队申请访问权限，并提供下方的代码。",
-  "tip-deployment": "这是 Minerva 安装配置的问题，与您无关。请将下方的代码告知您的 IT 团队。",
-  "close": "关闭",
-  "cancel": "取消",
-  "no-message": "未打开任何邮件",
-  "no-message-description": "请在 Outlook 中打开一封邮件以进行举报。",
-  "report-title": "举报此邮件",
-  "report-description": "请告诉我们当前打开的邮件有什么问题。",
-  "report-suspicious-title": "可疑",
-  "report-suspicious-description": "这封邮件有些不对劲。",
-  "report-spam-title": "垃圾邮件",
-  "report-spam-description": "无人订阅的批量邮件。",
-  "drawer-suspicious-title": "举报为可疑邮件",
-  "drawer-spam-title": "举报为垃圾邮件",
-  "reasons-label": "问题出在哪里？",
-  "reasons-mandatory-error": "请至少选择一个理由。",
-  "comment-label": "还有其他需要我们了解的信息吗？",
-  "comment-placeholder": "任何有助于日后查阅者理解的信息",
-  "send-report": "发送举报",
-  "details-title": "详细信息",
-  "details-open": "显示详细信息",
-  "details-user": "您",
-  "details-email": "邮件",
-  "details-environment": "环境",
-  "detail-name": "姓名",
-  "detail-email": "电子邮件",
-  "detail-subject": "主题",
-  "detail-from": "发件人",
-  "detail-received": "接收时间",
-  "detail-exchange-id": "邮件 ID",
-  "detail-host": "主机",
-  "detail-platform": "平台",
-  "confirmation-title": "已发送给 Minerva",
-  "confirmation-body": "Minerva 正在处理该邮件。您可以关闭此窗格。",
-  "confirmation-suspicious-title": "感谢您的举报",
-  "confirmation-suspicious-body": "该邮件正在发送给安全团队。",
-  "confirmation-spam-title": "已举报为垃圾邮件",
-  "confirmation-spam-body": "此类邮件应该不会再进入您的收件箱。",
-  "identified-system": "Minerva 已经了解这封邮件，安全团队正在处理。",
-  "identified-simulation": "这是贵组织内部的钓鱼演练。您举报得很对。",
-  "identified-unknown": "Minerva 之前没有见过这封邮件，会有人进行查看。",
-  "notified-title": "已通知的对象",
-  "notified-ok": "已发送至 {{address}}",
-  "notified-failed": "无法送达 {{address}}——举报仍已记录",
-  "detail-report-id": "举报 ID：{{id}}",
-  "contact-title": "需要帮助吗？",
-  "contact-more": "详细了解邮件举报",
-  "move-failed": "无法移动该邮件。您的举报已记录，可以自行移动该邮件。",
-  "footer-delete": "删除邮件",
-  "footer-spam": "移至垃圾邮件",
-  "unsupported-title": "Minerva 无法在此运行",
-  "unsupported-generic": "Minerva 无法在此窗口中启动。请在 Outlook 中重新打开该邮件。",
-  "unsupported-timeout": "Minerva 无法连接到 Outlook。请检查网络连接，然后重新打开该邮件。",
-  "unsupported-host": "Minerva 用于举报邮件，因此仅能在 Outlook 中运行。",
-  "unsupported-disabled": "贵组织已停用 Minerva。您的 IT 团队可以重新启用它。",
-  "unsupported-requirement-set": "此 Outlook 版本过旧，无法运行 Minerva。请更新 Outlook，或在 Outlook 网页版中打开该邮件。"
+  "product": "Minerva",
+  "general": {
+    "back": "返回",
+    "retry": "重试",
+    "close": "关闭",
+    "cancel": "取消"
+  },
+  "errors": {
+    "generic": {
+      "title": "Minerva 无法继续。",
+      "message": "出错了。",
+      "tip": "请关闭此窗格并重新打开该邮件。如果问题持续出现，请将下方的代码告知您的 IT 团队。"
+    },
+    "tips": {
+      "network": "请检查网络连接后重试。如果问题持续出现，请将下方的代码告知您的 IT 团队。",
+      "auth": "Minerva 无法为您登录。请重试；如果出现登录提示，请完成登录。",
+      "permission": "您的帐户无权使用 Minerva。请向 IT 团队申请访问权限，并提供下方的代码。",
+      "deployment": "这是 Minerva 安装配置的问题，与您无关。请将下方的代码告知您的 IT 团队。"
+    },
+    "unsupported": {
+      "title": "Minerva 无法在此运行",
+      "generic": "Minerva 无法在此窗口中启动。请在 Outlook 中重新打开该邮件。",
+      "timeout": "Minerva 无法连接到 Outlook。请检查网络连接，然后重新打开该邮件。",
+      "host": "Minerva 用于举报邮件，因此仅能在 Outlook 中运行。",
+      "disabled": "贵组织已停用 Minerva。您的 IT 团队可以重新启用它。",
+      "requirement-set": "此 Outlook 版本过旧，无法运行 Minerva。请更新 Outlook，或在 Outlook 网页版中打开该邮件。"
+    }
+  },
+  "report": {
+    "title": "举报此邮件",
+    "description": "请告诉我们当前打开的邮件有什么问题。",
+    "empty": {
+      "title": "未打开任何邮件",
+      "description": "请在 Outlook 中打开一封邮件以进行举报。"
+    },
+    "variant": {
+      "suspicious": {
+        "title": "可疑",
+        "description": "这封邮件有些不对劲。",
+        "drawer-title": "举报为可疑邮件"
+      },
+      "spam": {
+        "title": "垃圾邮件",
+        "description": "无人订阅的批量邮件。",
+        "drawer-title": "举报为垃圾邮件"
+      }
+    },
+    "reasons": {
+      "label": "问题出在哪里？",
+      "mandatory-error": "请至少选择一个理由。"
+    },
+    "comment": {
+      "label": "还有其他需要我们了解的信息吗？",
+      "placeholder": "任何有助于日后查阅者理解的信息"
+    },
+    "submit": "发送举报"
+  },
+  "details": {
+    "title": "详细信息",
+    "open": "显示详细信息",
+    "section": {
+      "user": {
+        "title": "您",
+        "name": "姓名",
+        "email": "电子邮件"
+      },
+      "email": {
+        "title": "邮件",
+        "subject": "主题",
+        "from": "发件人",
+        "received": "接收时间",
+        "exchange-id": "邮件 ID"
+      },
+      "environment": {
+        "title": "环境",
+        "host": "主机",
+        "platform": "平台"
+      }
+    }
+  },
+  "confirmation": {
+    "title": "已发送给 Minerva",
+    "body": "Minerva 正在处理该邮件。您可以关闭此窗格。",
+    "report-id": "举报 ID：{{id}}",
+    "variant": {
+      "suspicious": {
+        "title": "感谢您的举报",
+        "body": "该邮件正在发送给安全团队。"
+      },
+      "spam": {
+        "title": "已举报为垃圾邮件",
+        "body": "此类邮件应该不会再进入您的收件箱。"
+      }
+    },
+    "identified": {
+      "system": "Minerva 已经了解这封邮件，安全团队正在处理。",
+      "simulation": "这是贵组织内部的钓鱼演练。您举报得很对。",
+      "unknown": "Minerva 之前没有见过这封邮件，会有人进行查看。"
+    },
+    "notified": {
+      "title": "已通知的对象",
+      "ok": "已发送至 {{address}}",
+      "failed": "无法送达 {{address}}——举报仍已记录"
+    },
+    "contact": {
+      "title": "需要帮助吗？",
+      "more": "详细了解邮件举报"
+    },
+    "disposition": {
+      "move-failed": "无法移动该邮件。您的举报已记录，可以自行移动该邮件。",
+      "delete": "删除邮件",
+      "spam": "移至垃圾邮件"
+    }
+  }
 }
