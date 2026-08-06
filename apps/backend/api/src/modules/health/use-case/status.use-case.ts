@@ -1,15 +1,12 @@
 import type { UUID } from 'node:crypto';
 import { Result, type UseCase } from '@minerva/typescript-lib';
 import { Injectable } from '@nestjs/common';
-import { ApiStatus } from '../../enum/status.enum';
-import { EnvironmentService } from '../../plattform/environment/environment.service';
+import { ApiStatus } from '../../../enum/status.enum';
+import { EnvironmentService } from '../../../plattform/environment/environment.service';
 import type { StatusResponse } from '../dto/status.response';
 
-/** What {@link StatusUseCase} needs from the request it is answering. */
 export interface StatusInput {
-  /**
-   * The id of the request being answered, as settled by `RequestIdMiddleware`.
-   */
+  /** The id of the request being answered, as settled by `RequestIdMiddleware` */
   requestId: UUID;
 }
 

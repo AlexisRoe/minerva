@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import type { NextFunction, Request, Response } from 'express';
 import { describe, expect, it, vi } from 'vitest';
 
-import { RequestIdHeader } from '../constants/request.constants';
+import { RequestIdHeader } from '../../constants/request.constants';
 import type { RequestWithRequestId } from './request-id.interface';
 import { RequestIdMiddleware } from './request-id.middleware';
 

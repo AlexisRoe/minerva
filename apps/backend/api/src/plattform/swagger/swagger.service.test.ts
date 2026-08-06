@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SWAGGER_JSON_PATH, SWAGGER_SITE_TITLE, SWAGGER_UI_PATH } from '../../constants/api-documentation.constants';
 import { FAVICON_DATA_URI } from '../../constants/favicon.constants';
-import { HealthModule } from '../../health/health.module';
+import { HealthModule } from '../../modules/health/health.module';
 import { EnvironmentModule } from '../environment/environment.module';
 import { EnvironmentService } from '../environment/environment.service';
 import { SwaggerService } from './swagger.service';

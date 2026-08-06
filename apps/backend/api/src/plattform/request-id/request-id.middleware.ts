@@ -2,7 +2,7 @@ import { randomUUID, type UUID } from 'node:crypto';
 import { Injectable, type NestMiddleware } from '@nestjs/common';
 import { isString, isUUID } from 'class-validator';
 import type { NextFunction, Response } from 'express';
-import { REQUEST_ID_HEADER } from '../constants/request.constants';
+import { REQUEST_ID_HEADER } from '../../constants/request.constants';
 import type { RequestWithRequestId } from './request-id.interface';
 
 /**

@@ -4,7 +4,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { RequestIdHeader } from '../constants/request.constants';
+import { RequestIdHeader } from '../../constants/request.constants';
 import { RequestIdModule } from './request-id.module';
 
 /** The shape `randomUUID` produces, so a minted id can be told from a kept one. */

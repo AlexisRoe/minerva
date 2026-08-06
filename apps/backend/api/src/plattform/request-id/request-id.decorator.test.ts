@@ -5,7 +5,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { RequestIdHeader } from '../constants/request.constants';
+import { RequestIdHeader } from '../../constants/request.constants';
 import { RequestId } from './request-id.decorator';
 import type { RequestWithRequestId } from './request-id.interface';
 import { RequestIdModule } from './request-id.module';

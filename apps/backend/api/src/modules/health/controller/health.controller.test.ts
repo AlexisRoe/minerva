@@ -5,11 +5,11 @@ import request from 'supertest';
 import type { App } from 'supertest/types';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { RequestIdHeader } from '../../constants/request.constants';
-import { ApiStatus } from '../../enum/status.enum';
-import { EnvironmentModule } from '../../plattform/environment/environment.module';
-import { EnvironmentService } from '../../plattform/environment/environment.service';
-import { RequestIdModule } from '../../request-id/request-id.module';
+import { RequestIdHeader } from '../../../constants/request.constants';
+import { ApiStatus } from '../../../enum/status.enum';
+import { EnvironmentModule } from '../../../plattform/environment/environment.module';
+import { EnvironmentService } from '../../../plattform/environment/environment.service';
+import { RequestIdModule } from '../../../plattform/request-id/request-id.module';
 import { HealthModule } from '../health.module';
 
 /**

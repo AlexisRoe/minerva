@@ -11,16 +11,12 @@ import { HealthResponse } from './health.response';
  * and this one cannot drift apart: `status` and `name` mean the same thing here
  * as they do there, and Nest folds the inherited properties into the generated
  * schema.
- *
- * The extra three are the fields a bug report needs and a probe does not.
- * Reading them costs a round trip a per-second liveness check should not pay,
- * which is why they live on their own route instead of being added to
- * `GET /health`.
  */
 export class StatusResponse extends HealthResponse {
   @ApiProperty({
     description: 'The build that answered, so a report can be pinned to a release rather than to `main`.',
     example: '0.1.0',
+    pattern: '^d+.d+.d+$',
   })
   @Expose()
   @IsSemVer()
@@ -40,6 +36,7 @@ export class StatusResponse extends HealthResponse {
     description:
       'The id correlating this response with the request that caused it, and with the log lines either produced.',
     example: '3f1c9f9e-6f2a-4c2b-9a1e-2f0d5f7c8b31',
+    format: 'uuid',
   })
   @Expose()
   @IsString()
