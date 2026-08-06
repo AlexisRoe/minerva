@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { type ValidationError, validateSync } from 'class-validator';
 
-import { EnvironmentValidationError } from '../../domain/errors/environment.errors';
+import { EnvironmentValidationError } from '../../errors/environment.errors';
 import { EnvironmentVariables } from './environment.interface';
 
 const logger = new Logger('Environment');

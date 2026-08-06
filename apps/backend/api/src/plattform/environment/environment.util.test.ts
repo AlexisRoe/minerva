@@ -2,9 +2,8 @@ import { MinervaError } from '@minerva/typescript-lib';
 import { Logger } from '@nestjs/common';
 import type { ValidationError } from 'class-validator';
 import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
-
-import { EnvironmentValidationError } from '../../domain/errors/environment.errors';
 import { LogLevel, NodeEnvironment } from '../../enum/environment.enum';
+import { EnvironmentValidationError } from '../../errors/environment.errors';
 import { dropBlankValues, flattenValidationErrors, toServiceName, validateEnvironment } from './environment.util';
 
 const VALID_ENVIRONMENT = {
