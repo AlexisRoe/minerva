@@ -4,7 +4,13 @@ import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { ApiStatus } from '../../enum/status.enum';
 
 /**
- * What `GET /health` answers with: the liveness verdict and who gave it.
+ * What a liveness answer carries: the verdict and who gave it.
+ *
+ * One shape behind `GET /health`, `/health/live` and `/health/ready`, so a probe
+ * that moves from one to another finds the body it already parses, and a human
+ * reading three of them side by side compares like with like.
+ * {@link StatusResponse} extends it for the one route that reports more than a
+ * verdict.
  *
  * A class rather than an interface because the decorators need something that
  * survives compilation — `class-validator` and `class-transformer` both read
@@ -12,7 +18,7 @@ import { ApiStatus } from '../../enum/status.enum';
  * carry. Its shape is still plain, so a use-case can return an object literal
  * for it without constructing one.
  */
-export class RootResponse {
+export class HealthResponse {
   @ApiProperty({
     description: '`ok` while the process can serve traffic, `error` when it knows it cannot.',
     enum: ApiStatus,

@@ -17,7 +17,7 @@ assert {
 }
 
 docs {
-  The liveness verdict, from `RootUseCase` via `HealthController.root()`:
+  The liveness verdict, from `HealthUseCase` via `HealthController.root()`:
 
   ```json
   { "status": "ok", "name": "api" }
@@ -30,4 +30,7 @@ docs {
 
   `name` is what distinguishes this from the queue-coordinator's identical route, so a
   `baseUrl` pointing at the wrong service fails here instead of passing silently.
+
+  `GET /health/live` and `GET /health/ready` answer with exactly this body — they exist so
+  a Kubernetes manifest can bind each probe to its own path.
 }

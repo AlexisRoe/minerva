@@ -5,11 +5,11 @@ import { describe, expect, it } from 'vitest';
 import { ApiStatus } from '../../enum/status.enum';
 import type { EnvironmentVariables } from '../../plattform/environment/environment.interface';
 import { EnvironmentService } from '../../plattform/environment/environment.service';
-import { RootUseCase } from './health-root.use-case';
+import { HealthUseCase } from './health.use-case';
 
 /**
  * Resolved through Nest rather than with `new`, because half of what is worth
- * asserting here is the wiring: a `RootUseCase` that lost its `@Injectable`
+ * asserting here is the wiring: a `HealthUseCase` that lost its `@Injectable`
  * carries no `design:paramtypes`, and fails to resolve at exactly this point and
  * nowhere earlier.
  *
@@ -18,18 +18,18 @@ import { RootUseCase } from './health-root.use-case';
  * asserting against the api's own name would pass just as well if the use case
  * had gone back to a literal.
  */
-async function buildUseCase(variables: Partial<EnvironmentVariables>): Promise<RootUseCase> {
+async function buildUseCase(variables: Partial<EnvironmentVariables>): Promise<HealthUseCase> {
   const moduleReference = await Test.createTestingModule({
     providers: [
-      RootUseCase,
+      HealthUseCase,
       { provide: EnvironmentService, useValue: new EnvironmentService(new ConfigService(variables)) },
     ],
   }).compile();
 
-  return moduleReference.get(RootUseCase);
+  return moduleReference.get(HealthUseCase);
 }
 
-describe('RootUseCase', () => {
+describe('HealthUseCase', () => {
   it('answers with the name of the package that started the process, not a literal', async () => {
     const useCase = await buildUseCase({ npm_package_name: '@minerva/queue-coordinator' });
 

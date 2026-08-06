@@ -57,17 +57,38 @@ describe('setup Swagger', () => {
     const response = await request(app.getHttpServer()).get(`/${SWAGGER_JSON_PATH}`).expect(200);
 
     expect(response.body.info).toMatchObject({ title: 'Minerva API', version: SERVICE_VERSION });
-    expect(Object.keys(response.body.paths)).toEqual(['/health', '/health/ping']);
+    expect(Object.keys(response.body.paths).sort()).toEqual([
+      '/health',
+      '/health/live',
+      '/health/ping',
+      '/health/ready',
+      '/health/status',
+    ]);
   });
 
   it('resolves the response schema of a documented route', async () => {
     const response = await request(app.getHttpServer()).get(`/${SWAGGER_JSON_PATH}`).expect(200);
 
     expect(response.body.paths['/health'].get.responses['200'].content['application/json'].schema).toEqual({
-      $ref: '#/components/schemas/RootResponse',
+      $ref: '#/components/schemas/HealthResponse',
     });
-    expect(response.body.components.schemas.RootResponse.properties.name).toMatchObject({ type: 'string' });
+    expect(response.body.components.schemas.HealthResponse.properties.name).toMatchObject({ type: 'string' });
     expect(response.body.components.schemas.ApiStatus.enum).toEqual(['ok', 'error', 'pending']);
+  });
+
+  it('carries the inherited properties into the schema of the route that extends one', async () => {
+    const response = await request(app.getHttpServer()).get(`/${SWAGGER_JSON_PATH}`).expect(200);
+
+    /* `StatusResponse extends HealthResponse`, and a generated client is only
+       usable if that shows up as properties rather than as a lost base class. */
+    expect(Object.keys(response.body.components.schemas.StatusResponse.properties).sort()).toEqual([
+      'date',
+      'name',
+      'requestId',
+      'status',
+      'version',
+    ]);
+    expect(response.body.components.schemas.StatusResponse.properties.date).toMatchObject({ format: 'date-time' });
   });
 
   it('documents the ping route as plain text', async () => {

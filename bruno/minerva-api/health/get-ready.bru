@@ -1,0 +1,30 @@
+meta {
+  name: Get ready
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/health/ready
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq ok
+  res.body.name: eq api
+}
+
+docs {
+  What the kubelet's readiness probe calls. Answers with the same body as `GET /health`:
+
+  ```json
+  { "status": "ok", "name": "api" }
+  ```
+
+  A non-2xx here takes the pod out of the service endpoints and leaves it running, which
+  is the right answer while a dependency is unreachable. The api has no dependency yet, so
+  for now this can only ever agree with `/health/live` — see that request for why they are
+  still two routes.
+}

@@ -1,0 +1,48 @@
+meta {
+  name: Get status
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/health/status
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq ok
+  res.body.name: eq api
+  res.body.version: isDefined
+  res.body.date: isDefined
+  res.body.requestId: isDefined
+}
+
+docs {
+  The verdict plus everything needed to say which process gave it, from `StatusUseCase`:
+
+  ```json
+  {
+    "status": "ok",
+    "name": "api",
+    "version": "0.1.0",
+    "date": "2026-08-06T09:41:12.004Z",
+    "requestId": "not-yet-wired"
+  }
+  ```
+
+  Meant for a person, which is why it is not what the probes call — the three extra fields
+  are the ones a bug report starts with, and none of them are worth a round trip once a
+  second.
+
+  `version` comes from `npm_package_version`, so a `0.0.0` here means the process was
+  started by something that does not export it (`node dist/main.js`, `pnpm exec`, or a pod
+  whose spec is missing the pair) rather than that a release went out as `0.0.0`.
+
+  `date` is generated per call, in UTC — held against your own clock it also shows how far
+  the two have drifted.
+
+  `requestId` is the literal `not-yet-wired` until request ids exist; the assertions pin
+  the fields that are real and only check that this one is present.
+}

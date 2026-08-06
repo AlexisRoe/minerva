@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 
 import { HealthController } from './controller/health.controller';
-import { RootUseCase } from './use-case/health-root.use-case';
+import { HealthUseCase } from './use-case/health.use-case';
 import { PingUseCase } from './use-case/ping.use-case';
+import { StatusUseCase } from './use-case/status.use-case';
 
 @Module({
   controllers: [HealthController],
-  providers: [PingUseCase, RootUseCase],
+  providers: [PingUseCase, HealthUseCase, StatusUseCase],
 })
 export class HealthModule {}
