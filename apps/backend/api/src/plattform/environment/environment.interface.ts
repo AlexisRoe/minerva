@@ -1,5 +1,5 @@
-import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsNumber, IsOptional, IsUrl, Max, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsArray, IsEnum, IsInt, IsNumber, IsOptional, IsUrl, Matches, Max, Min, MinLength } from 'class-validator';
 
 import { LogLevel, NodeEnvironment } from '../../enum/environment.enum';
 
@@ -79,6 +79,62 @@ export class EnvironmentVariables {
   @Min(0)
   @Max(1)
   SENTRY_TRACES_SAMPLE_RATE?: number;
+
+  /**
+   * The browser origins allowed to call the api, comma separated, or empty to
+   * allow every one of them.
+   *
+   * `https://localhost:4201,https://localhost:4101` locally -- the two Vite dev
+   * servers. Entries are origins, not URLs: scheme, host and port and nothing
+   * else, because the CORS check compares them to the `Origin` header
+   * character for character and a trailing slash silently never matches. That
+   * is what `@Matches` is here for; `@IsUrl` alone would wave it through.
+   */
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? splitOrigins(value) : value))
+  @IsArray()
+  @IsUrl({ protocols: ['http', 'https'], require_tld: false, require_protocol: true }, { each: true })
+  @Matches(/^https?:\/\/[^/?#]+$/, { each: true, message: 'CORS_ORIGINS entries must be an origin without a path' })
+  CORS_ORIGINS?: readonly string[];
+
+  /**
+   * The key cookies are signed with, or absent to issue unsigned ones only.
+   *
+   * A signed cookie carries an HMAC of its value, which is what lets the api
+   * tell a cookie it set from one the browser was talked into holding. Without
+   * a secret `cookie-parser` cannot verify any, so `response.cookie(name,
+   * value, { signed: true })` throws rather than quietly issuing an unsigned
+   * one.
+   *
+   * Optional because unsigned cookies are a legitimate deployment and the
+   * normal case before there is anything to sign. The length floor is not:
+   * a guessable secret is worse than no secret, because it makes a forged
+   * cookie look verified. Generate one with `openssl rand -base64 32`.
+   */
+  @IsOptional()
+  @MinLength(32)
+  COOKIE_SECRET?: string;
+}
+
+/**
+ * Reads the comma separated list `CORS_ORIGINS` arrives as into the array the
+ * schema declares.
+ *
+ * Blank entries are dropped rather than rejected, so a list that grew a
+ * trailing comma or was wrapped over two lines still means what it looks like
+ * it means. A list of nothing but separators therefore reads as the empty list,
+ * which is the same thing as an unset variable: allow every origin.
+ *
+ * @example
+ * ```ts
+ * splitOrigins('https://localhost:4201, https://localhost:4101,'); // ['https://localhost:4201', 'https://localhost:4101']
+ * ```
+ */
+function splitOrigins(value: string): string[] {
+  return value
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
 }
 
 /**
@@ -109,4 +165,5 @@ export const ENVIRONMENT_DEFAULTS = {
   LOG_LEVEL: LogLevel.Log,
   API_PORT: 3000,
   SENTRY_TRACES_SAMPLE_RATE: 0,
+  CORS_ORIGINS: [],
 } as const satisfies Partial<EnvironmentVariables>;

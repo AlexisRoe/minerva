@@ -25,6 +25,8 @@
     "@sentry/nestjs": "catalog:",
     "class-transformer": "catalog:",
     "class-validator": "catalog:",
+    "cookie-parser": "catalog:",
+    "helmet": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:"
   },
@@ -33,6 +35,7 @@
     "@nestjs/schematics": "catalog:",
     "@nestjs/testing": "catalog:",
     "@swc/core": "catalog:",
+    "@types/cookie-parser": "catalog:",
     "@types/express": "catalog:",
     "@types/supertest": "catalog:",
     "supertest": "catalog:",

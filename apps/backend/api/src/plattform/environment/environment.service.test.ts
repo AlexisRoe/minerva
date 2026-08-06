@@ -21,7 +21,17 @@ import { validateEnvironment } from './environment.util';
 async function buildService(environment: Record<string, string>): Promise<EnvironmentService> {
   // Cleared first, because vitest sets NODE_ENV=test on the real process and a
   // test asserting a default must not depend on what the runner happens to say.
-  for (const name of ['NODE_ENV', 'LOG_LEVEL', 'API_PORT', 'SENTRY_DSN', 'SENTRY_TRACES_SAMPLE_RATE']) {
+  const schema = [
+    'NODE_ENV',
+    'LOG_LEVEL',
+    'API_PORT',
+    'SENTRY_DSN',
+    'SENTRY_TRACES_SAMPLE_RATE',
+    'CORS_ORIGINS',
+    'COOKIE_SECRET',
+  ];
+
+  for (const name of schema) {
     vi.stubEnv(name, undefined);
   }
 
@@ -97,6 +107,38 @@ describe('EnvironmentService', () => {
     const service = await buildService({ SENTRY_DSN: '' });
 
     expect(service.sentryDsn).toBeUndefined();
+  });
+
+  it('hands out the allowed origins as a list, not as the string it was configured as', async () => {
+    const service = await buildService({ CORS_ORIGINS: 'https://localhost:4201,https://localhost:4101' });
+
+    expect(service.corsOrigins).toEqual(['https://localhost:4201', 'https://localhost:4101']);
+  });
+
+  it('reports no allowed origins when none are configured, which means every origin', async () => {
+    const service = await buildService({});
+
+    expect(service.corsOrigins).toEqual([]);
+  });
+
+  it('reports no allowed origins for an empty variable, so an unset and a blank list agree', async () => {
+    const service = await buildService({ CORS_ORIGINS: '' });
+
+    expect(service.corsOrigins).toEqual([]);
+  });
+
+  it('hands out the cookie secret when one is configured', async () => {
+    const secret = 'a-test-secret-of-more-than-32-characters';
+    const service = await buildService({ COOKIE_SECRET: secret });
+
+    expect(service.cookieSecret).toBe(secret);
+  });
+
+  it('reports no cookie secret when nothing is signed, rather than inventing one', async () => {
+    const service = await buildService({});
+
+    expect(service.cookieSecret).toBeUndefined();
+    expect(ENVIRONMENT_DEFAULTS).not.toHaveProperty('COOKIE_SECRET');
   });
 
   it('falls back to the defaults for everything the environment leaves out', async () => {

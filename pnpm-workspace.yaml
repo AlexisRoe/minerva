@@ -58,6 +58,9 @@ catalog:
   class-transformer: 0.5.1
   '@nestjs/swagger': 11.4.6
   '@nestjs/config': 4.0.4
+  helmet: 8.3.0
+  cookie-parser: 1.4.7
+  '@types/cookie-parser': 1.4.10
 allowBuilds:
   # Install analytics pulled in by swagger-ui-dist. Its postinstall only reports
   # the install home; nothing in the build needs it to have run.

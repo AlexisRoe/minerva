@@ -130,6 +130,8 @@ describe('validateEnvironment', () => {
 
     expect(Object.keys(environment).sort()).toEqual([
       'API_PORT',
+      'COOKIE_SECRET',
+      'CORS_ORIGINS',
       'LOG_LEVEL',
       'NODE_ENV',
       'SENTRY_DSN',
@@ -159,6 +161,63 @@ describe('validateEnvironment', () => {
 
   it('rejects a DSN that is not a URL', () => {
     expect(() => validateEnvironment({ SENTRY_DSN: 'not-a-dsn' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('reads the origin list as an array, trimming what a wrapped line leaves behind', () => {
+    const environment = validateEnvironment({ CORS_ORIGINS: 'https://localhost:4201, https://localhost:4101,' });
+
+    expect(environment.CORS_ORIGINS).toEqual(['https://localhost:4201', 'https://localhost:4101']);
+  });
+
+  it('reads a single origin as a list of one', () => {
+    expect(validateEnvironment({ CORS_ORIGINS: 'https://minerva.example.com' }).CORS_ORIGINS).toEqual([
+      'https://minerva.example.com',
+    ]);
+  });
+
+  it('reads a list of nothing but separators as the empty list', () => {
+    expect(validateEnvironment({ CORS_ORIGINS: ',,' }).CORS_ORIGINS).toEqual([]);
+  });
+
+  it('rejects an origin carrying a path, which would never match the Origin header', () => {
+    expect(() => validateEnvironment({ CORS_ORIGINS: 'https://localhost:4201/' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('rejects an origin that is not a url', () => {
+    expect(() => validateEnvironment({ CORS_ORIGINS: 'localhost:4201' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('says which list the bad entry is in, so a one-line report is still actionable', () => {
+    expect.assertions(2);
+
+    try {
+      validateEnvironment({ CORS_ORIGINS: 'https://localhost:4201,nonsense' });
+    } catch (error) {
+      const issues = (error as EnvironmentValidationError).payload?.issues as string[];
+      expect(issues.every((issue) => issue.startsWith('CORS_ORIGINS: '))).toBe(true);
+      expect(issues.join('\n')).toContain('each value');
+    }
+  });
+
+  it('accepts a secret long enough to be worth signing with', () => {
+    const secret = 'a-test-secret-of-more-than-32-characters';
+
+    expect(validateEnvironment({ COOKIE_SECRET: secret }).COOKIE_SECRET).toBe(secret);
+  });
+
+  it('rejects a guessable cookie secret, which is worse than none at all', () => {
+    expect(() => validateEnvironment({ COOKIE_SECRET: 'secret' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('names no value in the payload for a rejected secret either', () => {
+    expect.assertions(1);
+
+    try {
+      validateEnvironment({ COOKIE_SECRET: 'hunter2' });
+    } catch (error) {
+      const issues = (error as EnvironmentValidationError).payload?.issues as string[];
+      expect(issues.join('\n')).not.toContain('hunter2');
+    }
   });
 
   it('accepts a self-hosted DSN without a public tld', () => {

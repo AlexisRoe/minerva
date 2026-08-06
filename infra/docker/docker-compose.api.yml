@@ -36,6 +36,8 @@ services:
       # offending variable named on its own line.
       SENTRY_DSN: ${BE_API_SENTRY_DSN:-}
       SENTRY_TRACES_SAMPLE_RATE: ${BE_API_SENTRY_TRACES_SAMPLE_RATE:-0}
+      CORS_ORIGINS: ${BE_API_CORS_ORIGINS:-}
+      COOKIE_SECRET: ${BE_API_COOKIE_SECRET:-}
       # tsc's watcher never sees inotify events through a macOS/Windows bind
       # mount, so it has to poll. Drop these two on Linux to save some CPU.
       TSC_WATCHFILE: DynamicPriorityPolling

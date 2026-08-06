@@ -136,6 +136,40 @@ export class EnvironmentService {
   }
 
   /**
+   * The browser origins allowed to call the api, empty for every origin.
+   *
+   * Empty is the honest answer for an unset variable rather than a locked-down
+   * one: this api has no browser client yet, and a guessed allow-list would
+   * reject the first one to arrive with a CORS error that looks like a bug in
+   * the frontend. `ServerService` is where that empty list turns into a policy.
+   *
+   * @example
+   * ```ts
+   * app.enableCors({ origin: environment.corsOrigins.length > 0 ? [...environment.corsOrigins] : true });
+   * ```
+   */
+  get corsOrigins(): readonly string[] {
+    return this.configService.get('CORS_ORIGINS', { infer: true }) ?? ENVIRONMENT_DEFAULTS.CORS_ORIGINS;
+  }
+
+  /**
+   * The key cookies are signed with, or `undefined` when none are signed.
+   *
+   * No fallback, for the same reason {@link sentryDsn} has none and the
+   * opposite reason {@link apiPort} has one: a generated stand-in would let
+   * signed cookies appear to work while every restart silently invalidated the
+   * ones already issued.
+   *
+   * @example
+   * ```ts
+   * app.use(cookieParser(environment.cookieSecret));
+   * ```
+   */
+  get cookieSecret(): string | undefined {
+    return this.configService.get('COOKIE_SECRET', { infer: true });
+  }
+
+  /**
    * Whether this is the production stage.
    *
    * Phrased as "is it production" rather than "is it not development", so a
