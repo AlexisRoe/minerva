@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SWAGGER_JSON_PATH, SWAGGER_SITE_TITLE, SWAGGER_UI_PATH } from '../../constants/api-documentation.constants';
 import { FAVICON_DATA_URI } from '../../constants/favicon.constants';
 import { REQUEST_ID_HEADER } from '../../constants/request.constants';
-import type { EnvironmentService } from '../environment/environment.service';
+import type { EnvironmentService } from '../environment/service/environment.service';
 
 export class SwaggerService {
   /**

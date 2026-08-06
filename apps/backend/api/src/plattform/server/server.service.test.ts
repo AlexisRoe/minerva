@@ -7,8 +7,8 @@ import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SWAGGER_UI_PATH } from '../../constants/api-documentation.constants';
-import type { EnvironmentVariables } from '../environment/environment.interface';
-import { EnvironmentService } from '../environment/environment.service';
+import type { EnvironmentVariables } from '../environment/interface/environment.interface';
+import { EnvironmentService } from '../environment/service/environment.service';
 import { SwaggerService } from '../swagger/swagger.service';
 import { SERVER_APPLICATION_OPTIONS, ServerService } from './server.service';
 

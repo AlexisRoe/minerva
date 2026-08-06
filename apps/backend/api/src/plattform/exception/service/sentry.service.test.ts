@@ -1,8 +1,7 @@
 import * as Sentry from '@sentry/nestjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
+import { DEFAULT_PROFILE_SESSION_SAMPLE_RATE, DEFAULT_TRACES_SAMPLE_RATE } from '../utils/sentry.util';
 import { SentryService } from './sentry.service';
-import { DEFAULT_PROFILE_SESSION_SAMPLE_RATE, DEFAULT_TRACES_SAMPLE_RATE } from './sentry.util';
 
 const DSN = 'https://key@o1.ingest.sentry.io/2';
 

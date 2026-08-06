@@ -2,7 +2,7 @@ import type { UUID } from 'node:crypto';
 import { Controller, Get, Header, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { ApiDocumentationTags } from '../../../enum/api-documentation.enum';
-import { RequestId } from '../../../plattform/request-id/request-id.decorator';
+import { RequestId } from '../../../plattform/request-id/decorators/request-id.decorator';
 import { HealthResponse } from '../dto/health.response';
 import { StatusResponse } from '../dto/status.response';
 import { HealthUseCase } from '../use-case/health.use-case';

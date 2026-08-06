@@ -6,7 +6,7 @@ import helmet from 'helmet';
 
 import { SWAGGER_UI_PATH } from '../../constants/api-documentation.constants';
 import { BODY_SIZE_LIMIT } from '../../constants/request.constants';
-import type { EnvironmentService } from '../environment/environment.service';
+import type { EnvironmentService } from '../environment/service/environment.service';
 
 /**
  * The options the api has to be created with for {@link ServerService.setup} to

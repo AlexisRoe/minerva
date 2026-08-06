@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { LogLevel, NodeEnvironment } from '../../enum/environment.enum';
-import { ENVIRONMENT_DEFAULTS, type EnvironmentVariables } from './environment.interface';
-import { toServiceName } from './environment.util';
+import { LogLevel, NodeEnvironment } from '../../../enum/environment.enum';
+import { ENVIRONMENT_DEFAULTS, type EnvironmentVariables } from '../interface/environment.interface';
+import { toServiceName } from '../utils/environment.util';
 
 /**
  * Typed, read-only access to the environment this process booted with, and the

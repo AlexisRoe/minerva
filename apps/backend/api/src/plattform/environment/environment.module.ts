@@ -1,8 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-
-import { EnvironmentService } from './environment.service';
-import { validateEnvironment } from './environment.util';
+import { EnvironmentService } from './service/environment.service';
+import { validateEnvironment } from './utils/environment.util';
 
 /**
  * Validates the environment once and exports {@link EnvironmentService} to the

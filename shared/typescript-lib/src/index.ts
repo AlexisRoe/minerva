@@ -8,8 +8,13 @@ export type {
   MinervaErrorProps,
   SerializedMinervaError,
 } from './custom-errors/minerva.error.types';
-export type { SentryLevel } from './custom-errors/minerva.error.util';
-export { convertToSentryLevel, serializeCause } from './custom-errors/minerva.error.util';
+export type { ConsoleMethod, NestLoggerMethod, SentryLevel } from './custom-errors/minerva.error.util';
+export {
+  CONSOLE_METHOD,
+  convertToSentryLevel,
+  NEST_LOGGER_METHOD,
+  serializeCause,
+} from './custom-errors/minerva.error.util';
 export { MissingEnvVarError, optionalEnv, readPort, requireEnv } from './env';
 export { DEFAULT_LANGUAGE, Languages } from './languages/available-languages';
 export type { BrowserLanguageSource } from './languages/languages.utils';

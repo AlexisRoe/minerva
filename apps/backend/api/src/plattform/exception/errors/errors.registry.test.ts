@@ -3,18 +3,12 @@ import { describe, expect, it } from 'vitest';
 
 import { type ErrorRegistryEntry, errorRegistry } from './errors.registry';
 
-/**
- * Annotated rather than inferred: the entry type is what declares constructors
- * to be `(...args: never[])`, and that is what lets the assertions below build
- * one with no arguments regardless of what its real signature asks for.
- */
+/** Annotated rather than inferred, so the assertions can build each class with no arguments. */
 const entries: [string, ErrorRegistryEntry][] = Object.entries(errorRegistry);
 
 /**
- * Guards the two properties the registry exists to provide: codes and
- * references are unique, and the class filed under a code is the class that
- * actually throws it. Both are easy to break by copying an existing error as a
- * starting point for a new one.
+ * Guards what the registry exists for: unique codes and references, each filed
+ * under the class that actually throws it. Copying an error breaks both.
  */
 describe('errorRegistry', () => {
   it('registers every error under a well-formed code', () => {

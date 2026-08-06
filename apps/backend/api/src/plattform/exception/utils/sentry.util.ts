@@ -1,33 +1,22 @@
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 
-import { SentryEnvironment } from './sentry.interface';
+import { SentryEnvironment } from '../interfaces/sentry.interface';
 
-/**
- * Share of transactions traced when nothing said otherwise.
- *
- * Production-shaped rather than off, because a reporting backend configured with
- * a DSN and then sampling nothing is a silent no-op nobody notices until they go
- * looking for a trace that was never taken.
- */
+/** Share of transactions traced when nothing said otherwise. */
 export const DEFAULT_TRACES_SAMPLE_RATE = 0.1;
 
 /**
- * Share of processes eligible to profile when nothing said otherwise.
- *
- * `1` rather than a fraction because this multiplies with
- * {@link DEFAULT_TRACES_SAMPLE_RATE} under the `trace` lifecycle: every process
- * may profile, but only for the tenth of transactions tracing already kept.
+ * Share of processes eligible to profile when nothing said otherwise. `1`
+ * because it multiplies with {@link DEFAULT_TRACES_SAMPLE_RATE}.
  */
 export const DEFAULT_PROFILE_SESSION_SAMPLE_RATE = 1;
 
 /**
- * Reads `value` as a number, keeping anything unreadable readable in the report.
+ * Reads `value` as a number, falling back only when it is unset or blank.
  *
- * A bad number has to survive as far as validation rather than being swallowed
- * by a fallback, or `SENTRY_TRACES_SAMPLE_RATE=full` would silently become the
- * default and nobody would learn the variable is wrong. `NaN` is what
- * `@IsNumber` rejects, so it is exactly the right thing to hand it.
+ * Anything unreadable becomes `NaN` so `@IsNumber` names the variable, rather
+ * than a fallback silently hiding the typo.
  *
  * @example
  * ```ts
@@ -45,10 +34,7 @@ export function toNumber(value: string | undefined, fallback: number): number {
 /**
  * Reads `value` as a boolean, leaving anything else for validation to reject.
  *
- * `Boolean('false')` is `true`, which is the trap this exists to avoid: the
- * environment only ever supplies strings, so the two words have to be matched
- * explicitly. Anything else comes back as the raw string and fails `@IsBoolean`
- * with the variable named.
+ * The two words are matched explicitly, because `Boolean('false')` is `true`.
  *
  * @example
  * ```ts
@@ -72,17 +58,14 @@ export function toBoolean(value: string | undefined, fallback: boolean): boolean
 }
 
 /**
- * Turns a raw environment into a validated {@link SentryEnvironment}, or `undefined`.
+ * Turns a raw environment into a validated {@link SentryEnvironment}, or
+ * `undefined` when there is no `SENTRY_DSN` or the configuration is not legal.
  *
- * `undefined` comes back in the two cases where not reporting is the right
- * answer: no `SENTRY_DSN` at all, which is the normal state locally and is
- * silent, and an environment that named a variable but got it wrong, which is
- * warned about on `console` and then ignored. Neither throws -- an observability
- * backend the api could not reach is a bad reason for the api not to start.
- *
- * `console` rather than Nest's `Logger` on purpose: this runs before any Nest
- * module is imported, and importing one here to print a warning is exactly the
- * ordering `instrument.ts` exists to prevent.
+ * Never throws: the api not reporting is survivable. The report goes to
+ * `console` rather than Nest's `Logger` because this runs before any Nest module
+ * may be imported -- see `instrument.ts`. It names the broken variable and the
+ * constraint it failed, never the message, which would quote the value the DSN
+ * cannot afford to have printed.
  *
  * @example
  * ```ts
@@ -114,6 +97,10 @@ export function readSentryEnvironment(environment: NodeJS.ProcessEnv): SentryEnv
 
   if (errors.length === 0) {
     return candidate;
+  }
+
+  for (const { property, constraints } of errors) {
+    console.warn(`[Sentry] ${property} failed: ${Object.keys(constraints ?? {}).join(', ')}.`);
   }
 
   console.warn('[Sentry] reporting is disabled because the configuration above is not valid.');

@@ -1,6 +1,6 @@
 import { type MiddlewareConsumer, Module, type NestModule, RequestMethod } from '@nestjs/common';
 
-import { RequestIdMiddleware } from './request-id.middleware';
+import { RequestIdMiddleware } from './middleware/request-id.middleware';
 
 /**
  * Puts `RequestIdMiddleware` in front of every route in the api.

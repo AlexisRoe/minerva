@@ -4,11 +4,10 @@ import type { Request } from 'express';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import { afterEach, describe, expect, it } from 'vitest';
-
-import { RequestIdHeader } from '../../constants/request.constants';
+import { REQUEST_ID_HEADER } from '../../../constants/request.constants';
+import type { RequestWithRequestId } from '../interface/request-id.interface';
+import { RequestIdModule } from '../request-id.module';
 import { RequestId } from './request-id.decorator';
-import type { RequestWithRequestId } from './request-id.interface';
-import { RequestIdModule } from './request-id.module';
 
 /** The shape `randomUUID` produces, so a minted id can be told from a kept one. */
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -62,7 +61,7 @@ describe('RequestId', () => {
 
     const response = await request(app.getHttpServer())
       .get('/fixture')
-      .set(RequestIdHeader, INCOMING_REQUEST_ID)
+      .set(REQUEST_ID_HEADER, INCOMING_REQUEST_ID)
       .expect(200);
 
     expect(response.body).toEqual({ requestId: INCOMING_REQUEST_ID });
@@ -81,7 +80,7 @@ describe('RequestId', () => {
 
     const response = await request(app.getHttpServer()).get('/fixture').expect(200);
 
-    expect(response.headers[RequestIdHeader.toLowerCase()]).toBe(response.body.requestId);
+    expect(response.headers[REQUEST_ID_HEADER.toLowerCase()]).toBe(response.body.requestId);
   });
 
   it('answers the same id twice within one request', async () => {
@@ -98,7 +97,7 @@ describe('RequestId', () => {
 
       const response = await request(app.getHttpServer())
         .get('/fixture')
-        .set(RequestIdHeader, INCOMING_REQUEST_ID)
+        .set(REQUEST_ID_HEADER, INCOMING_REQUEST_ID)
         .expect(200);
 
       expect(response.body).toEqual({ requestId: INCOMING_REQUEST_ID });

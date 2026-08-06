@@ -2,20 +2,16 @@
 import * as Sentry from '@sentry/nestjs';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
 
-import { readSentryEnvironment } from './sentry.util';
+import { readSentryEnvironment } from '../utils/sentry.util';
 
 export class SentryService {
   /**
-   * Starts Sentry from `environment`, or returns having started nothing.
+   * Starts Sentry from `environment`, and answers whether it did.
    *
-   * Returns whether it initialised, which is what makes the no-op observable to
-   * a test. Nothing is thrown on a bad configuration: the api not reporting is
-   * survivable, the api not booting is not.
-   *
-   * `profileLifecycle` is fixed at `trace` rather than configurable. Its default
-   * is `manual`, where a profile is only ever taken between explicit
-   * `startProfiler`/`stopProfiler` calls -- which nothing here makes, so
-   * `profileSessionSampleRate` would be a knob wired to nothing.
+   * A bad configuration is never thrown on: the api not reporting is survivable,
+   * the api not booting is not. `profileLifecycle` is fixed at `trace` because
+   * the default `manual` profiles only between explicit `startProfiler` calls,
+   * which nothing here makes.
    *
    * @example
    * ```ts

@@ -9,7 +9,7 @@ import { SWAGGER_JSON_PATH, SWAGGER_SITE_TITLE, SWAGGER_UI_PATH } from '../../co
 import { FAVICON_DATA_URI } from '../../constants/favicon.constants';
 import { HealthModule } from '../../modules/health/health.module';
 import { EnvironmentModule } from '../environment/environment.module';
-import { EnvironmentService } from '../environment/environment.service';
+import { EnvironmentService } from '../environment/service/environment.service';
 import { SwaggerService } from './swagger.service';
 
 /**

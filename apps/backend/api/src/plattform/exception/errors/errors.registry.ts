@@ -1,6 +1,7 @@
 import type { ErrorCode } from '@minerva/typescript-lib';
 
 import { EnvironmentValidationError } from './environment.errors';
+import { HttpRequestError, UnexpectedError } from './request.errors';
 
 /** What one entry of {@link errorRegistry} records about an error. */
 export interface ErrorRegistryEntry {
@@ -13,16 +14,11 @@ export interface ErrorRegistryEntry {
 }
 
 /**
- * Every error code this service can throw, in one place.
+ * Every error code this service can throw, in one place, so the next free code
+ * is the one after the last key and a removed code is never reused.
  *
- * The codes are what reaches a client, a log line and a Sentry fingerprint, so
- * they have to be unique and permanent. This map is what makes that checkable:
- * the next free code is the one after the last key, and a code that no longer
- * appears here has been removed rather than silently reused.
- *
- * The keys are typed as {@link ErrorCode}, so a malformed code does not compile.
- * Adding an error means adding its class to a `*.errors.ts` file (with a fresh
- * `uuidgen` reference) and a line here.
+ * Adding an error means adding its class to a `*.errors.ts` file with a fresh
+ * `uuidgen` reference, and a line here.
  *
  * @example Looking one up from a report
  * ```ts
@@ -33,6 +29,14 @@ export const errorRegistry = {
   ERR_001: {
     error: EnvironmentValidationError,
     description: 'The environment does not satisfy the schema the api boots from.',
+  },
+  ERR_002: {
+    error: HttpRequestError,
+    description: 'A request was refused with an HTTP status Nest itself decided on.',
+  },
+  ERR_003: {
+    error: UnexpectedError,
+    description: 'A request failed on something the api does not recognise as an error of its own.',
   },
   // `Partial`, because what is enforced is that every key is a well-formed
   // code -- not that all thousand of them are taken.

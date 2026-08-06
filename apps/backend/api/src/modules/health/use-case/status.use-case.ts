@@ -2,7 +2,7 @@ import type { UUID } from 'node:crypto';
 import { Result, type UseCase } from '@minerva/typescript-lib';
 import { Injectable } from '@nestjs/common';
 import { ApiStatus } from '../../../enum/status.enum';
-import { EnvironmentService } from '../../../plattform/environment/environment.service';
+import { EnvironmentService } from '../../../plattform/environment/service/environment.service';
 import type { StatusResponse } from '../dto/status.response';
 
 export interface StatusInput {

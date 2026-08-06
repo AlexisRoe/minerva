@@ -2,8 +2,8 @@ import { MinervaError } from '@minerva/typescript-lib';
 import { Logger } from '@nestjs/common';
 import type { ValidationError } from 'class-validator';
 import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
-import { LogLevel, NodeEnvironment } from '../../enum/environment.enum';
-import { EnvironmentValidationError } from '../../errors/environment.errors';
+import { LogLevel, NodeEnvironment } from '../../../enum/environment.enum';
+import { EnvironmentValidationError } from '../../exception/errors/environment.errors';
 import { dropBlankValues, flattenValidationErrors, toServiceName, validateEnvironment } from './environment.util';
 
 const COOKIE_SECRET = 'a-test-secret-of-more-than-32-characters';

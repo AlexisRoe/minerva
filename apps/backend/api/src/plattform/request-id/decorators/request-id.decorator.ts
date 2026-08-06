@@ -1,6 +1,6 @@
 import type { UUID } from 'node:crypto';
 import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
-import type { RequestWithRequestId } from './request-id.interface';
+import type { RequestWithRequestId } from '../interface/request-id.interface';
 
 /**
  * Hands a handler the id of the request it is answering.

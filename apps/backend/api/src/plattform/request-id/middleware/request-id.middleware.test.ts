@@ -1,9 +1,8 @@
 import { Test } from '@nestjs/testing';
 import type { NextFunction, Request, Response } from 'express';
 import { describe, expect, it, vi } from 'vitest';
-
-import { RequestIdHeader } from '../../constants/request.constants';
-import type { RequestWithRequestId } from './request-id.interface';
+import { REQUEST_ID_HEADER } from '../../../constants/request.constants';
+import type { RequestWithRequestId } from '../interface/request-id.interface';
 import { RequestIdMiddleware } from './request-id.middleware';
 
 /** The shape `randomUUID` produces, so a minted id can be told from a kept one. */
@@ -23,10 +22,12 @@ function buildContext(incoming?: string): {
   response: Response;
   next: NextFunction;
 } {
-  const header = vi.fn((name: string) => (name.toLowerCase() === RequestIdHeader.toLowerCase() ? incoming : undefined));
+  const header = vi.fn((name: string) =>
+    name.toLowerCase() === REQUEST_ID_HEADER.toLowerCase() ? incoming : undefined,
+  );
 
   return {
-    request: { header } as unknown as Request,
+    request: { header } as unknown as RequestWithRequestId,
     response: { setHeader: vi.fn() } as unknown as Response,
     next: vi.fn(),
   };
@@ -46,7 +47,7 @@ describe('RequestIdMiddleware', () => {
     new RequestIdMiddleware().use(request, response, next);
 
     expect((request as RequestWithRequestId).requestId).toBe(incoming);
-    expect(response.setHeader).toHaveBeenCalledWith(RequestIdHeader, incoming);
+    expect(response.setHeader).toHaveBeenCalledWith(REQUEST_ID_HEADER, incoming);
   });
 
   it('mints one when the caller sent none', () => {
@@ -62,7 +63,7 @@ describe('RequestIdMiddleware', () => {
 
     new RequestIdMiddleware().use(request, response, next);
 
-    expect(response.setHeader).toHaveBeenCalledWith(RequestIdHeader, (request as RequestWithRequestId).requestId);
+    expect(response.setHeader).toHaveBeenCalledWith(REQUEST_ID_HEADER, (request as RequestWithRequestId).requestId);
   });
 
   it('rejects a header that would split the response, and does not echo it back', () => {
@@ -71,7 +72,7 @@ describe('RequestIdMiddleware', () => {
     new RequestIdMiddleware().use(request, response, next);
 
     expect((request as RequestWithRequestId).requestId).toMatch(UUID_PATTERN);
-    expect(response.setHeader).not.toHaveBeenCalledWith(RequestIdHeader, expect.stringContaining('Set-Cookie'));
+    expect(response.setHeader).not.toHaveBeenCalledWith(REQUEST_ID_HEADER, expect.stringContaining('Set-Cookie'));
   });
 
   it('passes the request on, since an id is a diagnostic aid and never a reason to refuse one', () => {

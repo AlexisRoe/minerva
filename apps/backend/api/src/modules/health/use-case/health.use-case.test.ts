@@ -3,8 +3,8 @@ import { Test } from '@nestjs/testing';
 import { describe, expect, it } from 'vitest';
 
 import { ApiStatus } from '../../../enum/status.enum';
-import type { EnvironmentVariables } from '../../../plattform/environment/environment.interface';
-import { EnvironmentService } from '../../../plattform/environment/environment.service';
+import type { EnvironmentVariables } from '../../../plattform/environment/interface/environment.interface';
+import { EnvironmentService } from '../../../plattform/environment/service/environment.service';
 import { HealthUseCase } from './health.use-case';
 
 /**

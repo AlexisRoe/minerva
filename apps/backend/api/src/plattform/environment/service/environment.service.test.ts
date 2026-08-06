@@ -3,10 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { LogLevel, NodeEnvironment } from '../../enum/environment.enum';
-import { ENVIRONMENT_DEFAULTS } from './environment.interface';
+import { LogLevel, NodeEnvironment } from '../../../enum/environment.enum';
+import { ENVIRONMENT_DEFAULTS } from '../interface/environment.interface';
+import { validateEnvironment } from '../utils/environment.util';
 import { EnvironmentService } from './environment.service';
-import { validateEnvironment } from './environment.util';
 
 async function buildService(environment: Record<string, string>): Promise<EnvironmentService> {
   const schema = [
