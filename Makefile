@@ -1,9 +1,15 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup check-deps install build-libs certs copy-env icons fonts dev dev-manager dev-button shutdown-fe build verify verify-i18n verify-i18n-verbose test typecheck lint format storybook
+.PHONY: help setup check-deps install build-libs certs copy-env icons fonts dev dev-manager dev-button shutdown-fe api api-build api-logs api-down build verify verify-i18n verify-i18n-verbose test typecheck lint format storybook
 
 # Defaults for `make icons` (override on the command line)
 OUT ?= ./icons
+
+# The dockerised api (`make api`). docker compose interpolates the compose file
+# from the root .env; the port is read here too so the URL printed at the end
+# matches whatever Caddy actually bound.
+API_COMPOSE := docker compose --env-file .env -f infra/docker/docker-compose.api.yml
+API_PORT := $(or $(shell sed -n 's/^BE_API_PORT=//p' .env 2>/dev/null | tail -1),4401)
 
 # Defaults for `make verify-i18n` (override on the command line)
 I18N_PROJECTS ?= apps/frontend/minerva-button
@@ -53,6 +59,35 @@ dev-button: ## Run only minerva-button on https://localhost:4101 (builds the ui-
 # mentions `vite` are touched — see the guard in the script.
 shutdown-fe: ## DANGEROUS: force-kill the button and manager dev servers (DRY_RUN=1 to preview)
 	@bash scripts/shutdown-frontends.sh
+
+# `docker compose up` needs both preconditions before it can start: the .env it
+# interpolates, and the certificate Caddy terminates TLS with. Check for them
+# here rather than letting compose fail with its own, less obvious message.
+api: ## Run the api in Docker behind Caddy on https://api.localhost:BE_API_PORT (hot reload + inspector)
+	@if [ ! -f .env ]; then \
+		echo "No .env found. Run: make copy-env" >&2; \
+		exit 1; \
+	fi
+	@if [ ! -f infra/cert/minerva-local.pem ] || [ ! -f infra/cert/minerva-local-key.pem ]; then \
+		$(MAKE) --no-print-directory certs; \
+	fi
+	@$(API_COMPOSE) up --build --detach --wait
+	@echo
+	@echo "  api      https://api.localhost:$(API_PORT)  (also https://localhost:$(API_PORT))"
+	@echo "  health   https://api.localhost:$(API_PORT)/health"
+	@echo "  debugger 127.0.0.1:9229 — VS Code: 'Attach to api (Docker)'"
+	@echo "  logs     make api-logs"
+
+# `make api` already passes --build, which rebuilds every layer whose inputs
+# changed. This is the escape hatch for when the cache itself is the problem.
+api-build: ## Force a full rebuild of the api image, ignoring the layer cache
+	@$(API_COMPOSE) build --no-cache api
+
+api-logs: ## Follow the logs of the running api stack
+	@$(API_COMPOSE) logs --follow
+
+api-down: ## Stop the api stack and remove its containers
+	@$(API_COMPOSE) down
 
 build: ## Build every workspace package in dependency order
 	@pnpm build

@@ -1,0 +1,40 @@
+# Build context for apps/backend/api/Dockerfile.
+#
+# BuildKit prefers this file over the root .dockerignore when building with
+# `-f apps/backend/api/Dockerfile`, and it replaces it rather than adding to it.
+#
+# The context is the repository root because the api is a workspace member, but
+# only the api and the one library it imports belong in it. Everything else —
+# both frontends, the ui-lib, the queue-coordinator, the Python workers — is
+# excluded here, so touching them cannot invalidate a layer or slow the build.
+
+# Deny everything, then re-open the paths the image needs. Intermediate
+# directories are re-included explicitly: a directory that stays excluded is
+# never walked, and nothing below it can be matched.
+*
+
+!/package.json
+!/pnpm-lock.yaml
+!/pnpm-workspace.yaml
+!/.npmrc
+!/tsconfig.base.json
+!/tsconfig.backend.json
+
+!/apps
+/apps/*
+!/apps/backend
+/apps/backend/*
+!/apps/backend/api
+
+!/shared
+/shared/*
+!/shared/typescript-lib
+
+# Never ship build output, host dependencies or secrets, whatever the rules above say.
+**/node_modules
+**/dist
+**/coverage
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+**/*.log

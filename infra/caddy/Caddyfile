@@ -1,0 +1,36 @@
+# Reverse proxy in front of @minerva/api.
+#
+# Terminates TLS with the mkcert pair from infra/cert/ (mounted read-only at
+# /etc/caddy/cert) and forwards to the api container over the compose network.
+# Used by infra/docker/docker-compose.api.yml; `{$VAR:default}` placeholders are
+# filled from the environment, which compose loads from the root .env.
+{
+	# The mkcert certificate below is already trusted by the local CA, so Caddy
+	# must not try to issue one of its own. `disable_redirects` also keeps it
+	# from binding :80 for HTTP→HTTPS redirects — that port is not published.
+	auto_https disable_redirects
+
+	# Admin API stays inside the container (used by `caddy reload`).
+	admin localhost:2019
+}
+
+# BE_API_PORT is the api's public port — the one thing a caller needs to know.
+# One certificate covers `localhost` and `*.localhost` (see
+# scripts/generate-certs.sh), so both origins work on the same listener.
+https://api.localhost:{$BE_API_PORT:4401}, https://localhost:{$BE_API_PORT:4401} {
+	tls /etc/caddy/cert/minerva-local.pem /etc/caddy/cert/minerva-local-key.pem
+
+	encode zstd gzip
+
+	# Port 3000 is the api container's internal listener, fixed in its Dockerfile.
+	# X-Forwarded-{For,Proto,Host} are set by Caddy itself, so the app sees the
+	# browser-facing scheme and host rather than the container's.
+	reverse_proxy api:3000 {
+		# Server-Sent Events and long polling must not be buffered.
+		flush_interval -1
+	}
+
+	log {
+		format console
+	}
+}

@@ -18,13 +18,37 @@ CERT_DIR="${REPO_ROOT}/infra/cert"
 CERT_FILE="${CERT_DIR}/minerva-local.pem"
 KEY_FILE="${CERT_DIR}/minerva-local-key.pem"
 
-# Domains/IPs covered by the certificate. The *.localhost wildcard lets every
-# frontend project, the ui-lib, and each dockerised service run under its own
-# https://<name>.localhost origin while sharing this one certificate.
-CERT_DOMAINS=("localhost" "*.localhost" "127.0.0.1" "::1")
+# Every name the certificate has to cover, listed one by one.
+#
+# A `*.localhost` wildcard does NOT work here: browsers and OpenSSL both refuse
+# a wildcard whose parent is a single-label TLD, so `*.localhost` matches
+# nothing at all and `https://api.localhost` fails with a name mismatch rather
+# than a trust error. Every service origin therefore needs its own entry — add
+# one here when a new service gets a hostname, and re-run this script.
+CERT_DOMAINS=(
+  "localhost"
+  "api.localhost"
+  "queue.localhost"
+  "manager.localhost"
+  "button.localhost"
+  "storybook.localhost"
+  "127.0.0.1"
+  "::1"
+)
 
 # Regenerate if the certificate expires within this many days.
 MIN_DAYS_REMAINING=30
+
+# The names a certificate actually carries, one per line, sorted. openssl prints
+# the IPv6 loopback expanded, so it is folded back to the short form the list
+# above is written in.
+cert_names() {
+  openssl x509 -in "$1" -noout -ext subjectAltName 2>/dev/null |
+    tr ',' '\n' |
+    sed -n -e 's/^[[:space:]]*DNS://p' -e 's/^[[:space:]]*IP Address://p' |
+    sed -e 's/^0:0:0:0:0:0:0:1$/::1/' |
+    sort -u
+}
 
 # ---- colors -------------------------------------------------------------
 if [[ -t 1 ]]; then
@@ -89,6 +113,17 @@ elif ! openssl x509 -checkend "$((MIN_DAYS_REMAINING * 86400))" -noout -in "$CER
   EXPIRY="$(openssl x509 -enddate -noout -in "$CERT_FILE" 2>/dev/null | cut -d= -f2)"
   echo "  Status:     ${YELLOW}outdated${RESET}"
   echo "  Expires:    ${EXPIRY:-unknown}"
+elif [[ "$(printf '%s\n' "${CERT_DOMAINS[@]}" | sort -u)" != "$(cert_names "$CERT_FILE")" ]]; then
+  # A still-valid certificate for the wrong set of names is the failure mode
+  # that is hardest to see: it is trusted, it just does not match the host you
+  # opened. Adding a name to CERT_DOMAINS has to be enough to get a new one.
+  NEED_NEW_CERT=true
+  REASON="certificate does not cover the same names as CERT_DOMAINS"
+  echo "  Status:     ${YELLOW}wrong names${RESET}"
+  MISSING="$(comm -23 <(printf '%s\n' "${CERT_DOMAINS[@]}" | sort -u) <(cert_names "$CERT_FILE") | paste -sd' ' -)"
+  EXTRA="$(comm -13 <(printf '%s\n' "${CERT_DOMAINS[@]}" | sort -u) <(cert_names "$CERT_FILE") | paste -sd' ' -)"
+  [[ -n "$MISSING" ]] && echo "  Missing:    ${MISSING}"
+  [[ -n "$EXTRA" ]] && echo "  No longer wanted: ${EXTRA}"
 else
   EXPIRY="$(openssl x509 -enddate -noout -in "$CERT_FILE" 2>/dev/null | cut -d= -f2)"
   echo "  Status:     ${GREEN}valid${RESET}"
@@ -130,7 +165,8 @@ echo "  Expires:     ${EXPIRY:-unknown}"
 echo "  Domains:     ${CERT_DOMAINS[*]}"
 echo
 echo "  Point your frontend dev servers, the ui-lib dev server, and the"
-echo "  dockerised services' TLS config at these files to run over https://"
-echo "  (e.g. https://minerva-manager.localhost, https://api.localhost)."
+echo "  dockerised services' TLS config at these files to run over https://."
+echo "  Only the names listed above are covered — there is no wildcard, so a"
+echo "  new service origin means adding it to CERT_DOMAINS and re-running this."
 
 exit 0
