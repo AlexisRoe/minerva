@@ -36,7 +36,7 @@ export type {
   ReportingReasons,
   UserFeedback,
 } from './response/minerva-button-settings.response';
-export type { FailureResult, SuccessResult } from './result-type/result.class';
+export type { FailureResult, ResultBase, SuccessResult } from './result-type/result.class';
 export { Result } from './result-type/result.class';
 export type { SerializedResult } from './result-type/result.util';
 export { hasResultBrand, isSerializedResult, reviveError } from './result-type/result.util';
