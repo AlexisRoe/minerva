@@ -15,8 +15,6 @@ async function buildService(environment: Record<string, string>): Promise<Enviro
     'NODE_ENV',
     'LOG_LEVEL',
     'API_PORT',
-    'SENTRY_DSN',
-    'SENTRY_TRACES_SAMPLE_RATE',
     'CORS_ORIGINS',
     'COOKIE_SECRET',
   ];
@@ -46,12 +44,6 @@ describe('EnvironmentService', () => {
     const service = await buildService({ API_PORT: '4401' });
 
     expect(service.apiPort).toBe(4401);
-  });
-
-  it('hands out the sample rate as a number', async () => {
-    const service = await buildService({ SENTRY_TRACES_SAMPLE_RATE: '0.5' });
-
-    expect(service.sentryTracesSampleRate).toBe(0.5);
   });
 
   it('reports the service name unscoped, as the health body needs it', async () => {
@@ -106,18 +98,6 @@ describe('EnvironmentService', () => {
     expect(service.logLevels).toEqual(Object.values(LogLevel));
   });
 
-  it('hands out the Sentry DSN when one is configured', async () => {
-    const service = await buildService({ SENTRY_DSN: 'https://key@o1.ingest.sentry.io/2' });
-
-    expect(service.sentryDsn).toBe('https://key@o1.ingest.sentry.io/2');
-  });
-
-  it('reports no DSN when reporting is off', async () => {
-    const service = await buildService({ SENTRY_DSN: '' });
-
-    expect(service.sentryDsn).toBeUndefined();
-  });
-
   it('hands out the allowed origins as a list, not as the string it was configured as', async () => {
     const service = await buildService({ CORS_ORIGINS: 'https://localhost:4201,https://localhost:4101' });
 
@@ -156,14 +136,6 @@ describe('EnvironmentService', () => {
     expect(service.nodeEnv).toBe(ENVIRONMENT_DEFAULTS.NODE_ENV);
     expect(service.logLevel).toBe(ENVIRONMENT_DEFAULTS.LOG_LEVEL);
     expect(service.apiPort).toBe(ENVIRONMENT_DEFAULTS.API_PORT);
-    expect(service.sentryTracesSampleRate).toBe(ENVIRONMENT_DEFAULTS.SENTRY_TRACES_SAMPLE_RATE);
-  });
-
-  it('withholds the default it has no entry for, so absence stays absence', async () => {
-    const service = await buildService({});
-
-    expect(service.sentryDsn).toBeUndefined();
-    expect(ENVIRONMENT_DEFAULTS).not.toHaveProperty('SENTRY_DSN');
   });
 
   it('prefers the environment over every default it holds', async () => {
@@ -171,13 +143,11 @@ describe('EnvironmentService', () => {
       NODE_ENV: 'production',
       LOG_LEVEL: 'error',
       API_PORT: '4401',
-      SENTRY_TRACES_SAMPLE_RATE: '1',
     });
 
     expect(service.nodeEnv).toBe(NodeEnvironment.Production);
     expect(service.logLevel).toBe(LogLevel.Error);
     expect(service.apiPort).toBe(4401);
-    expect(service.sentryTracesSampleRate).toBe(1);
   });
 
   it('refuses to build the module when the environment is invalid', async () => {

@@ -13,7 +13,7 @@ import { toServiceName } from './environment.util';
  * as the `validate` hook of `ConfigModule.forRoot`, so it is legal or the
  * process is already dead. What is left to settle is absence, and that is a
  * different question per variable: {@link apiPort} falls back to
- * {@link ENVIRONMENT_DEFAULTS}, {@link sentryDsn} does not fall back at all
+ * {@link ENVIRONMENT_DEFAULTS}, {@link cookieSecret} does not fall back at all
  * because absent is a meaningful answer, and a variable with neither would have
  * failed validation for being required.
  *
@@ -142,39 +142,6 @@ export class EnvironmentService {
   }
 
   /**
-   * Where Sentry sends events, or `undefined` when reporting is off.
-   *
-   * The one getter that deliberately has no fallback: a deployment without an
-   * observability backend is a legitimate deployment and the normal case
-   * locally, so absence is the answer rather than a gap to paper over.
-   *
-   * @example
-   * ```ts
-   * if (environment.sentryDsn === undefined) {
-   *   return; // nothing to report to
-   * }
-   * ```
-   */
-  get sentryDsn(): string | undefined {
-    return this.configService.get('SENTRY_DSN', { infer: true });
-  }
-
-  /**
-   * Share of transactions Sentry traces, `0` through `1`, defaulting to none.
-   *
-   * @example
-   * ```ts
-   * Sentry.init({ tracesSampleRate: environment.sentryTracesSampleRate });
-   * ```
-   */
-  get sentryTracesSampleRate(): number {
-    return (
-      this.configService.get('SENTRY_TRACES_SAMPLE_RATE', { infer: true }) ??
-      ENVIRONMENT_DEFAULTS.SENTRY_TRACES_SAMPLE_RATE
-    );
-  }
-
-  /**
    * The browser origins allowed to call the api, empty for every origin.
    *
    * Empty is the honest answer for an unset variable rather than a locked-down
@@ -194,10 +161,9 @@ export class EnvironmentService {
   /**
    * The key cookies are signed with, or `undefined` when none are signed.
    *
-   * No fallback, for the same reason {@link sentryDsn} has none and the
-   * opposite reason {@link apiPort} has one: a generated stand-in would let
-   * signed cookies appear to work while every restart silently invalidated the
-   * ones already issued.
+   * No fallback, for the opposite reason {@link apiPort} has one: a generated
+   * stand-in would let signed cookies appear to work while every restart
+   * silently invalidated the ones already issued.
    *
    * @example
    * ```ts

@@ -25,7 +25,7 @@ import { MinervaError } from '@minerva/typescript-lib';
  * `class-validator` reports a tree of {@link ValidationError} objects; the
  * payload carries it flattened to one readable line per broken rule, because
  * that is what a person staring at a failed boot needs. Values are deliberately
- * left out: `SENTRY_DSN` and anything added next to it are secrets, and the
+ * left out: `COOKIE_SECRET` and anything added next to it are secrets, and the
  * payload travels to Sentry.
  */
 export class EnvironmentValidationError extends MinervaError {

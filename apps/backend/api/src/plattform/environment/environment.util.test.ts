@@ -6,12 +6,13 @@ import { LogLevel, NodeEnvironment } from '../../enum/environment.enum';
 import { EnvironmentValidationError } from '../../errors/environment.errors';
 import { dropBlankValues, flattenValidationErrors, toServiceName, validateEnvironment } from './environment.util';
 
+const COOKIE_SECRET = 'a-test-secret-of-more-than-32-characters';
+
 const VALID_ENVIRONMENT = {
   NODE_ENV: 'production',
   LOG_LEVEL: 'warn',
   API_PORT: '3000',
-  SENTRY_DSN: 'https://key@o1.ingest.sentry.io/2',
-  SENTRY_TRACES_SAMPLE_RATE: '0.25',
+  COOKIE_SECRET,
 } as const;
 
 function validationError(property: string, constraints: Record<string, string>, children: ValidationError[] = []) {
@@ -39,11 +40,11 @@ describe('dropBlankValues', () => {
   });
 
   it('drops the empty strings a template .env and compose interpolation leave behind', () => {
-    expect(dropBlankValues({ SENTRY_DSN: '', API_PORT: '3000' })).toEqual({ API_PORT: '3000' });
+    expect(dropBlankValues({ COOKIE_SECRET: '', API_PORT: '3000' })).toEqual({ API_PORT: '3000' });
   });
 
   it('drops whitespace-only values and trims the rest', () => {
-    expect(dropBlankValues({ SENTRY_DSN: '   ', API_PORT: ' 3000 ' })).toEqual({ API_PORT: '3000' });
+    expect(dropBlankValues({ COOKIE_SECRET: '   ', API_PORT: ' 3000 ' })).toEqual({ API_PORT: '3000' });
   });
 
   it('drops unset and null variables, leaving the service to decide what absence means', () => {
@@ -51,8 +52,8 @@ describe('dropBlankValues', () => {
   });
 
   it('passes non-string values through untouched', () => {
-    expect(dropBlankValues({ SENTRY_TRACES_SAMPLE_RATE: 0, ENABLED: false })).toEqual({
-      SENTRY_TRACES_SAMPLE_RATE: 0,
+    expect(dropBlankValues({ API_PORT: 0, ENABLED: false })).toEqual({
+      API_PORT: 0,
       ENABLED: false,
     });
   });
@@ -105,10 +106,9 @@ describe('validateEnvironment', () => {
     const environment = validateEnvironment({ ...VALID_ENVIRONMENT });
 
     expect(environment.API_PORT).toBe(3000);
-    expect(environment.SENTRY_TRACES_SAMPLE_RATE).toBe(0.25);
     expect(environment.NODE_ENV).toBe(NodeEnvironment.Production);
     expect(environment.LOG_LEVEL).toBe(LogLevel.Warn);
-    expect(environment.SENTRY_DSN).toBe('https://key@o1.ingest.sentry.io/2');
+    expect(environment.COOKIE_SECRET).toBe(COOKIE_SECRET);
   });
 
   it('accepts an empty environment, leaving every value absent for the service to resolve', () => {
@@ -117,8 +117,7 @@ describe('validateEnvironment', () => {
     expect(environment.NODE_ENV).toBeUndefined();
     expect(environment.LOG_LEVEL).toBeUndefined();
     expect(environment.API_PORT).toBeUndefined();
-    expect(environment.SENTRY_DSN).toBeUndefined();
-    expect(environment.SENTRY_TRACES_SAMPLE_RATE).toBeUndefined();
+    expect(environment.COOKIE_SECRET).toBeUndefined();
   });
 
   it('keeps the package identity a package manager exported', () => {
@@ -137,14 +136,14 @@ describe('validateEnvironment', () => {
     expect(environment.API_PORT).toBe(4401);
     expect(environment.NODE_ENV).toBeUndefined();
     expect(environment.LOG_LEVEL).toBeUndefined();
-    expect(environment.SENTRY_TRACES_SAMPLE_RATE).toBeUndefined();
+    expect(environment.COOKIE_SECRET).toBeUndefined();
   });
 
   it('treats a declared-but-empty variable as unset rather than as an illegal value', () => {
-    const environment = validateEnvironment({ API_PORT: '', SENTRY_DSN: '' });
+    const environment = validateEnvironment({ API_PORT: '', COOKIE_SECRET: '' });
 
     expect(environment.API_PORT).toBeUndefined();
-    expect(environment.SENTRY_DSN).toBeUndefined();
+    expect(environment.COOKIE_SECRET).toBeUndefined();
   });
 
   it('strips the unrelated variables process.env carries', () => {
@@ -156,8 +155,6 @@ describe('validateEnvironment', () => {
       'CORS_ORIGINS',
       'LOG_LEVEL',
       'NODE_ENV',
-      'SENTRY_DSN',
-      'SENTRY_TRACES_SAMPLE_RATE',
       'npm_package_name',
       'npm_package_version',
     ]);
@@ -177,14 +174,6 @@ describe('validateEnvironment', () => {
 
   it('rejects a log level Nest has no name for -- optional never means lenient', () => {
     expect(() => validateEnvironment({ LOG_LEVEL: 'trace' })).toThrow(EnvironmentValidationError);
-  });
-
-  it('rejects a sample rate above 1', () => {
-    expect(() => validateEnvironment({ SENTRY_TRACES_SAMPLE_RATE: '2' })).toThrow(EnvironmentValidationError);
-  });
-
-  it('rejects a DSN that is not a URL', () => {
-    expect(() => validateEnvironment({ SENTRY_DSN: 'not-a-dsn' })).toThrow(EnvironmentValidationError);
   });
 
   it('reads the origin list as an array, trimming what a wrapped line leaves behind', () => {
@@ -224,9 +213,7 @@ describe('validateEnvironment', () => {
   });
 
   it('accepts a secret long enough to be worth signing with', () => {
-    const secret = 'a-test-secret-of-more-than-32-characters';
-
-    expect(validateEnvironment({ COOKIE_SECRET: secret }).COOKIE_SECRET).toBe(secret);
+    expect(validateEnvironment({ COOKIE_SECRET }).COOKIE_SECRET).toBe(COOKIE_SECRET);
   });
 
   it('rejects a guessable cookie secret, which is worse than none at all', () => {
@@ -244,12 +231,6 @@ describe('validateEnvironment', () => {
     }
   });
 
-  it('accepts a self-hosted DSN without a public tld', () => {
-    expect(validateEnvironment({ SENTRY_DSN: 'https://key@sentry-relay/1' }).SENTRY_DSN).toBe(
-      'https://key@sentry-relay/1',
-    );
-  });
-
   it('carries every problem as its own string in the payload', () => {
     expect.assertions(3);
 
@@ -261,17 +242,6 @@ describe('validateEnvironment', () => {
       const issues = (error as EnvironmentValidationError).payload?.issues as string[];
       expect(issues).toHaveLength(2);
       expect(issues.map((issue) => issue.split(':')[0]).sort()).toEqual(['API_PORT', 'NODE_ENV']);
-    }
-  });
-
-  it('names no value in the payload, so a bad DSN is not leaked to Sentry', () => {
-    expect.assertions(1);
-
-    try {
-      validateEnvironment({ SENTRY_DSN: 'super-secret-but-invalid' });
-    } catch (error) {
-      const issues = (error as EnvironmentValidationError).payload?.issues as string[];
-      expect(issues.join('\n')).not.toContain('super-secret-but-invalid');
     }
   });
 

@@ -1,4 +1,4 @@
-import './instrument';
+import './plattform/sentry/instrument';
 
 import { MinervaError } from '@minerva/typescript-lib';
 import { NestFactory } from '@nestjs/core';

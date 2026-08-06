@@ -4,7 +4,6 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsSemVer,
   IsUrl,
@@ -35,9 +34,14 @@ import { LogLevel, NodeEnvironment } from '../../enum/environment.enum';
  * wrong".
  *
  * The names are deliberately unprefixed. `.env` namespaces per service
- * (`BE_API_PORT`, `BE_API_SENTRY_DSN`) and `infra/docker/docker-compose.api.yml`
+ * (`BE_API_PORT`, `BE_API_CORS_ORIGINS`) and `infra/docker/docker-compose.api.yml`
  * maps those onto the names below, so one `.env` can configure every service
  * without any of them knowing about the others.
+ *
+ * The `SENTRY_*` variables are the documented exception: they are read and
+ * validated in `src/instrument.ts` instead. Sentry has to be initialised before
+ * any application module is imported, which is long before this class is
+ * validated, so the schema could only ever describe them too late to be used.
  *
  * @see https://docs.nestjs.com/techniques/configuration#custom-validate-function
  */
@@ -102,29 +106,6 @@ export class EnvironmentVariables {
   @Min(1)
   @Max(65_535)
   API_PORT?: number;
-
-  /**
-   * Where Sentry sends events, or absent to disable reporting entirely.
-   *
-   * Optional because that is the normal case locally, and because an api that
-   * refuses to boot without an observability backend is worse than one that
-   * boots without it.
-   *
-   * `require_tld` is off so a self-hosted relay on an internal hostname passes;
-   * `require_protocol` then has to be on, because without a tld to insist on,
-   * `isUrl` happily reads any single word as a hostname.
-   */
-  @IsOptional()
-  @IsUrl({ protocols: ['http', 'https'], require_tld: false, require_protocol: true })
-  SENTRY_DSN?: string;
-
-  /** Share of transactions Sentry traces, `0` (none) through `1` (all). */
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  @Max(1)
-  SENTRY_TRACES_SAMPLE_RATE?: number;
 
   /**
    * The browser origins allowed to call the api, comma separated, or empty to
@@ -207,19 +188,10 @@ function splitOrigins(value: string): string[] {
  * ```
  */
 export const ENVIRONMENT_DEFAULTS = {
-  /* What the api is called when nothing said otherwise -- a bare `node
-     dist/main.js`, or a test runner started outside a package script. Scoped
-     like the manifest is, so `EnvironmentService.serviceName` strips it the same
-     way whether the value was supplied or fell back to this. */
   npm_package_name: '@minerva/api',
-  /* Deliberately not the current version: an unset variable means nobody told
-     this process which build it is, and `0.0.0` says exactly that. A plausible
-     number here would be worse than none, because a stale one is unfalsifiable
-     -- it looks like a version and reads like a lie only once someone checks. */
   npm_package_version: '0.0.0',
   NODE_ENV: NodeEnvironment.Development,
   LOG_LEVEL: LogLevel.Log,
   API_PORT: 3000,
-  SENTRY_TRACES_SAMPLE_RATE: 0,
   CORS_ORIGINS: [],
 } as const satisfies Partial<EnvironmentVariables>;

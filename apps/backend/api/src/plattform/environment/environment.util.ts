@@ -10,8 +10,8 @@ const logger = new Logger('Environment');
 /**
  * Drops the variables that are present but say nothing, so a default can apply.
  *
- * `.env` files are full of `SENTRY_DSN=`, and compose turns an unset
- * `${BE_API_SENTRY_DSN:-}` into the same thing. Left alone, that empty string
+ * `.env` files are full of `COOKIE_SECRET=`, and compose turns an unset
+ * `${BE_API_COOKIE_SECRET:-}` into the same thing. Left alone, that empty string
  * reaches validation as a value and fails it -- "declared but empty" has to
  * mean "not configured", or a template `.env` could never be committed with a
  * variable left blank.
@@ -21,7 +21,7 @@ const logger = new Logger('Environment');
  *
  * @example
  * ```ts
- * dropBlankValues({ API_PORT: ' 3000 ', SENTRY_DSN: '', NODE_ENV: undefined });
+ * dropBlankValues({ API_PORT: ' 3000 ', COOKIE_SECRET: '', NODE_ENV: undefined });
  * // { API_PORT: '3000' }
  * ```
  */
@@ -80,7 +80,7 @@ export function toServiceName(packageName: string): string {
  * `children`. Logging the tree gives a wall of JSON that buries the one line
  * that matters, which is the whole reason this exists.
  *
- * Values are never included. `SENTRY_DSN` is a secret and this output goes to
+ * Values are never included. `COOKIE_SECRET` is a secret and this output goes to
  * both the console and a `MinervaError` payload bound for Sentry.
  *
  * @example
@@ -108,7 +108,7 @@ export function flattenValidationErrors(errors: readonly ValidationError[], pare
  * the root module is resolved -- before any controller exists and long before
  * the process listens. The order matters:
  *
- * 1. blanks are dropped, so `SENTRY_DSN=` counts as unset;
+ * 1. blanks are dropped, so `COOKIE_SECRET=` counts as unset;
  * 2. `plainToInstance` converts, because everything from the environment is a
  *    string and `@IsInt` would reject `'3000'`;
  * 3. `validateSync` checks, and `whitelist` strips the several hundred

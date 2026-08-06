@@ -19,7 +19,7 @@ import { validateEnvironment } from './environment.util';
  *
  * `skipProcessEnv` is what makes the validated snapshot the only source.
  * `ConfigService` otherwise falls back to `process.env` for anything the
- * snapshot does not have, which quietly undoes the work: `SENTRY_DSN=` would
+ * snapshot does not have, which quietly undoes the work: `COOKIE_SECRET=` would
  * come back as `''` instead of `undefined`, and every value would come back as
  * the string it was before conversion.
  *
