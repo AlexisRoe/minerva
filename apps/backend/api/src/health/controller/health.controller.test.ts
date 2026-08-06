@@ -5,10 +5,11 @@ import request from 'supertest';
 import type { App } from 'supertest/types';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { STUB_REQUEST_ID } from '../../constants/request.constants';
+import { RequestIdHeader } from '../../constants/request.constants';
 import { ApiStatus } from '../../enum/status.enum';
 import { EnvironmentModule } from '../../plattform/environment/environment.module';
 import { EnvironmentService } from '../../plattform/environment/environment.service';
+import { RequestIdModule } from '../../request-id/request-id.module';
 import { HealthModule } from '../health.module';
 
 /**
@@ -23,6 +24,12 @@ const SERVICE_VERSION = '7.7.7';
 /** Every route that has to answer with the plain liveness verdict. */
 const VERDICT_ROUTES = ['/health', '/health/live', '/health/ready'] as const;
 
+/** A uuid v4 the api would keep rather than replace. */
+const INCOMING_REQUEST_ID = '3f1c9f9e-6f2a-4c2b-9a1e-2f0d5f7c8b31';
+
+/** The shape `randomUUID` produces, so a minted id can be told from a kept one. */
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
 describe('HealthController', () => {
   let app: INestApplication<App>;
 
@@ -30,7 +37,9 @@ describe('HealthController', () => {
     /* `EnvironmentModule` is imported rather than the service provided directly:
        it is `@Global`, which is what lets the use cases resolve the same
        service. The override then pins the values under test. */
-    const moduleFixture = await Test.createTestingModule({ imports: [EnvironmentModule, HealthModule] })
+    const moduleFixture = await Test.createTestingModule({
+      imports: [EnvironmentModule, RequestIdModule, HealthModule],
+    })
       .overrideProvider(EnvironmentService)
       .useValue(
         new EnvironmentService(
@@ -78,8 +87,31 @@ describe('HealthController', () => {
       name: 'queue-coordinator',
       version: SERVICE_VERSION,
       date: expect.any(String),
-      requestId: STUB_REQUEST_ID,
+      requestId: expect.stringMatching(UUID_PATTERN),
     });
+  });
+
+  it('answers /health/status under the id the caller asked for', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/health/status')
+      .set(RequestIdHeader, INCOMING_REQUEST_ID)
+      .expect(200);
+
+    expect(response.body.requestId).toBe(INCOMING_REQUEST_ID);
+  });
+
+  it('reports the same id in the body of /health/status that it sets in the header', async () => {
+    const response = await request(app.getHttpServer()).get('/health/status').expect(200);
+
+    /* The body is the readable half and the header is the one every other route
+       carries; a report that quotes one has to be findable by the other. */
+    expect(response.headers[RequestIdHeader.toLowerCase()]).toBe(response.body.requestId);
+  });
+
+  it.each(VERDICT_ROUTES)('gives %s an id in the header even though its body has no room for one', async (route) => {
+    const response = await request(app.getHttpServer()).get(route).expect(200);
+
+    expect(response.headers[RequestIdHeader.toLowerCase()]).toBeDefined();
   });
 
   it('dates /health/status with a timestamp a client can parse, not with whatever the locale prints', async () => {

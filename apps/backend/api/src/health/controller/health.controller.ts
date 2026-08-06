@@ -1,6 +1,8 @@
+import type { UUID } from 'node:crypto';
 import { Controller, Get, Header, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiProduces, ApiTags } from '@nestjs/swagger';
 import { ApiDocumentationTags } from '../../enum/api-documentation.enum';
+import { RequestId } from '../../request-id/request-id.decorator';
 import { HealthResponse } from '../dto/health.response';
 import { StatusResponse } from '../dto/status.response';
 import { HealthUseCase } from '../use-case/health.use-case';
@@ -94,8 +96,8 @@ export class HealthController {
       'The liveness verdict plus the build it came from, the time the process believes it is, and the id correlating this response with its request. Meant for a human diagnosing something, not for a probe.',
   })
   @ApiOkResponse({ description: 'The identity of the process that answered.', type: StatusResponse })
-  async status(): Promise<StatusResponse> {
-    const result = await this.statusUseCase.execute();
+  async status(@RequestId() requestId: UUID): Promise<StatusResponse> {
+    const result = await this.statusUseCase.execute({ requestId });
 
     if (result.isFailure()) {
       throw result.error;

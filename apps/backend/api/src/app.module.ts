@@ -6,9 +6,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
 import { EnvironmentModule } from './plattform/environment/environment.module';
+import { RequestIdModule } from './request-id/request-id.module';
 
 @Module({
-  imports: [EnvironmentModule, SentryModule.forRoot(), HealthModule],
+  imports: [EnvironmentModule, RequestIdModule, SentryModule.forRoot(), HealthModule],
   controllers: [AppController],
   providers: [AppService, { provide: APP_FILTER, useClass: SentryGlobalFilter }],
 })

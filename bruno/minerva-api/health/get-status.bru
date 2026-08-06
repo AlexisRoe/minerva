@@ -17,6 +17,7 @@ assert {
   res.body.version: isDefined
   res.body.date: isDefined
   res.body.requestId: isDefined
+  res.headers['x-minerva-request-id']: isDefined
 }
 
 docs {
@@ -28,7 +29,7 @@ docs {
     "name": "api",
     "version": "0.1.0",
     "date": "2026-08-06T09:41:12.004Z",
-    "requestId": "not-yet-wired"
+    "requestId": "3f1c9f9e-6f2a-4c2b-9a1e-2f0d5f7c8b31"
   }
   ```
 
@@ -43,6 +44,11 @@ docs {
   `date` is generated per call, in UTC — held against your own clock it also shows how far
   the two have drifted.
 
-  `requestId` is the literal `not-yet-wired` until request ids exist; the assertions pin
-  the fields that are real and only check that this one is present.
+  `requestId` is the id this response was answered under. `RequestIdMiddleware` takes it
+  from the `X-MINERVA-REQUEST-ID` header when the caller sends a uuid v4, and mints one
+  otherwise; either way it comes back in the response header of *every* route, and on this
+  one in the body as well — which makes this the route to send it to when you want to see
+  what the api did with it. The header itself lives disabled in the collection settings,
+  because every route takes it; switch it on there and the value you set comes back in
+  both halves of this response.
 }

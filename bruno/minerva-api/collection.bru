@@ -4,6 +4,7 @@ auth {
 
 headers {
   Accept: application/json
+  ~X-MINERVA-REQUEST-ID: 3f1c9f9e-6f2a-4c2b-9a1e-2f0d5f7c8b31
 }
 
 docs {
@@ -20,6 +21,16 @@ docs {
 
   `Accept: application/json` below covers every JSON route. `GET /health/ping` answers
   `text/plain` and overrides it on the request itself.
+
+  `X-MINERVA-REQUEST-ID` sits here disabled because *every* route accepts it, not just the
+  ones that mention it — `RequestIdMiddleware` runs in front of the whole app, so the
+  header is a collection-wide concern in exactly the way `Accept` is. Send a uuid v4 and
+  the api answers under it; send nothing, or something that is not a uuid v4, and it mints
+  one. Either way it comes back in the response header of every route, which is why the
+  requests below assert it is there. Switch it on to name a request before making it —
+  but switch it off again before sending two, or both get answered under the same id.
+  OpenAPI knows about it as a global parameter, so `{{baseUrl}}/docs` shows it on every
+  operation too.
 
   The service has no authentication yet, so the collection-level auth mode is `none` and
   every request inherits it. When auth arrives, set it once here rather than per request.

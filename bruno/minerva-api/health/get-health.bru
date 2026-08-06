@@ -14,6 +14,7 @@ assert {
   res.status: eq 200
   res.body.status: eq ok
   res.body.name: eq api
+  res.headers['x-minerva-request-id']: isDefined
 }
 
 docs {
@@ -33,4 +34,10 @@ docs {
 
   `GET /health/live` and `GET /health/ready` answer with exactly this body — they exist so
   a Kubernetes manifest can bind each probe to its own path.
+
+  The `X-MINERVA-REQUEST-ID` asserted above is on every response the api gives, this one
+  included: `RequestIdMiddleware` keeps the id you sent if it is a uuid v4 and mints one
+  otherwise. It is the id to quote when reporting what a route answered — `GET
+  /health/status` is the only one that also puts it in the body. Sending your own is a
+  collection-level header, disabled by default, because every route here accepts it.
 }

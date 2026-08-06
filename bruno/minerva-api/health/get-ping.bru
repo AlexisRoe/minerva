@@ -18,6 +18,7 @@ assert {
   res.status: eq 200
   res.body: eq pong
   res.headers['content-type']: contains text/plain
+  res.headers['x-minerva-request-id']: isDefined
 }
 
 docs {
