@@ -13,17 +13,21 @@ get {
 assert {
   res.status: eq 200
   res.body.status: eq ok
-  res.body.service: eq api
+  res.body.name: eq api
 }
 
 docs {
-  Liveness probe. Returns the `HealthReport` from `AppService.health()`:
+  The liveness verdict, from `RootUseCase` via `HealthController.root()`:
 
   ```json
-  { "status": "ok", "service": "api" }
+  { "status": "ok", "name": "api" }
   ```
 
-  The `service` field is what distinguishes this from the queue-coordinator's identical
-  route, so the assertion checks it — a misconfigured `baseUrl` pointing at :3001 fails
-  here instead of passing silently.
+  Verdict only — it probes no database, queue or downstream service, so `ok` means this
+  process is up and routing works and says nothing about anything behind it. `status` is
+  the `ApiStatus` enum (`ok` | `error` | `pending`), which is why the assertion pins the
+  value rather than only checking the field is there.
+
+  `name` is what distinguishes this from the queue-coordinator's identical route, so a
+  `baseUrl` pointing at the wrong service fails here instead of passing silently.
 }
