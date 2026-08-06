@@ -54,6 +54,12 @@ catalog:
   '@types/office-js': 1.0.604
   '@azure/msal-browser': 5.17.3
   rollup-plugin-visualizer: 7.0.1
+  class-validator: 0.15.1
+  class-transformer: 0.5.1
+  '@nestjs/swagger': 11.4.6
 allowBuilds:
+  # Install analytics pulled in by swagger-ui-dist. Its postinstall only reports
+  # the install home; nothing in the build needs it to have run.
+  '@scarf/scarf': false
   '@swc/core': true
   esbuild: true

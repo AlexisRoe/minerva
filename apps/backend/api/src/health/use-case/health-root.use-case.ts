@@ -1,4 +1,5 @@
 import { Result, type UseCase } from '@minerva/typescript-lib';
+import { ApiStatus } from '../../enum/status.enum';
 import type { RootResponse } from '../dto/root.response';
 
 /**
@@ -11,6 +12,6 @@ import type { RootResponse } from '../dto/root.response';
  */
 export class RootUseCase implements UseCase<void, RootResponse> {
   async execute(): Promise<Result<RootResponse>> {
-    return Result.withSuccess({ status: 'ok', name: 'api' });
+    return Result.withSuccess({ status: ApiStatus.Ok, name: 'api' });
   }
 }

@@ -20,7 +20,10 @@
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
     "@nestjs/platform-express": "catalog:",
+    "@nestjs/swagger": "catalog:",
     "@sentry/nestjs": "catalog:",
+    "class-transformer": "catalog:",
+    "class-validator": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:"
   },

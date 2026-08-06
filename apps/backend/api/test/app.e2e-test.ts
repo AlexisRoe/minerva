@@ -25,7 +25,7 @@ describe('AppController (e2e)', () => {
   it('GET /health', async () => {
     const response = await request(app.getHttpServer()).get('/health').expect(200);
 
-    expect(response.body).toEqual({ status: 'ok', service: 'api' });
+    expect(response.body).toEqual({ status: 'ok', name: 'api' });
   });
 
   it('POST /jobs rejects a malformed payload', async () => {
