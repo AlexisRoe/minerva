@@ -5,9 +5,10 @@ import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
+import { EnvironmentModule } from './plattform/environment/environment.module';
 
 @Module({
-  imports: [SentryModule.forRoot(), HealthModule],
+  imports: [EnvironmentModule, SentryModule.forRoot(), HealthModule],
   controllers: [AppController],
   providers: [AppService, { provide: APP_FILTER, useClass: SentryGlobalFilter }],
 })

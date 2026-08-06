@@ -29,8 +29,11 @@ services:
       # is the only client and it comes in over the compose network — so it is
       # fixed rather than configurable. BE_API_PORT is the published one.
       API_PORT: '3000'
-      # The services read unprefixed names (shared/typescript-lib/src/env.ts)
-      # while .env namespaces them per service — bridge the two here.
+      # The services read unprefixed names (the api's schema lives in
+      # apps/backend/api/src/plattform/environment/environment.interface.ts)
+      # while .env namespaces them per service — bridge the two here. A name
+      # missing or misspelled here fails the api's boot validation with the
+      # offending variable named on its own line.
       SENTRY_DSN: ${BE_API_SENTRY_DSN:-}
       SENTRY_TRACES_SAMPLE_RATE: ${BE_API_SENTRY_TRACES_SAMPLE_RATE:-0}
       # tsc's watcher never sees inotify events through a macOS/Windows bind

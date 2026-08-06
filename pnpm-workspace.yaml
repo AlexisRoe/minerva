@@ -57,6 +57,7 @@ catalog:
   class-validator: 0.15.1
   class-transformer: 0.5.1
   '@nestjs/swagger': 11.4.6
+  '@nestjs/config': 4.0.4
 allowBuilds:
   # Install analytics pulled in by swagger-ui-dist. Its postinstall only reports
   # the install home; nothing in the build needs it to have run.
