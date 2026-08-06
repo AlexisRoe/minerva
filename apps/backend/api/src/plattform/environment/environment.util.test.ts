@@ -5,9 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } fr
 
 import { EnvironmentValidationError } from '../../domain/errors/environment.errors';
 import { LogLevel, NodeEnvironment } from '../../enum/environment.enum';
-import { dropBlankValues, flattenValidationErrors, validateEnvironment } from './environment.util';
+import { dropBlankValues, flattenValidationErrors, toServiceName, validateEnvironment } from './environment.util';
 
-/** A minimal environment that passes, so each test can break exactly one thing. */
 const VALID_ENVIRONMENT = {
   NODE_ENV: 'production',
   LOG_LEVEL: 'warn',
@@ -16,10 +15,24 @@ const VALID_ENVIRONMENT = {
   SENTRY_TRACES_SAMPLE_RATE: '0.25',
 } as const;
 
-/** Builds the tree `class-validator` produces, without running it. */
 function validationError(property: string, constraints: Record<string, string>, children: ValidationError[] = []) {
   return { property, constraints, children } as ValidationError;
 }
+
+describe('toServiceName', () => {
+  it('drops the workspace scope npm needs and a reader does not', () => {
+    expect(toServiceName('@minerva/api')).toBe('api');
+  });
+
+  it('leaves an unscoped name alone', () => {
+    expect(toServiceName('api')).toBe('api');
+  });
+
+  it('keeps a value that is nothing but a scope, rather than answering with an empty name', () => {
+    expect(toServiceName('@minerva')).toBe('@minerva');
+    expect(toServiceName('@minerva/')).toBe('@minerva/');
+  });
+});
 
 describe('dropBlankValues', () => {
   it('keeps values that say something', () => {
@@ -109,6 +122,16 @@ describe('validateEnvironment', () => {
     expect(environment.SENTRY_TRACES_SAMPLE_RATE).toBeUndefined();
   });
 
+  it('keeps the package identity a package manager exported', () => {
+    const environment = validateEnvironment({ ...VALID_ENVIRONMENT, npm_package_name: '@minerva/api' });
+
+    expect(environment.npm_package_name).toBe('@minerva/api');
+  });
+
+  it('rejects a version that is not one, rather than putting it in the OpenAPI document', () => {
+    expect(() => validateEnvironment({ npm_package_version: 'latest' })).toThrow(EnvironmentValidationError);
+  });
+
   it('fills in no defaults of its own', () => {
     const environment = validateEnvironment({ API_PORT: '4401' });
 
@@ -136,6 +159,8 @@ describe('validateEnvironment', () => {
       'NODE_ENV',
       'SENTRY_DSN',
       'SENTRY_TRACES_SAMPLE_RATE',
+      'npm_package_name',
+      'npm_package_version',
     ]);
   });
 

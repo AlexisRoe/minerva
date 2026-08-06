@@ -99,10 +99,12 @@ async function buildApp(variables: Partial<EnvironmentVariables> = {}): Promise<
     logger: false,
   });
 
+  const environment = environmentOf(variables);
+
   // Middleware registered after a route would never see a request for it, so
   // the order these two run in is itself under test.
-  ServerService.setup(app, environmentOf(variables));
-  SwaggerService.setup(app);
+  ServerService.setup(app, environment);
+  SwaggerService.setup(app, environment);
 
   await app.init();
 

@@ -43,6 +43,36 @@ export function dropBlankValues(config: Record<string, unknown>): Record<string,
 }
 
 /**
+ * Drops the npm scope from a package name, leaving what the service is called.
+ *
+ * `npm_package_name` arrives as `@minerva/api`, because npm needs the scope to
+ * keep names unique across the workspace. A `GET /health` body answering
+ * `@minerva/api` reads like a dependency rather than a service, and the scope is
+ * the workspace -- which anyone reading that response already knows.
+ *
+ * An unscoped name comes back untouched, and so does a value that is nothing but
+ * a scope: returning an empty string there would turn a misconfigured launch
+ * into a health response with no name at all.
+ *
+ * @example
+ * ```ts
+ * toServiceName('@minerva/api'); // 'api'
+ * toServiceName('api');          // 'api'
+ * ```
+ *
+ * @see https://docs.npmjs.com/cli/v11/using-npm/scope
+ */
+export function toServiceName(packageName: string): string {
+  if (!packageName.startsWith('@')) {
+    return packageName;
+  }
+
+  const unscoped = packageName.split('/').at(1);
+
+  return unscoped === undefined || unscoped === '' ? packageName : unscoped;
+}
+
+/**
  * Flattens `class-validator`'s error tree into one readable line per broken rule.
  *
  * A {@link ValidationError} is a node, not a message: the messages sit in

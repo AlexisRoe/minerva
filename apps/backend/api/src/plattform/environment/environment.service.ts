@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { LogLevel, NodeEnvironment } from '../../enum/environment.enum';
 import { ENVIRONMENT_DEFAULTS, type EnvironmentVariables } from './environment.interface';
+import { toServiceName } from './environment.util';
 
 /**
  * Typed, read-only access to the environment this process booted with, and the
@@ -39,6 +40,44 @@ import { ENVIRONMENT_DEFAULTS, type EnvironmentVariables } from './environment.i
 @Injectable()
 export class EnvironmentService {
   constructor(private readonly configService: ConfigService<EnvironmentVariables>) {}
+
+  /**
+   * What this service is called -- `api`, unscoped from the `@minerva/api` a
+   * package manager exports as `npm_package_name`.
+   *
+   * This is what distinguishes a `GET /health` body from the queue-coordinator's
+   * identically shaped one, so it has to follow a rename of the package rather
+   * than be restated next to it. Unscoped because the scope names the workspace,
+   * which every reader of that response already knows.
+   *
+   * @example
+   * ```ts
+   * return { status: ApiStatus.Ok, name: environment.serviceName };
+   * ```
+   */
+  get serviceName(): string {
+    return toServiceName(
+      this.configService.get('npm_package_name', { infer: true }) ?? ENVIRONMENT_DEFAULTS.npm_package_name,
+    );
+  }
+
+  /**
+   * Which build this is, from the manifest of whatever started the process.
+   *
+   * Falls back to {@link ENVIRONMENT_DEFAULTS}' `0.0.0`, which is not a version
+   * anything ships under: the api was launched by something that does not export
+   * `npm_package_version` -- a bare `node dist/main.js`, `pnpm exec`, a pod
+   * missing the variable -- and saying so is more useful than a number that
+   * happens to have been right when it was typed.
+   *
+   * @example
+   * ```ts
+   * new DocumentBuilder().setVersion(environment.serviceVersion);
+   * ```
+   */
+  get serviceVersion(): string {
+    return this.configService.get('npm_package_version', { infer: true }) ?? ENVIRONMENT_DEFAULTS.npm_package_version;
+  }
 
   /**
    * Which stage this process is running on, defaulting to the least privileged

@@ -1,5 +1,18 @@
 import { Transform, Type } from 'class-transformer';
-import { IsArray, IsEnum, IsInt, IsNumber, IsOptional, IsUrl, Matches, Max, Min, MinLength } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsSemVer,
+  IsUrl,
+  Matches,
+  Max,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 import { LogLevel, NodeEnvironment } from '../../enum/environment.enum';
 
@@ -29,6 +42,39 @@ import { LogLevel, NodeEnvironment } from '../../enum/environment.enum';
  * @see https://docs.nestjs.com/techniques/configuration#custom-validate-function
  */
 export class EnvironmentVariables {
+  /**
+   * What the package this process was started from is called, scope and all.
+   *
+   * The two `npm_package_*` variables are the odd ones here: nobody writes them
+   * into a `.env`. A package manager exports them from the manifest when it runs
+   * a script, so `pnpm dev` and `pnpm test` supply them for free -- and so does
+   * anything those scripts spawn, which is how the app the nest CLI starts ends
+   * up with them. `pnpm exec` and a bare `node dist/main.js` do not, which is
+   * why both are optional; in a deployed stage Kubernetes sets them from the
+   * image metadata instead.
+   *
+   * Reading identity from here rather than importing `package.json` keeps the
+   * manifest out of the compiled application, and leaves the value overridable
+   * by whatever actually launched the process.
+   *
+   * @see https://docs.npmjs.com/cli/v11/using-npm/scripts#packagejson-vars
+   */
+  @IsOptional()
+  @IsNotEmpty()
+  npm_package_name?: string;
+
+  /**
+   * The `version` of that same package.
+   *
+   * `@IsSemVer` rather than a plain string: this reaches the OpenAPI document as
+   * the version of the described api, and a client generator has every right to
+   * expect something it can compare. A malformed value fails the boot -- optional
+   * means "may be absent", never "may be wrong".
+   */
+  @IsOptional()
+  @IsSemVer()
+  npm_package_version?: string;
+
   /**
    * Which stage this process thinks it is running on.
    *
@@ -161,6 +207,16 @@ function splitOrigins(value: string): string[] {
  * ```
  */
 export const ENVIRONMENT_DEFAULTS = {
+  /* What the api is called when nothing said otherwise -- a bare `node
+     dist/main.js`, or a test runner started outside a package script. Scoped
+     like the manifest is, so `EnvironmentService.serviceName` strips it the same
+     way whether the value was supplied or fell back to this. */
+  npm_package_name: '@minerva/api',
+  /* Deliberately not the current version: an unset variable means nobody told
+     this process which build it is, and `0.0.0` says exactly that. A plausible
+     number here would be worse than none, because a stale one is unfalsifiable
+     -- it looks like a version and reads like a lie only once someone checks. */
+  npm_package_version: '0.0.0',
   NODE_ENV: NodeEnvironment.Development,
   LOG_LEVEL: LogLevel.Log,
   API_PORT: 3000,

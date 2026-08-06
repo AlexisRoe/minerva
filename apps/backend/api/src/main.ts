@@ -16,7 +16,7 @@ async function bootstrap(): Promise<void> {
   app.useLogger(environment.logLevels);
 
   ServerService.setup(app, environment);
-  SwaggerService.setup(app);
+  SwaggerService.setup(app, environment);
 
   await app.listen(environment.apiPort);
 }

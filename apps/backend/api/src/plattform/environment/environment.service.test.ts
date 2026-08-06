@@ -8,20 +8,10 @@ import { ENVIRONMENT_DEFAULTS } from './environment.interface';
 import { EnvironmentService } from './environment.service';
 import { validateEnvironment } from './environment.util';
 
-/**
- * Boots the real `ConfigModule` against a stubbed `process.env`, rather than a
- * hand-built `ConfigService`. What is worth asserting is that the validated,
- * converted values are the ones that come back out -- and that only holds if
- * the `validate` hook is actually wired in.
- *
- * `ignoreEnvFile` keeps the repository's own `.env` out of it, so the test says
- * the same thing on a machine that has one and on CI, which does not. The
- * remaining options mirror `EnvironmentModule`, which is the point.
- */
 async function buildService(environment: Record<string, string>): Promise<EnvironmentService> {
-  // Cleared first, because vitest sets NODE_ENV=test on the real process and a
-  // test asserting a default must not depend on what the runner happens to say.
   const schema = [
+    'npm_package_name',
+    'npm_package_version',
     'NODE_ENV',
     'LOG_LEVEL',
     'API_PORT',
@@ -62,6 +52,25 @@ describe('EnvironmentService', () => {
     const service = await buildService({ SENTRY_TRACES_SAMPLE_RATE: '0.5' });
 
     expect(service.sentryTracesSampleRate).toBe(0.5);
+  });
+
+  it('reports the service name unscoped, as the health body needs it', async () => {
+    const service = await buildService({ npm_package_name: '@minerva/queue-coordinator' });
+
+    expect(service.serviceName).toBe('queue-coordinator');
+  });
+
+  it('reports the version the launching package manager announced', async () => {
+    const service = await buildService({ npm_package_version: '2.4.1' });
+
+    expect(service.serviceVersion).toBe('2.4.1');
+  });
+
+  it('falls back to a version nothing ships under, when nothing announced one', async () => {
+    const service = await buildService({});
+
+    expect(service.serviceVersion).toBe(ENVIRONMENT_DEFAULTS.npm_package_version);
+    expect(service.serviceName).toBe('api');
   });
 
   it('reports the stage it booted with', async () => {

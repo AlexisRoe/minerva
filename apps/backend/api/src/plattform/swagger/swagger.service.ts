@@ -3,6 +3,7 @@ import type { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SWAGGER_JSON_PATH, SWAGGER_SITE_TITLE, SWAGGER_UI_PATH } from '../../constants/api-documentation.constants';
 import { FAVICON_DATA_URI } from '../../constants/favicon.constants';
+import type { EnvironmentService } from '../environment/environment.service';
 
 export class SwaggerService {
   /**
@@ -14,22 +15,24 @@ export class SwaggerService {
    *
    * Nothing here is gated by environment: the document describes only what the
    * routes already answer, so exposing it says nothing a caller could not learn by
-   * calling them.
+   * calling them. `environment` is taken for the version alone — a document has to
+   * say which build it describes, and a literal here would keep advertising a
+   * number that no longer matches the routes below it.
    *
    * @example
    * ```ts
    * const app = await NestFactory.create(AppModule);
-   * setupSwagger(app);          // GET /docs and GET /docs/json
+   * SwaggerService.setup(app, app.get(EnvironmentService));   // GET /docs and GET /docs/json
    * await app.listen(3000);
    * ```
    *
    * @see https://docs.nestjs.com/openapi/introduction
    */
-  static setup(app: INestApplication): void {
+  static setup(app: INestApplication, environment: EnvironmentService): void {
     const config = new DocumentBuilder()
       .setTitle('Minerva API')
       .setDescription('The api that turns incoming email into structured, reviewable work items.')
-      .setVersion('0.1.0')
+      .setVersion(environment.serviceVersion)
       .addTag('health', 'Liveness probes: what this process knows about itself.')
       .build();
 

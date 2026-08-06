@@ -112,7 +112,13 @@ EXPOSE 3000 9229
 
 # The inspector binds to 0.0.0.0 because a debugger attaches from the host;
 # the port is published on 127.0.0.1 only, so it stays off the network.
-CMD ["pnpm", "exec", "nest", "start", "--debug", "0.0.0.0:9229", "--watch", "--preserveWatchOutput"]
+#
+# `pnpm run`, not `pnpm exec`: only the former exports the manifest as
+# `npm_package_name` / `npm_package_version`, which the api reads for its own
+# identity (see `EnvironmentVariables`). The nest CLI passes them on to the
+# process it spawns. The flags live in the script rather than here so that both
+# halves of the launch stay in one place.
+CMD ["pnpm", "run", "dev:docker"]
 
 # --------------------------------------------------------------- production --
 FROM node:${NODE_VERSION}-alpine AS production
