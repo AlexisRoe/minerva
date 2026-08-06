@@ -154,14 +154,15 @@ vite.https.ts                  shared TLS options for the frontend dev servers
 
 ### Prerequisites
 
-Node **26.5.0** (see `.nvmrc`), pnpm **>= 11**, Docker, and GNU make. Run `make check-deps` to
-verify all of them at once — it prints the install command for anything missing.
+Node **26.5.0** (see `.nvmrc`), pnpm **>= 11**, Docker, GNU make, and openssl. Run `make check-deps`
+to verify all of them at once — it prints the install command for anything missing.
 
 ### First time
 
 ```sh
 make setup        # check-deps → certs → install, in that order
 make copy-env     # create .env from .env.template (backs up an existing .env)
+make secret VAR=BE_API_COOKIE_SECRET   # fill in the api's cookie signing key
 make build        # build all six packages in dependency order
 ```
 
@@ -170,7 +171,7 @@ first one that fails, so a missing tool is reported before anything tries to ins
 
 | Step | Target | What it does |
 | --- | --- | --- |
-| 1 | `make check-deps` | Verifies Homebrew, pnpm, Node, Docker, and make — exits non-zero if any is missing |
+| 1 | `make check-deps` | Verifies Homebrew, pnpm, Node, Docker, make, and openssl — exits non-zero if any is missing |
 | 2 | `make certs` | Generates the mkcert TLS pair, or leaves a still-valid one alone |
 | 3 | `make install` | `pnpm install` across the whole workspace |
 
@@ -181,6 +182,13 @@ expires, say — without repeating the rest.
 edit, and re-running it moves your existing `.env` to a timestamped backup. It only copies the
 template; every value in it has a working default, so an empty `.env` still boots locally. Sentry
 stays disabled while its DSN is empty.
+
+`make secret` generates a random key with `openssl rand -base64 32`. Without `VAR` it prints one and
+touches nothing, so `make secret | pbcopy` is the whole workflow; with `VAR=<NAME>` it writes into
+that variable in `.env`. An existing value is never replaced without `FORCE=1`, because rotating a
+signing key invalidates everything already signed with it — every cookie a running api handed out.
+`BE_API_COOKIE_SECRET` is the one variable that needs it today; empty means the api issues unsigned
+cookies only, and anything shorter than 32 characters fails its boot validation.
 
 ### Day to day
 
@@ -201,6 +209,7 @@ stays disabled while its DSN is empty.
 | `make format` | Biome with `--write` — applies formatting and safe fixes |
 | `make verify` | lint → typecheck → test, stopping at the first failure |
 | `make icons` | Generate PWA/Outlook PNG sizes: `make icons SRC=path/to/source.png [OUT=dir]` |
+| `make secret` | Generate a random secret: `make secret [VAR=NAME]` writes it into `.env` when `VAR` is given |
 
 `make help` lists all targets with their descriptions.
 

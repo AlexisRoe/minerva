@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup check-deps install build-libs certs copy-env icons fonts dev dev-manager dev-button shutdown-fe api api-build api-logs api-down build verify verify-i18n verify-i18n-verbose test typecheck lint format storybook
+.PHONY: help setup check-deps install build-libs certs copy-env secret icons fonts dev dev-manager dev-button shutdown-fe api api-build api-logs api-down build verify verify-i18n verify-i18n-verbose test typecheck lint format storybook
 
 # Defaults for `make icons` (override on the command line)
 OUT ?= ./icons
@@ -26,7 +26,7 @@ setup: ## Prepare a fresh checkout: check-deps, certs, install, then build the s
 	@$(MAKE) --no-print-directory install
 	@$(MAKE) --no-print-directory build-libs
 
-check-deps: ## Check that required local tooling (homebrew, pnpm, node, docker, make) is installed
+check-deps: ## Check that required local tooling (homebrew, pnpm, node, docker, make, openssl) is installed
 	@bash scripts/check-dependencies.sh
 
 install: ## Install project dependencies with pnpm
@@ -45,6 +45,12 @@ certs: ## Create/renew local TLS certificates (mkcert) for the frontends, ui-lib
 
 copy-env: ## Create the local .env from .env.template (backs up an existing .env)
 	@bash scripts/initial-setup.sh
+
+# Without VAR the secret is printed and nothing is touched, so `make secret | pbcopy`
+# works. With VAR it is written into .env, and an existing value is kept unless
+# FORCE=1 — rotating one invalidates everything already signed with it.
+secret: ## Generate a random secret; VAR=NAME writes it into .env (FORCE=1 to replace an existing value)
+	@bash scripts/generate-secret.sh "$(VAR)"
 
 dev: ## Run every app in watch mode (builds the ui-lib first)
 	@pnpm dev

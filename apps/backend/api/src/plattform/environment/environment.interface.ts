@@ -109,7 +109,7 @@ export class EnvironmentVariables {
    * Optional because unsigned cookies are a legitimate deployment and the
    * normal case before there is anything to sign. The length floor is not:
    * a guessable secret is worse than no secret, because it makes a forged
-   * cookie look verified. Generate one with `openssl rand -base64 32`.
+   * cookie look verified. Generate one with `make secret`.
    */
   @IsOptional()
   @MinLength(32)

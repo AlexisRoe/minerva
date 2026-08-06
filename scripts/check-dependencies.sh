@@ -72,6 +72,14 @@ check_app "make" "make" \
   "make --version" \
   "xcode-select --install (Xcode Command Line Tools), or: brew install make"
 
+# `make secret` generates the signing keys .env holds (BE_API_COOKIE_SECRET and
+# whatever follows it) with `openssl rand`. macOS ships a binary, but a PATH
+# that does not reach it is possible — and a checkout that cannot generate a
+# secret cannot bring the api up with signed cookies.
+check_app "OpenSSL" "openssl" \
+  "openssl version" \
+  "ships with macOS; brew install openssl for a current one, or: apt install openssl"
+
 # ---- summary ----------------------------------------------------------
 echo "----------------------------------------------------------------------"
 echo "${BOLD}Summary:${RESET} ${GREEN}${FOUND_COUNT} installed${RESET}, ${RED}${MISSING_COUNT} missing${RESET}"
