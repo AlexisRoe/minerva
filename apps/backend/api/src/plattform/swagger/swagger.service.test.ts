@@ -7,16 +7,16 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SWAGGER_JSON_PATH, SWAGGER_SITE_TITLE, SWAGGER_UI_PATH } from '../../constants/api-documentation.constants';
 import { FAVICON_DATA_URI } from '../../constants/favicon.constants';
 import { HealthModule } from '../../health/health.module';
-import { setupSwagger } from './swagger.util';
+import { SwaggerService } from './swagger.service';
 
-describe('setupSwagger', () => {
+describe('setup Swagger', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
     const moduleFixture = await Test.createTestingModule({ imports: [HealthModule] }).compile();
 
     app = moduleFixture.createNestApplication();
-    setupSwagger(app);
+    SwaggerService.setup(app);
     await app.init();
   });
 
@@ -33,7 +33,6 @@ describe('setupSwagger', () => {
 
     expect(response.text).toContain(`<title>${SWAGGER_SITE_TITLE}</title>`);
     expect(response.text).toContain(`<link rel='icon' href='${FAVICON_DATA_URI}' />`);
-    /* The custom link replaces Swagger's own two, rather than joining them. */
     expect(response.text).not.toContain('favicon-32x32.png');
   });
 
@@ -47,9 +46,6 @@ describe('setupSwagger', () => {
   it('resolves the response schema of a documented route', async () => {
     const response = await request(app.getHttpServer()).get(`/${SWAGGER_JSON_PATH}`).expect(200);
 
-    /* The `type: RootResponse` on the controller only carries a schema because
-       the DTO's properties are decorated too — an undecorated DTO documents the
-       route as returning an empty object. */
     expect(response.body.paths['/health'].get.responses['200'].content['application/json'].schema).toEqual({
       $ref: '#/components/schemas/RootResponse',
     });
