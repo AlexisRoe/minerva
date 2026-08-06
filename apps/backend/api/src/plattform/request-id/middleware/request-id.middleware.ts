@@ -1,15 +1,14 @@
-import { randomUUID, type UUID } from 'node:crypto';
 import { Injectable, type NestMiddleware } from '@nestjs/common';
-import { isString, isUUID } from 'class-validator';
 import type { NextFunction, Response } from 'express';
 import { REQUEST_ID_HEADER } from '../../../constants/request.constants';
 import type { RequestWithRequestId } from '../interface/request-id.interface';
+import { toRequestId } from '../utils/request-id.util';
 
 /**
  * Gives every request an id, and tells the caller which one it got.
  *
  * The first thing that runs on a request and the reason anything downstream can
- * assume an id exists: it takes {@link RequestIdHeader} if the caller sent a
+ * assume an id exists: it takes {@link REQUEST_ID_HEADER} if the caller sent a
  * usable one and mints a uuid otherwise, so a handler never has to decide
  * between the two. `toRequestId` holds that decision, including what makes an
  * incoming value unusable.
@@ -25,10 +24,7 @@ import type { RequestWithRequestId } from '../interface/request-id.interface';
 @Injectable()
 export class RequestIdMiddleware implements NestMiddleware {
   use(request: RequestWithRequestId, response: Response, next: NextFunction): void {
-    const requestHeader = request.header(REQUEST_ID_HEADER);
-
-    const isValidRequestId = isString(requestHeader) && isUUID(requestHeader, '4');
-    const requestId: UUID = isValidRequestId ? (requestHeader as UUID) : randomUUID();
+    const requestId = toRequestId(request.header(REQUEST_ID_HEADER));
 
     response.setHeader(REQUEST_ID_HEADER, requestId);
     request.requestId = requestId;

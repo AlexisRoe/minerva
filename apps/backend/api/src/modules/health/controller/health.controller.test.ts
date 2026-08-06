@@ -5,7 +5,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { RequestIdHeader } from '../../../constants/request.constants';
+import { REQUEST_ID_HEADER } from '../../../constants/request.constants';
 import { ApiStatus } from '../../../enum/status.enum';
 import { EnvironmentModule } from '../../../plattform/environment/environment.module';
 import { EnvironmentService } from '../../../plattform/environment/service/environment.service';
@@ -94,7 +94,7 @@ describe('HealthController', () => {
   it('answers /health/status under the id the caller asked for', async () => {
     const response = await request(app.getHttpServer())
       .get('/health/status')
-      .set(RequestIdHeader, INCOMING_REQUEST_ID)
+      .set(REQUEST_ID_HEADER, INCOMING_REQUEST_ID)
       .expect(200);
 
     expect(response.body.requestId).toBe(INCOMING_REQUEST_ID);
@@ -105,13 +105,13 @@ describe('HealthController', () => {
 
     /* The body is the readable half and the header is the one every other route
        carries; a report that quotes one has to be findable by the other. */
-    expect(response.headers[RequestIdHeader.toLowerCase()]).toBe(response.body.requestId);
+    expect(response.headers[REQUEST_ID_HEADER.toLowerCase()]).toBe(response.body.requestId);
   });
 
   it.each(VERDICT_ROUTES)('gives %s an id in the header even though its body has no room for one', async (route) => {
     const response = await request(app.getHttpServer()).get(route).expect(200);
 
-    expect(response.headers[RequestIdHeader.toLowerCase()]).toBeDefined();
+    expect(response.headers[REQUEST_ID_HEADER.toLowerCase()]).toBeDefined();
   });
 
   it('dates /health/status with a timestamp a client can parse, not with whatever the locale prints', async () => {

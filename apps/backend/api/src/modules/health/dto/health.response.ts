@@ -16,6 +16,8 @@ export class HealthResponse {
   @ApiProperty({
     description: '`ok` while the process can serve traffic, `error` when it knows it cannot.',
     enum: ApiStatus,
+    /* Names the enum, which is what emits it as a reusable schema instead of inlining the values per property. */
+    enumName: 'ApiStatus',
     example: ApiStatus.Ok,
   })
   @Expose()

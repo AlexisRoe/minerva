@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import type { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Response } from 'express';
 import { describe, expect, it, vi } from 'vitest';
 import { REQUEST_ID_HEADER } from '../../../constants/request.constants';
 import type { RequestWithRequestId } from '../interface/request-id.interface';
@@ -18,7 +18,7 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0
  * lowercased header a real client sends.
  */
 function buildContext(incoming?: string): {
-  request: Request;
+  request: RequestWithRequestId;
   response: Response;
   next: NextFunction;
 } {
@@ -46,7 +46,7 @@ describe('RequestIdMiddleware', () => {
 
     new RequestIdMiddleware().use(request, response, next);
 
-    expect((request as RequestWithRequestId).requestId).toBe(incoming);
+    expect(request.requestId).toBe(incoming);
     expect(response.setHeader).toHaveBeenCalledWith(REQUEST_ID_HEADER, incoming);
   });
 
@@ -55,7 +55,7 @@ describe('RequestIdMiddleware', () => {
 
     new RequestIdMiddleware().use(request, response, next);
 
-    expect((request as RequestWithRequestId).requestId).toMatch(UUID_PATTERN);
+    expect(request.requestId).toMatch(UUID_PATTERN);
   });
 
   it('answers with the same id it put on the request -- the two halves are what make a trace joinable', () => {
@@ -63,7 +63,7 @@ describe('RequestIdMiddleware', () => {
 
     new RequestIdMiddleware().use(request, response, next);
 
-    expect(response.setHeader).toHaveBeenCalledWith(REQUEST_ID_HEADER, (request as RequestWithRequestId).requestId);
+    expect(response.setHeader).toHaveBeenCalledWith(REQUEST_ID_HEADER, request.requestId);
   });
 
   it('rejects a header that would split the response, and does not echo it back', () => {
@@ -71,7 +71,7 @@ describe('RequestIdMiddleware', () => {
 
     new RequestIdMiddleware().use(request, response, next);
 
-    expect((request as RequestWithRequestId).requestId).toMatch(UUID_PATTERN);
+    expect(request.requestId).toMatch(UUID_PATTERN);
     expect(response.setHeader).not.toHaveBeenCalledWith(REQUEST_ID_HEADER, expect.stringContaining('Set-Cookie'));
   });
 

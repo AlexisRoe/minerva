@@ -13,6 +13,9 @@ const NOW = new Date('2026-08-06T09:41:12.004Z');
 /** The id of the request being answered, as the controller would pass it in. */
 const REQUEST_ID = '3f1c9f9e-6f2a-4c2b-9a1e-2f0d5f7c8b31';
 
+/** A second one, to tell an id that was carried through from one that was remembered. */
+const SECOND_REQUEST_ID = '8c2d4a1b-7e5f-4b3a-9d6c-1f0e2a3b4c5d';
+
 /**
  * Resolved through Nest for the same reason {@link HealthUseCase}'s test is: the
  * `@Injectable` that makes the constructor resolvable is only exercised by
@@ -69,14 +72,14 @@ describe('StatusUseCase', () => {
     const useCase = await buildUseCase({});
 
     const first = await useCase.execute({ requestId: REQUEST_ID });
-    const second = await useCase.execute({ requestId: 'a-second-request' });
+    const second = await useCase.execute({ requestId: SECOND_REQUEST_ID });
 
     if (first.isFailure() || second.isFailure()) {
       throw new Error('reporting the process identity cannot fail');
     }
 
     expect(first.value.requestId).toBe(REQUEST_ID);
-    expect(second.value.requestId).toBe('a-second-request');
+    expect(second.value.requestId).toBe(SECOND_REQUEST_ID);
   });
 
   it('falls back to the same identity the environment service does, rather than to one of its own', async () => {
