@@ -146,18 +146,60 @@ describe('validateEnvironment', () => {
     expect(environment.COOKIE_SECRET).toBeUndefined();
   });
 
+  it('accepts the connection URIs the compose stack builds', () => {
+    const environment = validateEnvironment({
+      DATABASE_URL: 'postgres://minerva_rw:secret@postgres:5432/minerva',
+      VALKEY_URL: 'redis://:secret@valkey:6379',
+      S3_ENDPOINT: 'http://garage:3900',
+      S3_PUBLIC_BASE_URL: 'https://assets.localhost:4501',
+      CAMO_BASE_URL: 'https://proxy.localhost:4502',
+      QUEUE_COORDINATOR_URL: 'http://queue-coordinator:4301',
+    });
+
+    expect(environment.DATABASE_URL).toBe('postgres://minerva_rw:secret@postgres:5432/minerva');
+    expect(environment.VALKEY_URL).toBe('redis://:secret@valkey:6379');
+    expect(environment.S3_ENDPOINT).toBe('http://garage:3900');
+    expect(environment.QUEUE_COORDINATOR_URL).toBe('http://queue-coordinator:4301');
+  });
+
+  it('rejects a database url that is not a postgres one', () => {
+    // A mysql:// here would otherwise reach the driver and fail there, well past
+    // the point where the message can say which variable was wrong.
+    expect(() => validateEnvironment({ DATABASE_URL: 'mysql://user@host/db' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('rejects a valkey url that is not a redis one', () => {
+    expect(() => validateEnvironment({ VALKEY_URL: 'valkey://valkey:6379' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('rejects a public asset base url that carries a path', () => {
+    // It is concatenated with an object key, so a trailing path segment would
+    // silently produce URLs pointing at the wrong prefix.
+    expect(() => validateEnvironment({ S3_PUBLIC_BASE_URL: 'https://assets.localhost:4501/bucket' })).toThrow(
+      EnvironmentValidationError,
+    );
+  });
+
+  it('rejects a camo key that is not 64 hexadecimal characters', () => {
+    expect(() => validateEnvironment({ CAMO_KEY: 'not-hex' })).toThrow(EnvironmentValidationError);
+    expect(validateEnvironment({ CAMO_KEY: 'a'.repeat(64) }).CAMO_KEY).toBe('a'.repeat(64));
+  });
+
+  it('reads the Valkey database numbers as numbers, and refuses one outside the keyspace', () => {
+    expect(validateEnvironment({ VALKEY_DB_CACHE: '1' }).VALKEY_DB_CACHE).toBe(1);
+    expect(() => validateEnvironment({ VALKEY_DB_CACHE: '16' })).toThrow(EnvironmentValidationError);
+  });
+
   it('strips the unrelated variables process.env carries', () => {
     const environment = validateEnvironment({ ...VALID_ENVIRONMENT, BE_API_PORT: '4401', HOME: '/root' });
 
-    expect(Object.keys(environment).sort()).toEqual([
-      'API_PORT',
-      'COOKIE_SECRET',
-      'CORS_ORIGINS',
-      'LOG_LEVEL',
-      'NODE_ENV',
-      'npm_package_name',
-      'npm_package_version',
-    ]);
+    // Asserted as an exclusion rather than as the full list of declared names:
+    // the point is that a variable the schema does not declare cannot get
+    // through, and enumerating the ones that can would have to be rewritten
+    // every time the api learns to talk to something new.
+    expect(Object.keys(environment)).not.toContain('BE_API_PORT');
+    expect(Object.keys(environment)).not.toContain('HOME');
+    expect(environment.API_PORT).toBe(3000);
   });
 
   it('rejects a port that is not a number', () => {
