@@ -1,0 +1,442 @@
+# The Minerva stack: one Caddy in front, the NestJS services behind it, and the
+# four background services they run on.
+#
+# Never invoked by hand — the Makefile is the interface, and it is what selects
+# the profiles:
+#
+#   make infra     postgres, valkey, garage, camo, caddy
+#   make api       the api and the background services it needs
+#   make backend   every backend service
+#   make up        the above with the frontends built into the Caddy image
+#
+# Interpolated from the root .env (`docker compose --env-file .env`), which is
+# also the only file that holds a credential. Every image is pinned to an exact
+# version: `latest` turns a rebuild into an upgrade nobody asked for.
+#
+# ---- profiles -------------------------------------------------------------
+#
+# A service with no profile starts unconditionally, which is not what any of
+# these want, so every one of them names at least one: `infra`, `api` or
+# `backend`. `depends_on` still pulls a service in when its own profile is not
+# selected, so `--profile api` starts postgres, valkey and caddy without listing
+# `infra` as well.
+#
+# There is no `frontend` profile, because there is no frontend service: the
+# button and the manager are static bundles inside the caddy image, and `make up`
+# selects them with MINERVA_CADDY_TARGET rather than with a profile.
+#
+# ---- what is reachable from the host --------------------------------------
+#
+# Caddy is the only way in, and it terminates TLS with the mkcert pair from
+# `make certs`:
+#
+#   https://api.localhost:BE_API_PORT              the api
+#   https://reporter.localhost:APP_FE_RB_PORT      the button      (make up only)
+#   https://manager.localhost:APP_FE_MANANGER_PORT the manager     (make up only)
+#   https://assets.localhost:INFRA_GARAGE_WEB_PORT the public bucket
+#   https://proxy.localhost:INFRA_CAMO_PORT        the image proxy
+#
+# The queue coordinator is deliberately absent from that list: it listens on the
+# compose network only. Everything else published below is bound to 127.0.0.1 and
+# exists for a debugger or a database client, not for the application.
+
+name: minerva
+
+# ---- shared fragments -----------------------------------------------------
+# The two NestJS services are configured identically apart from their names and
+# their Sentry variables, so the parts that would otherwise be copied live here.
+# Every profile a background service belongs to. They are needed by all three of
+# the ways the stack starts, and compose validates `depends_on` against the
+# services the selected profiles define — so listing only `infra` here makes
+# `--profile backend` fail on the api's dependency rather than quietly pulling it
+# in.
+x-infra-profiles: &infra-profiles ['infra', 'api', 'backend']
+
+x-node-service: &node-service
+  restart: unless-stopped
+  # node as PID 1 ignores signals it has no handler for, which would make Nest's
+  # shutdown hooks (and `make down`) wait for the SIGKILL timeout.
+  init: true
+  networks:
+    - minerva
+
+x-node-watch-env: &node-watch-env
+  # tsc's watcher never sees inotify events through a macOS/Windows bind mount,
+  # so it has to poll. Drop these two on Linux to save some CPU.
+  TSC_WATCHFILE: DynamicPriorityPolling
+  TSC_WATCHDIRECTORY: DynamicPriorityPolling
+
+# What the backend needs in order to reach the background services. Written once
+# here because the api, the coordinator and every future worker need the same
+# thing, and a URL assembled twice is a URL that will disagree with itself.
+#
+# The services read unprefixed names while .env namespaces them per service —
+# bridging the two is what this whole block is for. A name missing or misspelled
+# here fails the api's boot validation with the offending variable named on its
+# own line.
+x-backend-env: &backend-env
+  # The read/write role, not the owner: the application inserts and updates rows,
+  # it does not change their shape. Migrations are the owner's job and connect
+  # with INFRA_POSTGRES_USER instead.
+  DATABASE_URL: postgres://minerva_rw:${INFRA_POSTGRES_RW_PASSWORD:-}@postgres:5432/${INFRA_POSTGRES_DB:-minerva}
+  VALKEY_URL: redis://:${INFRA_VALKEY_PASSWORD:-}@valkey:6379
+  VALKEY_DB_QUEUE: ${INFRA_VALKEY_DB_QUEUE:-0}
+  VALKEY_DB_CACHE: ${INFRA_VALKEY_DB_CACHE:-1}
+  VALKEY_DB_SSE: ${INFRA_VALKEY_DB_SSE:-2}
+  # Plain http and the container port: this call never leaves the compose
+  # network, so there is no TLS to terminate and nothing to reverse proxy.
+  S3_ENDPOINT: http://garage:3900
+  S3_REGION: garage
+  S3_ACCESS_KEY_ID: ${INFRA_GARAGE_ACCESS_KEY_ID:-}
+  S3_SECRET_ACCESS_KEY: ${INFRA_GARAGE_SECRET_ACCESS_KEY:-}
+  S3_BUCKET_ASSETS: assets
+  S3_BUCKET_ARTIFACTS: artifacts
+  # Where an object in the public bucket is readable from a browser. Not derived
+  # from S3_ENDPOINT: that one is the signed S3 API, this one is Garage's website
+  # endpoint through Caddy, and only the latter serves a bucket unauthenticated.
+  S3_PUBLIC_BASE_URL: https://assets.localhost:${INFRA_GARAGE_WEB_PORT:-4501}
+  CAMO_BASE_URL: https://proxy.localhost:${INFRA_CAMO_PORT:-4502}
+  CAMO_KEY: ${INFRA_CAMO_KEY:-}
+
+services:
+  # ------------------------------------------------------------------ caddy --
+  caddy:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.caddy
+      target: ${MINERVA_CADDY_TARGET:-proxy}
+      args:
+        # The frontends read their settings from a config.json that Vite emits at
+        # build time, so the values have to be present while the bundle is built
+        # rather than when the container starts. See infra/README.md for what
+        # that costs and how to undo it.
+        APP_FE_RB_SENTRY_DSN: ${APP_FE_RB_SENTRY_DSN:-}
+        APP_FE_RB_SENTRY_TRACES_SAMPLE_RATE: ${APP_FE_RB_SENTRY_TRACES_SAMPLE_RATE:-0}
+        APP_FE_RB_APP_DOMAIN: ${APP_FE_RB_APP_DOMAIN:-}
+        APP_FE_RB_ALLOW_DEMO: ${APP_FE_RB_ALLOW_DEMO:-false}
+        APP_FE_RB_ENTRA_CLIENT_ID: ${APP_FE_RB_ENTRA_CLIENT_ID:-}
+        APP_FE_RB_OFFICE_READY_TIMEOUT_MS: ${APP_FE_RB_OFFICE_READY_TIMEOUT_MS:-5000}
+        APP_FE_MANANGER_SENTRY_DSN: ${APP_FE_MANANGER_SENTRY_DSN:-}
+        APP_FE_MANANGER_SENTRY_TRACES_SAMPLE_RATE: ${APP_FE_MANANGER_SENTRY_TRACES_SAMPLE_RATE:-0}
+    image: minerva/caddy:${MINERVA_CADDY_TARGET:-proxy}
+    restart: unless-stopped
+    profiles: *infra-profiles
+    environment:
+      # Every port Caddy binds. The Caddyfile reads them as `{$VAR:default}`, and
+      # the defaults there have to match the ones below or a site block ends up
+      # on a port that is not published.
+      BE_API_PORT: ${BE_API_PORT:-4401}
+      APP_FE_RB_PORT: ${APP_FE_RB_PORT:-4101}
+      APP_FE_MANANGER_PORT: ${APP_FE_MANANGER_PORT:-4201}
+      INFRA_GARAGE_WEB_PORT: ${INFRA_GARAGE_WEB_PORT:-4501}
+      INFRA_CAMO_PORT: ${INFRA_CAMO_PORT:-4502}
+    ports:
+      - '127.0.0.1:${BE_API_PORT:-4401}:${BE_API_PORT:-4401}'
+      - '127.0.0.1:${APP_FE_RB_PORT:-4101}:${APP_FE_RB_PORT:-4101}'
+      - '127.0.0.1:${APP_FE_MANANGER_PORT:-4201}:${APP_FE_MANANGER_PORT:-4201}'
+      - '127.0.0.1:${INFRA_GARAGE_WEB_PORT:-4501}:${INFRA_GARAGE_WEB_PORT:-4501}'
+      - '127.0.0.1:${INFRA_CAMO_PORT:-4502}:${INFRA_CAMO_PORT:-4502}'
+    volumes:
+      - ../caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # mkcert output from `make certs`. Missing certificates are a hard stop:
+      # Caddy exits rather than silently serving something untrusted.
+      - ../cert:/etc/caddy/cert:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    healthcheck:
+      # Caddy's own admin API rather than a site: this container is up as soon as
+      # the config loaded, and whether an upstream answers is that upstream's
+      # healthcheck to report. Checking a site here would make `make infra` hang
+      # waiting for an api that is not part of the profile.
+      test: ['CMD', 'wget', '--quiet', '-O', '/dev/null', 'http://127.0.0.1:2019/config/']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - minerva
+
+  # --------------------------------------------------------------- postgres --
+  postgres:
+    image: postgres:18.4-alpine
+    restart: unless-stopped
+    profiles: *infra-profiles
+    environment:
+      # The owner role. The read/write and read-only roles are created by the
+      # init script below, which is the only place they exist.
+      POSTGRES_DB: ${INFRA_POSTGRES_DB:-minerva}
+      POSTGRES_USER: ${INFRA_POSTGRES_USER:-minerva_app}
+      POSTGRES_PASSWORD: ${INFRA_POSTGRES_PASSWORD:?INFRA_POSTGRES_PASSWORD is required — make secret VAR=INFRA_POSTGRES_PASSWORD}
+      POSTGRES_RW_PASSWORD: ${INFRA_POSTGRES_RW_PASSWORD:?INFRA_POSTGRES_RW_PASSWORD is required — make secret VAR=INFRA_POSTGRES_RW_PASSWORD}
+      POSTGRES_RO_PASSWORD: ${INFRA_POSTGRES_RO_PASSWORD:?INFRA_POSTGRES_RO_PASSWORD is required — make secret VAR=INFRA_POSTGRES_RO_PASSWORD}
+      # scram-sha-256 for connections arriving over the network too. The default
+      # trusts anything on the container's own subnet, which is every other
+      # service in this file.
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    ports:
+      # 127.0.0.1 so psql and a GUI client work while nothing on the network can
+      # reach the database.
+      - '127.0.0.1:${INFRA_POSTGRES_PORT:-5432}:5432'
+    volumes:
+      # /var/lib/postgresql, not /var/lib/postgresql/data. From 18 on these images
+      # store the cluster in a major-version-specific subdirectory of it, so that
+      # `pg_upgrade --link` can see both versions without crossing a mount point.
+      # Mounting the old path makes the entrypoint refuse to start.
+      - postgres-data:/var/lib/postgresql
+      # Run in filename order, and only when the data directory is empty — so
+      # editing this script does nothing to a volume that already exists. See
+      # infra/README.md for how to re-run it on purpose.
+      - ../postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    networks:
+      - minerva
+
+  # ----------------------------------------------------------------- valkey --
+  valkey:
+    image: valkey/valkey:9.1.1-alpine
+    restart: unless-stopped
+    profiles: *infra-profiles
+    # The config file carries everything except the password, which would mean a
+    # credential in a file that is checked in.
+    command: ['valkey-server', '/etc/valkey/valkey.conf', '--requirepass', '${INFRA_VALKEY_PASSWORD:?INFRA_VALKEY_PASSWORD is required — make secret VAR=INFRA_VALKEY_PASSWORD}']
+    ports:
+      - '127.0.0.1:${INFRA_VALKEY_PORT:-6379}:6379'
+    volumes:
+      - valkey-data:/data
+      - ../valkey/valkey.conf:/etc/valkey/valkey.conf:ro
+    healthcheck:
+      # PING is refused before authentication, so the password has to be passed;
+      # it reaches the process as an argument either way, one line above.
+      test: ['CMD', 'valkey-cli', '-a', '${INFRA_VALKEY_PASSWORD:-}', '--no-auth-warning', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - minerva
+
+  # ----------------------------------------------------------------- garage --
+  # S3-compatible object storage. Single node, so `replication_factor = 1` — see
+  # infra/garage/garage.toml.
+  #
+  # @see https://garagehq.deuxfleurs.fr/documentation/quick-start/
+  garage:
+    image: dxflrs/garage:v2.3.0
+    restart: unless-stopped
+    profiles: *infra-profiles
+    environment:
+      # Both are 64 hexadecimal characters or Garage refuses to start. They are
+      # passed as environment variables rather than written into garage.toml,
+      # which is checked in.
+      GARAGE_RPC_SECRET: ${INFRA_GARAGE_RPC_SECRET:?INFRA_GARAGE_RPC_SECRET is required — make secret HEX=1 VAR=INFRA_GARAGE_RPC_SECRET}
+      GARAGE_ADMIN_TOKEN: ${INFRA_GARAGE_ADMIN_TOKEN:?INFRA_GARAGE_ADMIN_TOKEN is required — make secret HEX=1 VAR=INFRA_GARAGE_ADMIN_TOKEN}
+    ports:
+      # The signed S3 API, on 127.0.0.1 for `aws s3` from the host. The website
+      # endpoint is not here — Caddy publishes that one as assets.localhost.
+      - '127.0.0.1:${INFRA_GARAGE_S3_PORT:-3900}:3900'
+    volumes:
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
+      - ../garage/garage.toml:/etc/garage.toml:ro
+    healthcheck:
+      # Garage's admin API answers /health once the node is up and its layout
+      # applied, which is exactly the point garage-init and the backend can start
+      # talking to it. The image has no shell and no wget, so this goes through
+      # the binary's own client.
+      test: ['CMD', '/garage', 'status']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - minerva
+
+  # Creates the layout, the two buckets and the access key, then exits. Idempotent
+  # — running `make infra` again finds everything in place and does nothing.
+  #
+  # Its own image, because dxflrs/garage is a single static binary with no shell:
+  # there is nothing in it to run a script with.
+  garage-init:
+    build:
+      context: ../garage
+      dockerfile: Dockerfile.init
+    image: minerva/garage-init:local
+    profiles: *infra-profiles
+    # A one-shot container. `unless-stopped` would restart it forever.
+    restart: 'no'
+    depends_on:
+      garage:
+        condition: service_healthy
+    environment:
+      GARAGE_ADMIN_TOKEN: ${INFRA_GARAGE_ADMIN_TOKEN:-}
+      GARAGE_RPC_SECRET: ${INFRA_GARAGE_RPC_SECRET:-}
+      GARAGE_ACCESS_KEY_ID: ${INFRA_GARAGE_ACCESS_KEY_ID:?INFRA_GARAGE_ACCESS_KEY_ID is required — see .env.template}
+      GARAGE_SECRET_ACCESS_KEY: ${INFRA_GARAGE_SECRET_ACCESS_KEY:?INFRA_GARAGE_SECRET_ACCESS_KEY is required — see .env.template}
+      GARAGE_HOST: garage
+    volumes:
+      # The same config the node reads: the CLI takes the rpc secret and the
+      # admin endpoint from it.
+      - ../garage/garage.toml:/etc/garage.toml:ro
+    networks:
+      - minerva
+
+  # ------------------------------------------------------------------- camo --
+  # Signed-URL image proxy, so the frontends never load remote content from a
+  # reported email directly: no third party sees the reader's IP, and there is no
+  # mixed content to explain.
+  #
+  # @see https://github.com/cactus/go-camo
+  camo:
+    image: ghcr.io/cactus/go-camo:v2.7.5
+    restart: unless-stopped
+    profiles: *infra-profiles
+    environment:
+      # The HMAC key whoever builds the URLs shares with camo. Without a matching
+      # signature every request is refused, which is what stops this from being
+      # an open proxy for anyone who finds the port.
+      #
+      # GOCAMO_HMAC, not CAMO_KEY: that is the name go-camo reads for its `-k`
+      # flag. Passing it as an environment variable rather than on the command
+      # line keeps it out of the process list.
+      GOCAMO_HMAC: ${INFRA_CAMO_KEY:?INFRA_CAMO_KEY is required — make secret HEX=1 VAR=INFRA_CAMO_KEY}
+      # Caddy terminates TLS and reaches camo over the compose network. 0.0.0.0:8080
+      # is go-camo's own default; stated here because the Caddyfile hard-codes it.
+      GOCAMO_LISTEN: '0.0.0.0:8080'
+    healthcheck:
+      # Only that the listener is up. go-camo exposes no health route — every
+      # path that is not a correctly signed URL is a 404, including one a
+      # healthcheck would have to invent — so there is nothing more to ask it.
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '8080']
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - minerva
+
+  # -------------------------------------------------------------------- api --
+  api:
+    <<: *node-service
+    build:
+      context: ../..
+      dockerfile: apps/backend/api/Dockerfile
+      target: ${MINERVA_API_TARGET:-development}
+    image: minerva/api:${MINERVA_API_TARGET:-development}
+    # Two profiles, so `make api` and `make backend` both reach it.
+    profiles: ['api', 'backend']
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      garage-init:
+        condition: service_completed_successfully
+    env_file:
+      - ../../.env
+    environment:
+      <<: [*backend-env, *node-watch-env]
+      # Container-internal listen port. Nothing on the host reaches it — Caddy is
+      # the only client and it comes in over the compose network — so it is fixed
+      # rather than configurable. BE_API_PORT is the published one.
+      API_PORT: '3000'
+      SENTRY_DSN: ${BE_API_SENTRY_DSN:-}
+      SENTRY_TRACES_SAMPLE_RATE: ${BE_API_SENTRY_TRACES_SAMPLE_RATE:-0}
+      SENTRY_PROFILE_SESSION_SAMPLE_RATE: ${BE_API_SENTRY_PROFILE_SESSION_SAMPLE_RATE:-0}
+      SENTRY_ENABLE_LOGS: ${BE_API_SENTRY_ENABLE_LOGS:-false}
+      CORS_ORIGINS: ${BE_API_CORS_ORIGINS:-}
+      COOKIE_SECRET: ${BE_API_COOKIE_SECRET:-}
+      # Where to hand a job over. Internal, like the coordinator itself.
+      QUEUE_COORDINATOR_URL: http://queue-coordinator:${BE_QUEUE_PORT:-4301}
+    ports:
+      # Inspector only. HTTP is not published — Caddy is the way in.
+      - '127.0.0.1:${BE_API_DEBUG_PORT:-9229}:9229'
+    volumes:
+      # Sources and the configs nest reads at startup. node_modules and dist are
+      # deliberately not mounted: they belong to the image.
+      - ../../apps/backend/api/src:/app/apps/backend/api/src
+      - ../../apps/backend/api/nest-cli.json:/app/apps/backend/api/nest-cli.json:ro
+      - ../../apps/backend/api/tsconfig.json:/app/apps/backend/api/tsconfig.json:ro
+      - ../../apps/backend/api/tsconfig.build.json:/app/apps/backend/api/tsconfig.build.json:ro
+      - ../../tsconfig.base.json:/app/tsconfig.base.json:ro
+      - ../../tsconfig.backend.json:/app/tsconfig.backend.json:ro
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      # First boot compiles the whole project before anything listens.
+      start_period: 90s
+
+  # ------------------------------------------------------- queue coordinator --
+  # No published service port and no Caddy site block on purpose: the coordinator
+  # is reached at http://queue-coordinator:4301 from inside the network and from
+  # nowhere else. Its port is the first of the queue family's 4301, 4302, 4303 —
+  # container ports, which share the number space with nothing on the host.
+  queue-coordinator:
+    <<: *node-service
+    build:
+      context: ../..
+      dockerfile: apps/backend/queue-coordinator/Dockerfile
+      target: ${MINERVA_QUEUE_TARGET:-development}
+    image: minerva/queue-coordinator:${MINERVA_QUEUE_TARGET:-development}
+    profiles: ['backend']
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      garage-init:
+        condition: service_completed_successfully
+    env_file:
+      - ../../.env
+    environment:
+      <<: [*backend-env, *node-watch-env]
+      QUEUE_COORDINATOR_PORT: ${BE_QUEUE_PORT:-4301}
+      SENTRY_DSN: ${BE_QUEUE_SENTRY_DSN:-}
+      SENTRY_TRACES_SAMPLE_RATE: ${BE_QUEUE_SENTRY_TRACES_SAMPLE_RATE:-0}
+      SENTRY_PROFILE_SESSION_SAMPLE_RATE: ${BE_QUEUE_SENTRY_PROFILE_SESSION_SAMPLE_RATE:-0}
+    ports:
+      # The inspector, and only the inspector: a debugger runs on the host, so
+      # this one has to cross the boundary. Bound to 127.0.0.1.
+      - '127.0.0.1:${BE_QUEUE_DEBUG_PORT:-9230}:9229'
+    volumes:
+      - ../../apps/backend/queue-coordinator/src:/app/apps/backend/queue-coordinator/src
+      - ../../apps/backend/queue-coordinator/nest-cli.json:/app/apps/backend/queue-coordinator/nest-cli.json:ro
+      - ../../apps/backend/queue-coordinator/tsconfig.json:/app/apps/backend/queue-coordinator/tsconfig.json:ro
+      - ../../apps/backend/queue-coordinator/tsconfig.build.json:/app/apps/backend/queue-coordinator/tsconfig.build.json:ro
+      - ../../tsconfig.base.json:/app/tsconfig.base.json:ro
+      - ../../tsconfig.backend.json:/app/tsconfig.backend.json:ro
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:'+process.env.QUEUE_COORDINATOR_PORT+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 90s
+
+volumes:
+  caddy-data:
+  caddy-config:
+  postgres-data:
+  valkey-data:
+  # Garage keeps its metadata database and its object data apart so the first can
+  # sit on an SSD and the second anywhere. Two volumes, for the same reason.
+  garage-meta:
+  garage-data:
+
+networks:
+  minerva:
+    name: minerva

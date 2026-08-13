@@ -1,0 +1,60 @@
+# Garage — S3-compatible object storage for the Minerva stack.
+#
+# Mounted read-only at /etc/garage.toml by infra/docker/docker-compose.yml, and
+# read by the garage-init container too: the CLI takes the RPC endpoint and the
+# secret from the same file the node does.
+#
+# No credential appears here. `rpc_secret` and the admin token arrive as
+# GARAGE_RPC_SECRET and GARAGE_ADMIN_TOKEN, which override the corresponding
+# settings, because this file is checked in.
+#
+# @see https://garagehq.deuxfleurs.fr/documentation/reference-manual/configuration/
+
+# One node, so one copy of every object. Garage's default is 3, which on a single
+# node means no write ever reaches quorum and every upload fails.
+#
+# This is the setting that cannot be changed casually later: raising it requires
+# a cluster-wide restart with the same value on every node.
+replication_factor = 1
+
+# Metadata and object data are separate volumes (see the compose file) so the
+# first can sit on fast storage and the second anywhere. Garage expects them to
+# be distinct directories regardless.
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+
+# LMDB is Garage's default and the only engine recommended for a single node.
+db_engine = "lmdb"
+
+# The port the nodes gossip on. There is one node, but the CLI in garage-init
+# connects over this too, which is why it binds beyond loopback.
+rpc_bind_addr = "[::]:3901"
+# How that CLI, running in another container, is told to reach this node.
+rpc_public_addr = "garage:3901"
+
+[s3_api]
+# The signed S3 API. Published on 127.0.0.1 by compose for `aws s3` from the
+# host; the backend reaches it over the compose network at http://garage:3900.
+api_bind_addr = "[::]:3900"
+# Arbitrary, but the client has to send the same one or the request signature
+# does not verify. Mirrored as S3_REGION in the compose file.
+s3_region = "garage"
+# Suffix for virtual-hosted-style addressing (`bucket.s3.garage`). Path-style
+# (`/bucket/key`) works regardless, and is what the SDK is configured for.
+root_domain = ".s3.garage"
+
+[s3_web]
+# The unauthenticated website endpoint. This is what makes the public `assets`
+# bucket readable in a browser, and it only ever serves a bucket that has been
+# marked with `garage bucket website --allow`.
+bind_addr = "[::]:3902"
+# Garage picks the bucket out of the Host header against this suffix, so
+# `assets.web.garage` serves the `assets` bucket. Caddy rewrites the
+# browser-facing `assets.localhost` to that — see infra/caddy/Caddyfile.
+root_domain = ".web.garage"
+index = "index.html"
+
+[admin]
+# Used by the container healthcheck and by garage-init to read the node id
+# before it can address the node over RPC.
+api_bind_addr = "[::]:3903"

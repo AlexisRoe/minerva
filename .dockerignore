@@ -12,10 +12,10 @@ node_modules
 **/.pytest_cache
 **/.mypy_cache
 **/.ruff_cache
-infra/certs
+infra/cert
 .env
 .env.*
-!.env.example
+!.env.template
 tmp
 docs
 *.log

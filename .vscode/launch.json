@@ -17,7 +17,7 @@
     },
     {
       // For the api running in Docker (`make api`). The inspector is published
-      // on 127.0.0.1 by infra/docker/docker-compose.api.yml; remoteRoot maps the
+      // on 127.0.0.1 by infra/docker/docker-compose.yml; remoteRoot maps the
       // container's paths back onto the workspace so breakpoints bind.
       "type": "node",
       "request": "attach",

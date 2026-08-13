@@ -1,0 +1,126 @@
+# syntax=docker/dockerfile:1.10
+#
+# Caddy — the single ingress for the Minerva stack, optionally carrying the two
+# frontend bundles.
+#
+# The build context is the *repository root*, because the `proxy-with-frontends`
+# target builds the button and the manager out of the pnpm workspace:
+#
+#   docker build -f infra/docker/Dockerfile.caddy --target proxy-with-frontends .
+#
+# Targets:
+#   proxy                 Caddy alone. `make infra`, `make api`, `make backend`.
+#   proxy-with-frontends  ...plus /srv/reporter and /srv/manager. `make up`.
+#
+# Two targets rather than two images because Caddy is the only way into the
+# stack and is therefore always running: `make infra` must not pay for two Vite
+# builds it has no use for. With the plain `proxy` target those two directories
+# are empty and the frontend site blocks in infra/caddy/Caddyfile return 404,
+# which is the honest answer.
+
+ARG NODE_VERSION=26.5.0
+ARG CADDY_VERSION=2.10.2
+
+# --------------------------------------------------------------------- deps --
+# Manifests only, so this layer survives every change that is not a dependency
+# change. Mirrors apps/backend/api/Dockerfile — same pnpm-from-packageManager
+# trick, same reasons.
+FROM node:${NODE_VERSION}-alpine AS deps
+
+ENV HOME=/home/node \
+    PNPM_HOME=/pnpm \
+    PATH=/pnpm:$PATH \
+    # The root `prepare` script installs husky's git hooks; there is no .git here.
+    HUSKY=0
+
+# Node 26 no longer ships corepack, so pnpm is installed by hand — with the
+# version taken from `packageManager` in the root manifest rather than pinned a
+# second time here, so the image cannot drift from the lockfile's pnpm.
+COPY package.json /tmp/root-package.json
+RUN npm install --global "pnpm@$(node -p "require('/tmp/root-package.json').packageManager.split('@').pop()")" \
+    && rm /tmp/root-package.json \
+    && mkdir -p /app /pnpm \
+    && chown -R node:node /app /pnpm /home/node
+
+WORKDIR /app
+USER node
+
+COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY --chown=node:node apps/frontend/minerva-button/package.json apps/frontend/minerva-button/
+COPY --chown=node:node apps/frontend/minerva-manager/package.json apps/frontend/minerva-manager/
+COPY --chown=node:node shared/typescript-lib/package.json shared/typescript-lib/
+COPY --chown=node:node shared/ui-lib/package.json shared/ui-lib/
+
+RUN --mount=type=cache,target=/pnpm/store,uid=1000,gid=1000 \
+    pnpm install --frozen-lockfile --store-dir /pnpm/store \
+        --filter @minerva/button... --filter @minerva/manager...
+
+# -------------------------------------------------------------------- build --
+FROM deps AS build
+
+# The frontends resolve @minerva/ui-lib and @minerva/typescript-lib through their
+# built dist/, and their `build` script runs `tsc --noEmit` first — so both
+# libraries have to be compiled before either app is typechecked.
+# Every root tsconfig, not just the base: shared/typescript-lib extends the
+# backend one (it is a shared library, not a backend one) and both apps and the
+# ui-lib extend the web one.
+COPY --chown=node:node tsconfig.base.json tsconfig.backend.json tsconfig.web.json ./
+COPY --chown=node:node vite.https.ts vite.fonts.ts vite.pages.ts vite.runtime-config.ts ./
+COPY --chown=node:node shared shared
+COPY --chown=node:node apps/frontend/minerva-button apps/frontend/minerva-button
+COPY --chown=node:node apps/frontend/minerva-manager apps/frontend/minerva-manager
+
+RUN pnpm --filter @minerva/typescript-lib build \
+    && pnpm --filter @minerva/ui-lib build
+
+# The settings each app publishes in its dist/config.json, read by
+# vite.runtime-config.ts through Vite's `loadEnv` — which reads the real process
+# environment as well as the .env, so exporting them here is enough.
+#
+# This is the compromise the static-in-the-image approach costs: config.json is
+# baked at build time, so changing a DSN means rebuilding rather than restarting.
+# Acceptable for a local stack that is rebuilt by `make up` anyway; the way out,
+# if these images are ever promoted between stages, is an entrypoint that
+# rewrites config.json before Caddy starts. See infra/README.md.
+#
+# No `.env` is copied into this image (see the .dockerignore next to this file),
+# so an unset build arg becomes the fallback in each app's config.entries.ts
+# rather than picking up a value from the host by accident.
+ARG APP_FE_RB_SENTRY_DSN=
+ARG APP_FE_RB_SENTRY_TRACES_SAMPLE_RATE=0
+ARG APP_FE_RB_APP_DOMAIN=
+ARG APP_FE_RB_ALLOW_DEMO=false
+ARG APP_FE_RB_ENTRA_CLIENT_ID=
+ARG APP_FE_RB_OFFICE_READY_TIMEOUT_MS=5000
+ARG APP_FE_MANANGER_SENTRY_DSN=
+ARG APP_FE_MANANGER_SENTRY_TRACES_SAMPLE_RATE=0
+
+ENV APP_FE_RB_SENTRY_DSN=${APP_FE_RB_SENTRY_DSN} \
+    APP_FE_RB_SENTRY_TRACES_SAMPLE_RATE=${APP_FE_RB_SENTRY_TRACES_SAMPLE_RATE} \
+    APP_FE_RB_APP_DOMAIN=${APP_FE_RB_APP_DOMAIN} \
+    APP_FE_RB_ALLOW_DEMO=${APP_FE_RB_ALLOW_DEMO} \
+    APP_FE_RB_ENTRA_CLIENT_ID=${APP_FE_RB_ENTRA_CLIENT_ID} \
+    APP_FE_RB_OFFICE_READY_TIMEOUT_MS=${APP_FE_RB_OFFICE_READY_TIMEOUT_MS} \
+    APP_FE_MANANGER_SENTRY_DSN=${APP_FE_MANANGER_SENTRY_DSN} \
+    APP_FE_MANANGER_SENTRY_TRACES_SAMPLE_RATE=${APP_FE_MANANGER_SENTRY_TRACES_SAMPLE_RATE} \
+    NODE_ENV=production
+
+RUN pnpm --filter @minerva/button build \
+    && pnpm --filter @minerva/manager build
+
+# -------------------------------------------------------------------- proxy --
+FROM caddy:${CADDY_VERSION}-alpine AS proxy
+
+# Empty, so that the frontend site blocks in the Caddyfile have a root to point
+# at even when no frontend was built. Without them Caddy fails to load the
+# config rather than serving 404s.
+RUN mkdir -p /srv/reporter /srv/manager
+
+# Nothing is EXPOSEd: which ports this listens on is decided by the Caddyfile
+# from the environment, and compose publishes exactly those.
+
+# ----------------------------------------------------- proxy-with-frontends --
+FROM proxy AS proxy-with-frontends
+
+COPY --from=build /app/apps/frontend/minerva-button/dist /srv/reporter
+COPY --from=build /app/apps/frontend/minerva-manager/dist /srv/manager
