@@ -39,7 +39,7 @@ flowchart LR
   subgraph infra["infra/docker"]
     pg[("Postgres")]
     valkey[("Valkey")]
-    s3[("S3 / LocalStack")]
+    s3[("Garage<br/>S3 object storage")]
     camo["camo<br/>image proxy"]
   end
 
@@ -77,23 +77,38 @@ the same time.
 | **4201** | minerva-manager (dev + preview) | `apps/frontend/minerva-manager/vite.config.ts` |
 | **4301** | Storybook for the ui-lib | `scripts/storybook-dev.sh` (`STORYBOOK_PORT` overrides) |
 | **4401** | api behind Caddy (`make api`) | `BE_API_PORT` in `.env` |
+| **4101** | minerva-button behind Caddy (`make up`) | `APP_FE_RB_PORT` in `.env` |
+| **4201** | minerva-manager behind Caddy (`make up`) | `APP_FE_MANANGER_PORT` in `.env` |
+| **4501** | the public `assets` bucket, via Caddy | `INFRA_GARAGE_WEB_PORT` in `.env` |
+| **4502** | camo image proxy, via Caddy | `INFRA_CAMO_PORT` in `.env` |
+| 5432 | Postgres | `INFRA_POSTGRES_PORT` in `.env` |
+| 6379 | Valkey | `INFRA_VALKEY_PORT` in `.env` |
+| 3900 | Garage's signed S3 API | `INFRA_GARAGE_S3_PORT` in `.env` |
 | 9229 | V8 inspector of the dockerised api | `BE_API_DEBUG_PORT` in `.env` |
+| 9230 | V8 inspector of the queue coordinator | `BE_QUEUE_DEBUG_PORT` in `.env` |
 | 3000 | api (NestJS) inside its container | fixed in `apps/backend/api/Dockerfile` |
-| 3001 | queue-coordinator (NestJS) | `QUEUE_COORDINATOR_PORT` in `.env` |
-| 5432 | Postgres | `infra/docker/docker-compose.yml` |
-| 6379 | Valkey | `infra/docker/docker-compose.yml` |
-| 4566 | LocalStack (S3) | `infra/docker/docker-compose.yml` |
-| 8443 | camo image proxy | `infra/docker/docker-compose.yml` |
+| 4301 | queue-coordinator inside its container | `BE_QUEUE_PORT` in `.env` — **not published** |
 
 The api continues the `4x01` range at **4401**, one step past Storybook, so the whole stack —
-both frontends, Storybook and the api — can run at once.
+both frontends, Storybook and the api — can run at once. The infrastructure Caddy fronts follows on
+at **45xx**.
 
-The api listens on 3000 *inside* its container and nothing publishes that port — Caddy is the only
-client, over the compose network — so it can never collide with a host port. `BE_API_PORT` is what
-the api is reachable on, and the only one worth configuring.
+Each frontend keeps one port whether it is served by its Vite dev server or out of Docker, so
+`https://reporter.localhost:4101` and `https://localhost:4101` are the same app from two different
+builds. Running both at once is a port conflict, which is the intended answer.
 
-The `4x01` ports are served over HTTPS (see [HTTPS in development](#https-in-development)); the
-docker services bind to `127.0.0.1` only.
+Two kinds of port never meet the host at all. The api listens on 3000 *inside* its container and
+nothing publishes it — Caddy is the only client, over the compose network. The queue family is
+numbered from **4301** upwards (4301 the coordinator, 4302 and 4303 reserved for the two email
+workers) and is likewise unpublished and unproxied: those services are reached by service name from
+inside the network and from nowhere else. Being container ports, they share the number space with
+nothing on the host — 4301 is also Storybook's host port, and the two can never collide.
+
+The `4x01` and `45xx` ports are served over HTTPS (see
+[HTTPS in development](#https-in-development)); everything else binds to `127.0.0.1` only.
+
+Details of the whole stack — profiles, credentials, the infrastructure ADRs — are in
+[`infra/README.md`](infra/README.md).
 
 ### Package view
 
@@ -133,12 +148,16 @@ shared/
   python-lib/                  Python (not in the pnpm workspace)
   assets/                      fonts shared by the apps and Storybook
 infra/
+  README.md                    the docker stack: profiles, credentials, infrastructure ADRs
   cert/                        mkcert output (gitignored)
-  caddy/                       Caddyfile: TLS termination + reverse proxy for the api
-  docker/                      docker-compose.yml: postgres, valkey, localstack, camo
-                               docker-compose.api.yml: the api + Caddy (`make api`)
+  caddy/                       Caddyfile: TLS termination, one site block per hostname
+  docker/                      docker-compose.yml: the whole stack, split into profiles
+                               Dockerfile.caddy: Caddy, optionally carrying the frontends
+  postgres/                    role creation, run once when the volume is created
+  valkey/                      persistence and eviction policy
+  garage/                      object storage config + its one-shot init container
 bruno/                         API collections
-scripts/                       dependency check, env setup, certs, icon generation
+scripts/                       dependency check, env setup, secrets, certs, icons, i18n
 biome.json                     formatting + linting for every TypeScript package
 pnpm-workspace.yaml            workspace members, version catalog, pnpm settings
 tsconfig.base.json             strict base config
@@ -234,15 +253,19 @@ make api-down   # stop and remove them
 ```
 
 It serves <https://api.localhost:4401> (and <https://localhost:4401>), with `/health` as a quick
-check. The target creates the certificate first if `infra/cert/` is empty, and refuses to start
-without a `.env` rather than letting compose fail on an unset variable.
+check. The target checks the certificate first, and refuses to start without a `.env` rather than
+letting compose fail on an unset variable.
 
-Two containers, defined in `infra/docker/docker-compose.api.yml`:
+`make api` is one of four ways to start the stack, all defined in `infra/docker/docker-compose.yml`
+and selected by profile — `make infra` for the background services alone, `make backend` for both
+NestJS services, `make up` for everything including the two frontends built for production.
+[`infra/README.md`](infra/README.md) is the reference for all of it; what follows is the api.
 
 | Container | What it does |
 | --- | --- |
 | `api` | NestJS from `apps/backend/api/Dockerfile`, target `development`, listening on 3000 inside the container |
 | `caddy` | Terminates TLS with the mkcert pair and reverse-proxies to `api:3000` (`infra/caddy/Caddyfile`) |
+| `postgres`, `valkey`, `garage`, `camo` | Pulled in by `depends_on`; the api gets their URLs and credentials from the compose file |
 
 Nothing else from the workspace comes along. The image build copies the api, `shared/typescript-lib`
 and the root manifests — and nothing else; `apps/backend/api/Dockerfile.dockerignore` keeps the
@@ -263,8 +286,10 @@ workspace so breakpoints in `src/` bind to the running code. Chrome DevTools wor
 `chrome://inspect`. The port is published on the loopback interface only.
 
 **The `.env` bridge.** The compose file loads the root `.env` and translates the namespaced names
-into the unprefixed ones the services read (`BE_API_SENTRY_DSN` → `SENTRY_DSN`, see
-`shared/typescript-lib/src/env.ts`).
+into the unprefixed ones the services read (`BE_API_SENTRY_DSN` → `SENTRY_DSN`). The api validates
+the result at boot and names the offending variable on its own line when something is wrong — see
+`apps/backend/api/src/plattform/environment/`, and the four-step recipe for adding a variable in
+[`infra/README.md`](infra/README.md).
 
 **The production image.** The same Dockerfile has a `production` target: it drops
 devDependencies, ships only `dist/`, runs as the unprivileged `node` user and carries its own
@@ -370,11 +395,11 @@ the HTTP/1.1 they served before.
 Firefox does not use the macOS keychain, so `mkcert -install` can only reach it when nss is
 present: `brew install nss && mkcert -install`. Chrome, Safari and Edge need nothing extra.
 
-> **Not wired up yet:** `infra/docker/docker-compose.yml` (postgres, valkey, localstack, camo) has
-> no make target, and the credentials it requires (`POSTGRES_*`, `VALKEY_PASSWORD`, `S3_BUCKET`,
-> `CAMO_HMAC_KEY`) are not in `.env.template`. That stack is separate from the api stack
-> (`infra/docker/docker-compose.api.yml`, `make api`), which is wired up and does use the
-> certificates — when the api needs postgres or valkey, join the two on the `minerva` network.
+The certificate covers every hostname the stack serves, listed one by one in `CERT_DOMAINS` in
+`scripts/generate-certs.sh` — `*.localhost` is not a valid wildcard, because browsers and OpenSSL
+both refuse one whose parent is a single-label TLD. Giving a new service a hostname means adding a
+line there; the docker targets re-check coverage on every start and write a new certificate when it
+no longer matches.
 
 ---
 
