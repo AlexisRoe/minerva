@@ -16,7 +16,8 @@ minerva-api/
   environments/
     local.bru                   baseUrl for a locally running api
   health/
-    get-health.bru              GET  /health
+    get-health.bru              GET  /health — the liveness verdict
+    get-ping.bru                GET  /health/ping — text/plain `pong`
   jobs/
     create-parse-job.bru        POST /jobs — kind: parse
     create-screenshot-job.bru   POST /jobs — kind: screenshot
@@ -33,7 +34,7 @@ Install the official **[Bruno extension](https://marketplace.visualstudio.com/it
 [recommended extensions](../.vscode/extensions.json), so VS Code offers it on first open. It runs
 requests in an editor tab, next to the controller you are working on.
 
-1. Start the API — `make dev` from the repo root, or `pnpm --filter @minerva/api start:dev`.
+1. Start the API — `make api` from the repo root, which is what `local` points at.
 2. Open the Bruno panel; it picks up `minerva-api/` automatically.
 3. **Select the `local` environment.** `{{baseUrl}}` is undefined without it and requests fail on a
    malformed URL.
@@ -54,16 +55,19 @@ pnpm dlx @usebruno/cli run health --env local # one folder only
 ```
 
 It exits non-zero if any assertion fails. Against a locally running api, the current set reports
-4 requests, 8 assertions, 2 tests — all passing.
+5 requests, 11 assertions, 2 tests — all passing.
 
 ## Environments
 
-Only `local` exists so far, pointing at `http://localhost:3000` — matching `API_PORT` in the
-repo-root `.env` (see [`.env.template`](../.env.template)). Plain HTTP is deliberate: the mkcert
-pair in `infra/cert/` is wired into the Vite dev servers and Storybook, not into the NestJS
-bootstrap in [`apps/backend/api/src/main.ts`](../apps/backend/api/src/main.ts). If TLS is added there, switch
-the variable to `https://` — Bruno trusts the certificate because mkcert installs its CA into the
-system trust store.
+Only `local` exists so far, pointing at `https://api.localhost:4401` — the address `make api`
+prints, where Caddy terminates TLS with the mkcert pair from `infra/cert/` and forwards to the api
+container. HTTPS rather than the NestJS listener directly, because that listener is on a
+container-internal port nothing on the host can reach; Bruno trusts the certificate because mkcert
+installs its CA into the system trust store.
+
+The port is `BE_API_PORT` in the repo-root `.env` (see [`.env.template`](../.env.template)) and is
+spelled out here rather than interpolated — Bruno reads a collection-root `.env`, not the repo-root
+one. Change it in both places if you move the api off 4401.
 
 Add further environments as `environments/<name>.bru` with the same `vars` block. **Never put a
 secret in one** — these files are committed. Bruno reads a gitignored `.env` from the collection

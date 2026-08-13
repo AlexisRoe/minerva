@@ -23,6 +23,7 @@ body:json {
 
 assert {
   res.status: eq 400
+  res.headers['x-minerva-request-id']: isDefined
 }
 
 tests {

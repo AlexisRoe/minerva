@@ -28,6 +28,7 @@ vars:post-response {
 assert {
   res.status: eq 201
   res.body.kind: eq parse
+  res.headers['x-minerva-request-id']: isDefined
 }
 
 tests {

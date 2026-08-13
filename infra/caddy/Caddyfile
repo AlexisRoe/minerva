@@ -1,0 +1,127 @@
+# The one way into the Minerva stack.
+#
+# Terminates TLS with the mkcert pair from infra/cert/ (mounted read-only at
+# /etc/caddy/cert) and either forwards to a service over the compose network or
+# serves a frontend bundle baked into this image. Used by
+# infra/docker/docker-compose.yml; `{$VAR:default}` placeholders are filled from
+# the environment, which compose loads from the root .env.
+#
+# One hostname per service, each on the port that service already owns in
+# .env.template — so the dockerised button answers on the same URL its Vite dev
+# server does. The two are mutually exclusive by design.
+#
+# There is deliberately no site block for the queue coordinator: it is reachable
+# on the compose network and nowhere else.
+{
+	# The mkcert certificate below is already trusted by the local CA, so Caddy
+	# must not try to issue one of its own. `disable_redirects` also keeps it
+	# from binding :80 for HTTP→HTTPS redirects — that port is not published.
+	auto_https disable_redirects
+
+	# Admin API stays inside the container (used by `caddy reload`, and by this
+	# container's healthcheck).
+	admin localhost:2019
+}
+
+# Everything every site block needs. `import` rather than a global option
+# because the certificate has to be named per site, and repeating it five times
+# is five places to forget it.
+#
+# One certificate covers every name below — see scripts/generate-certs.sh, which
+# lists them one by one because a `*.localhost` wildcard is not valid.
+(common) {
+	tls /etc/caddy/cert/minerva-local.pem /etc/caddy/cert/minerva-local-key.pem
+
+	encode zstd gzip
+
+	log {
+		format console
+	}
+}
+
+# What a single-page app needs, and what it must not have. The hashed bundle can
+# be cached forever because its name changes when it does; index.html and
+# config.json must not be cached at all, or a deploy is invisible until the
+# browser gives up on its copy.
+(spa) {
+	import common
+
+	header /assets/* Cache-Control "public, max-age=31536000, immutable"
+	header /index.html Cache-Control "no-store"
+	header /config.json Cache-Control "no-store"
+
+	file_server
+}
+
+# ------------------------------------------------------------------ the api --
+# BE_API_PORT is the api's public port — the one thing a caller needs to know.
+# `localhost` is served here too, so a client that has not learned the hostnames
+# yet still reaches something.
+https://api.localhost:{$BE_API_PORT:4401}, https://localhost:{$BE_API_PORT:4401} {
+	import common
+
+	# Port 3000 is the api container's internal listener, fixed in its Dockerfile.
+	# X-Forwarded-{For,Proto,Host} are set by Caddy itself, so the app sees the
+	# browser-facing scheme and host rather than the container's.
+	reverse_proxy api:3000 {
+		# Server-Sent Events and long polling must not be buffered.
+		flush_interval -1
+	}
+}
+
+# ------------------------------------------------------- the reporting button --
+# Static bundle from apps/frontend/minerva-button, built into this image by the
+# `proxy-with-frontends` target of infra/docker/Dockerfile.caddy. With the plain
+# `proxy` target the directory is empty and every path 404s, which is the honest
+# answer: `make infra` did not build a frontend.
+https://reporter.localhost:{$APP_FE_RB_PORT:4101} {
+	root * /srv/reporter
+
+	# The button is not a single-page app in the usual sense: support.html and
+	# auth-dialog.html are real entry points of their own (see `extraPages` in its
+	# vite.config.ts), so they resolve as files and only the rest falls back.
+	try_files {path} {path}/ /index.html
+
+	import spa
+}
+
+# ----------------------------------------------------------------- the manager --
+https://manager.localhost:{$APP_FE_MANANGER_PORT:4201} {
+	root * /srv/manager
+
+	try_files {path} {path}/ /index.html
+
+	import spa
+
+	# The service worker decides for itself when to update; a cached copy of it
+	# would pin the app to the build that installed it.
+	header /sw.js Cache-Control "no-store"
+	header /manifest.webmanifest Cache-Control "no-store"
+}
+
+# ------------------------------------------------------------ the public bucket --
+# Garage's website endpoint, which serves a bucket without any signing — the only
+# reason `assets` is reachable from a browser at all. The private `artifacts`
+# bucket has no site block here and is only reachable through signed S3 calls.
+https://assets.localhost:{$INFRA_GARAGE_WEB_PORT:4501} {
+	import common
+
+	# 3902 is Garage's s3_web listener. It picks the bucket out of the Host header
+	# against the `root_domain` in infra/garage/garage.toml, so the header has to
+	# be rewritten from the browser-facing name to the one Garage knows the bucket
+	# by — otherwise it looks for a bucket called `assets.localhost`.
+	reverse_proxy garage:3902 {
+		header_up Host assets.web.garage
+	}
+}
+
+# ------------------------------------------------------------- the image proxy --
+# go-camo. Every request carries an HMAC of the target URL, so this being public
+# does not make it an open proxy.
+#
+# @see https://github.com/cactus/go-camo
+https://proxy.localhost:{$INFRA_CAMO_PORT:4502} {
+	import common
+
+	reverse_proxy camo:8080
+}

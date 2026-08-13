@@ -1,0 +1,39 @@
+# syntax=docker/dockerfile:1.10
+#
+# The one-shot container that turns a fresh Garage node into a usable one:
+# cluster layout, the two buckets, the access key. See init.sh for what it does
+# and why each step is safe to repeat.
+#
+# It exists because dxflrs/garage is a single static binary on an empty
+# filesystem — no shell, no wget, nothing to run a script with. So the binary is
+# lifted out of that image and dropped into an Alpine that has one.
+#
+#   docker build -f infra/garage/Dockerfile.init infra/garage
+#
+# The build context is this directory, not the repository root: nothing outside
+# it is needed.
+
+# Must match the `garage` service's image in infra/docker/docker-compose.yml. The
+# CLI and the node speak a versioned RPC protocol and refuse each other across a
+# major version.
+ARG GARAGE_VERSION=v2.3.0
+ARG ALPINE_VERSION=3.22
+
+FROM dxflrs/garage:${GARAGE_VERSION} AS garage-binary
+
+FROM alpine:${ALPINE_VERSION}
+
+# curl for the admin API, jq to read the node id out of its response. Alpine
+# pins no versions of its own, so the image tag above is what makes this
+# reproducible.
+RUN apk add --no-cache curl jq
+
+COPY --from=garage-binary /garage /usr/local/bin/garage
+COPY init.sh /usr/local/bin/garage-init.sh
+
+RUN chmod +x /usr/local/bin/garage-init.sh
+
+# Runs as an unprivileged user: it only ever talks to the node over the network.
+USER nobody
+
+ENTRYPOINT ["/usr/local/bin/garage-init.sh"]

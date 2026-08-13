@@ -16,6 +16,21 @@
       "outFiles": ["${workspaceFolder}/apps/backend/api/dist/**/*.js", "!**/node_modules/**"]
     },
     {
+      // For the api running in Docker (`make api`). The inspector is published
+      // on 127.0.0.1 by infra/docker/docker-compose.yml; remoteRoot maps the
+      // container's paths back onto the workspace so breakpoints bind.
+      "type": "node",
+      "request": "attach",
+      "name": "Attach to api (Docker)",
+      "address": "127.0.0.1",
+      "port": 9229,
+      "restart": true,
+      "localRoot": "${workspaceFolder}/apps/backend/api",
+      "remoteRoot": "/app/apps/backend/api",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true
+    },
+    {
       "type": "node",
       "request": "launch",
       "name": "Debug queue-coordinator",

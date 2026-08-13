@@ -91,6 +91,7 @@ env/
 .env.*.local
 # Timestamped .env backups created by scripts/initial-setup.sh (.env.20260727-134500)
 .env.[0-9]*
+.env.*.[0-9]*
 !.env.example
 
 # ==========================================

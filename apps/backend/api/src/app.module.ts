@@ -1,13 +1,27 @@
 import { Module } from '@nestjs/common';
-import { APP_FILTER } from '@nestjs/core';
-import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
+import { SentryModule } from '@sentry/nestjs/setup';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { HealthModule } from './modules/health/health.module';
+import { ManagerModule } from './modules/manager/manager.module';
+import { ReporterModule } from './modules/reporter/reporter.module';
+import { SDKModule } from './modules/sdk/sdk.module';
+import { EnvironmentModule } from './plattform/environment/environment.module';
+import { ExceptionModule } from './plattform/exception/exception.module';
+import { RequestIdModule } from './plattform/request-id/request-id.module';
 
+/** `SentryModule.forRoot()` wires the tracing only; `ExceptionModule` reports. */
 @Module({
-  imports: [SentryModule.forRoot()],
-  controllers: [AppController],
-  providers: [AppService, { provide: APP_FILTER, useClass: SentryGlobalFilter }],
+  imports: [
+    SentryModule.forRoot(),
+    EnvironmentModule,
+    RequestIdModule,
+    ExceptionModule,
+    HealthModule,
+    ReporterModule,
+    ManagerModule,
+    SDKModule,
+  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

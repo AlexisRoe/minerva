@@ -1,0 +1,56 @@
+# Build context for infra/docker/Dockerfile.caddy.
+#
+# BuildKit prefers this file over the root .dockerignore when building with
+# `-f infra/docker/Dockerfile.caddy`, and it replaces it rather than adding to it.
+#
+# The context is the repository root because the frontends are workspace members
+# and need the root lockfile, the version catalog, the shared Vite plugins and
+# both shared libraries. Everything else — the backend services, the Python
+# workers, bruno, documentation — is excluded here, so touching them cannot
+# invalidate a layer or slow the build.
+
+# Deny everything, then re-open the paths the image needs. Intermediate
+# directories are re-included explicitly: a directory that stays excluded is
+# never walked, and nothing below it can be matched.
+*
+
+!/package.json
+!/pnpm-lock.yaml
+!/pnpm-workspace.yaml
+!/.npmrc
+!/tsconfig.base.json
+# shared/typescript-lib extends the backend one; the apps and the ui-lib extend
+# the web one.
+!/tsconfig.backend.json
+!/tsconfig.web.json
+
+# The shared Vite plugins the app configs import from the root.
+!/vite.https.ts
+!/vite.fonts.ts
+!/vite.pages.ts
+!/vite.runtime-config.ts
+
+!/apps
+/apps/*
+!/apps/frontend
+/apps/frontend/*
+!/apps/frontend/minerva-button
+!/apps/frontend/minerva-manager
+
+# shared/ in full: ui-lib and typescript-lib are built here, and shared/assets
+# holds the fonts and icons both apps bundle.
+!/shared
+
+# Never ship build output, host dependencies or secrets, whatever the rules above
+# say. The .env in particular: the frontends' settings arrive as build args, and
+# a copy of the host's .env in the context would let `loadEnv` read a value
+# nobody passed.
+**/node_modules
+**/dist
+**/dev-dist
+**/coverage
+**/storybook-static
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+**/*.log

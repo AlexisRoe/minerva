@@ -25,8 +25,10 @@ flowchart LR
   end
 
   subgraph services["Node services"]
-    api["api<br/>NestJS · :3000"]
+    caddy["Caddy<br/>TLS + reverse proxy · :4401"]
+    api["api<br/>NestJS · :3000 internal"]
     qc["queue-coordinator<br/>NestJS · :3001"]
+    caddy -->|"https://api.localhost"| api
   end
 
   subgraph python["Python workers"]
@@ -37,12 +39,12 @@ flowchart LR
   subgraph infra["infra/docker"]
     pg[("Postgres")]
     valkey[("Valkey")]
-    s3[("S3 / LocalStack")]
+    s3[("Garage<br/>S3 object storage")]
     camo["camo<br/>image proxy"]
   end
 
-  manager -.-> api
-  button -.-> api
+  manager -.-> caddy
+  button -.-> caddy
   api -->|"POST /jobs (EmailJob)"| qc
   qc -.-> valkey
   api -.-> pg
@@ -74,15 +76,39 @@ the same time.
 | **4101** | minerva-button (dev + preview) | `apps/frontend/minerva-button/vite.config.ts` |
 | **4201** | minerva-manager (dev + preview) | `apps/frontend/minerva-manager/vite.config.ts` |
 | **4301** | Storybook for the ui-lib | `scripts/storybook-dev.sh` (`STORYBOOK_PORT` overrides) |
-| 3000 | api (NestJS) | `API_PORT` in `.env` |
-| 3001 | queue-coordinator (NestJS) | `QUEUE_COORDINATOR_PORT` in `.env` |
-| 5432 | Postgres | `infra/docker/docker-compose.yml` |
-| 6379 | Valkey | `infra/docker/docker-compose.yml` |
-| 4566 | LocalStack (S3) | `infra/docker/docker-compose.yml` |
-| 8443 | camo image proxy | `infra/docker/docker-compose.yml` |
+| **4401** | api behind Caddy (`make api`) | `BE_API_PORT` in `.env` |
+| **4101** | minerva-button behind Caddy (`make up`) | `APP_FE_RB_PORT` in `.env` |
+| **4201** | minerva-manager behind Caddy (`make up`) | `APP_FE_MANANGER_PORT` in `.env` |
+| **4501** | the public `assets` bucket, via Caddy | `INFRA_GARAGE_WEB_PORT` in `.env` |
+| **4502** | camo image proxy, via Caddy | `INFRA_CAMO_PORT` in `.env` |
+| 5432 | Postgres | `INFRA_POSTGRES_PORT` in `.env` |
+| 6379 | Valkey | `INFRA_VALKEY_PORT` in `.env` |
+| 3900 | Garage's signed S3 API | `INFRA_GARAGE_S3_PORT` in `.env` |
+| 9229 | V8 inspector of the dockerised api | `BE_API_DEBUG_PORT` in `.env` |
+| 9230 | V8 inspector of the queue coordinator | `BE_QUEUE_DEBUG_PORT` in `.env` |
+| 3000 | api (NestJS) inside its container | fixed in `apps/backend/api/Dockerfile` |
+| 4301 | queue-coordinator inside its container | `BE_QUEUE_PORT` in `.env` — **not published** |
 
-The three `4x01` ports are served over HTTPS (see [HTTPS in development](#https-in-development));
-the docker services bind to `127.0.0.1` only.
+The api continues the `4x01` range at **4401**, one step past Storybook, so the whole stack —
+both frontends, Storybook and the api — can run at once. The infrastructure Caddy fronts follows on
+at **45xx**.
+
+Each frontend keeps one port whether it is served by its Vite dev server or out of Docker, so
+`https://reporter.localhost:4101` and `https://localhost:4101` are the same app from two different
+builds. Running both at once is a port conflict, which is the intended answer.
+
+Two kinds of port never meet the host at all. The api listens on 3000 *inside* its container and
+nothing publishes it — Caddy is the only client, over the compose network. The queue family is
+numbered from **4301** upwards (4301 the coordinator, 4302 and 4303 reserved for the two email
+workers) and is likewise unpublished and unproxied: those services are reached by service name from
+inside the network and from nowhere else. Being container ports, they share the number space with
+nothing on the host — 4301 is also Storybook's host port, and the two can never collide.
+
+The `4x01` and `45xx` ports are served over HTTPS (see
+[HTTPS in development](#https-in-development)); everything else binds to `127.0.0.1` only.
+
+Details of the whole stack — profiles, credentials, the infrastructure ADRs — are in
+[`infra/README.md`](infra/README.md).
 
 ### Package view
 
@@ -122,10 +148,16 @@ shared/
   python-lib/                  Python (not in the pnpm workspace)
   assets/                      fonts shared by the apps and Storybook
 infra/
+  README.md                    the docker stack: profiles, credentials, infrastructure ADRs
   cert/                        mkcert output (gitignored)
-  docker/                      docker-compose.yml: postgres, valkey, localstack, camo
+  caddy/                       Caddyfile: TLS termination, one site block per hostname
+  docker/                      docker-compose.yml: the whole stack, split into profiles
+                               Dockerfile.caddy: Caddy, optionally carrying the frontends
+  postgres/                    role creation, run once when the volume is created
+  valkey/                      persistence and eviction policy
+  garage/                      object storage config + its one-shot init container
 bruno/                         API collections
-scripts/                       dependency check, env setup, certs, icon generation
+scripts/                       dependency check, env setup, secrets, certs, icons, i18n
 biome.json                     formatting + linting for every TypeScript package
 pnpm-workspace.yaml            workspace members, version catalog, pnpm settings
 tsconfig.base.json             strict base config
@@ -141,14 +173,15 @@ vite.https.ts                  shared TLS options for the frontend dev servers
 
 ### Prerequisites
 
-Node **26.5.0** (see `.nvmrc`), pnpm **>= 11**, Docker, and GNU make. Run `make check-deps` to
-verify all of them at once — it prints the install command for anything missing.
+Node **26.5.0** (see `.nvmrc`), pnpm **>= 11**, Docker, GNU make, and openssl. Run `make check-deps`
+to verify all of them at once — it prints the install command for anything missing.
 
 ### First time
 
 ```sh
 make setup        # check-deps → certs → install, in that order
 make copy-env     # create .env from .env.template (backs up an existing .env)
+make secret VAR=BE_API_COOKIE_SECRET   # fill in the api's cookie signing key
 make build        # build all six packages in dependency order
 ```
 
@@ -157,7 +190,7 @@ first one that fails, so a missing tool is reported before anything tries to ins
 
 | Step | Target | What it does |
 | --- | --- | --- |
-| 1 | `make check-deps` | Verifies Homebrew, pnpm, Node, Docker, and make — exits non-zero if any is missing |
+| 1 | `make check-deps` | Verifies Homebrew, pnpm, Node, Docker, make, and openssl — exits non-zero if any is missing |
 | 2 | `make certs` | Generates the mkcert TLS pair, or leaves a still-valid one alone |
 | 3 | `make install` | `pnpm install` across the whole workspace |
 
@@ -169,6 +202,13 @@ edit, and re-running it moves your existing `.env` to a timestamped backup. It o
 template; every value in it has a working default, so an empty `.env` still boots locally. Sentry
 stays disabled while its DSN is empty.
 
+`make secret` generates a random key with `openssl rand -base64 32`. Without `VAR` it prints one and
+touches nothing, so `make secret | pbcopy` is the whole workflow; with `VAR=<NAME>` it writes into
+that variable in `.env`. An existing value is never replaced without `FORCE=1`, because rotating a
+signing key invalidates everything already signed with it — every cookie a running api handed out.
+`BE_API_COOKIE_SECRET` is the one variable that needs it today; empty means the api issues unsigned
+cookies only, and anything shorter than 32 characters fails its boot validation.
+
 ### Day to day
 
 | Command | What it does |
@@ -177,6 +217,10 @@ stays disabled while its DSN is empty.
 | `make dev-manager` | Only minerva-manager on <https://localhost:4201> (builds the ui-lib first) |
 | `make dev-button` | Only minerva-button on <https://localhost:4101> (builds the ui-lib first) |
 | `make storybook` | Storybook for the shared ui-lib on <https://localhost:4301> |
+| `make api` | The api in Docker behind Caddy on <https://api.localhost:4401> — hot reload + debugger |
+| `make api-logs` | Follow the logs of the running api stack |
+| `make api-down` | Stop the api stack and remove its containers |
+| `make api-build` | Force a full rebuild of the api image, ignoring the layer cache |
 | `make build` | `pnpm -r build` — topological build of all six packages |
 | `make test` | The whole Vitest suite (node + jsdom projects) |
 | `make typecheck` | `tsc --noEmit` in every package |
@@ -184,6 +228,7 @@ stays disabled while its DSN is empty.
 | `make format` | Biome with `--write` — applies formatting and safe fixes |
 | `make verify` | lint → typecheck → test, stopping at the first failure |
 | `make icons` | Generate PWA/Outlook PNG sizes: `make icons SRC=path/to/source.png [OUT=dir]` |
+| `make secret` | Generate a random secret: `make secret [VAR=NAME]` writes it into `.env` when `VAR` is given |
 
 `make help` lists all targets with their descriptions.
 
@@ -195,6 +240,61 @@ itself, either use `make dev` (which keeps `vite build --watch` running alongsid
 Backends run individually with pnpm filters, e.g. `pnpm --filter @minerva/api dev`. VS Code
 launch configurations for both services, for Vitest on the current file, and for both frontends
 in Chrome are in `.vscode/launch.json`.
+
+### The api in Docker
+
+`make api` runs the api the way it is deployed — in a container, behind a TLS-terminating reverse
+proxy — without giving up the dev loop:
+
+```sh
+make api        # build if needed, start, wait for healthy, print the URLs
+make api-logs   # follow both containers
+make api-down   # stop and remove them
+```
+
+It serves <https://api.localhost:4401> (and <https://localhost:4401>), with `/health` as a quick
+check. The target checks the certificate first, and refuses to start without a `.env` rather than
+letting compose fail on an unset variable.
+
+`make api` is one of four ways to start the stack, all defined in `infra/docker/docker-compose.yml`
+and selected by profile — `make infra` for the background services alone, `make backend` for both
+NestJS services, `make up` for everything including the two frontends built for production.
+[`infra/README.md`](infra/README.md) is the reference for all of it; what follows is the api.
+
+| Container | What it does |
+| --- | --- |
+| `api` | NestJS from `apps/backend/api/Dockerfile`, target `development`, listening on 3000 inside the container |
+| `caddy` | Terminates TLS with the mkcert pair and reverse-proxies to `api:3000` (`infra/caddy/Caddyfile`) |
+| `postgres`, `valkey`, `garage`, `camo` | Pulled in by `depends_on`; the api gets their URLs and credentials from the compose file |
+
+Nothing else from the workspace comes along. The image build copies the api, `shared/typescript-lib`
+and the root manifests — and nothing else; `apps/backend/api/Dockerfile.dockerignore` keeps the
+frontends, the ui-lib, the queue-coordinator and the Python workers out of the build context
+entirely, so editing them cannot invalidate a layer.
+
+**Hot reload.** `apps/backend/api/src/` is bind-mounted into the container, where `nest start
+--watch` recompiles on save and restarts the process — about two seconds from save to serving.
+Two things do *not* hot reload: a change to `shared/typescript-lib` (the api consumes its built
+`dist/`) and a change to `package.json` or the lockfile — both need a `make api`, which rebuilds
+the layers those live in. Note that nest only restarts on a **clean** compile: while a type error
+is on screen the container keeps serving the last version that built, and a container *restarted*
+in that state cannot boot at all.
+
+**Debugger.** The V8 inspector listens on `127.0.0.1:9229`. In VS Code pick the *Attach to api
+(Docker)* configuration from `.vscode/launch.json`; it maps `/app/apps/backend/api` back onto the
+workspace so breakpoints in `src/` bind to the running code. Chrome DevTools works too, via
+`chrome://inspect`. The port is published on the loopback interface only.
+
+**The `.env` bridge.** The compose file loads the root `.env` and translates the namespaced names
+into the unprefixed ones the services read (`BE_API_SENTRY_DSN` → `SENTRY_DSN`). The api validates
+the result at boot and names the offending variable on its own line when something is wrong — see
+`apps/backend/api/src/plattform/environment/`, and the four-step recipe for adding a variable in
+[`infra/README.md`](infra/README.md).
+
+**The production image.** The same Dockerfile has a `production` target: it drops
+devDependencies, ships only `dist/`, runs as the unprivileged `node` user and carries its own
+`HEALTHCHECK`. Build it with `docker build -f apps/backend/api/Dockerfile --target production .`,
+or run the whole stack against it with `MINERVA_API_TARGET=production make api`.
 
 ### Before pushing
 
@@ -250,20 +350,39 @@ enough. To bypass it in an emergency: `git push --no-verify`.
 
 ### HTTPS in development
 
-All three dev servers run over TLS using the mkcert pair in `infra/cert/`, generated by
-`make certs`. One certificate covers `localhost`, `*.localhost`, `127.0.0.1` and `::1`, so every
-server can share it — including future `https://<service>.localhost` origins.
+Every local server runs over TLS using the mkcert pair in `infra/cert/`, generated by `make certs`.
+One certificate covers all of them; the names it carries are the `CERT_DOMAINS` list in
+`scripts/generate-certs.sh`:
+
+```
+localhost  api.localhost  queue.localhost  manager.localhost  button.localhost
+storybook.localhost  127.0.0.1  ::1
+```
+
+**There is no wildcard, on purpose.** `*.localhost` looks like it would cover every service origin,
+but no validator accepts a wildcard whose parent is a single-label TLD — Chrome, Safari, Firefox
+and OpenSSL all require at least two labels to the right of the `*`. A cert with `DNS:*.localhost`
+is trusted and still fails on `https://api.localhost` with a *name mismatch*, which reads like a
+trust problem and is not one. So every service hostname is listed individually: **add yours to
+`CERT_DOMAINS` and re-run `make certs`.**
+
+`make certs` regenerates when the certificate is missing, within 30 days of expiry, **or when its
+names no longer match `CERT_DOMAINS`** — editing that list is enough, no manual deletion. Servers
+already running keep the old certificate in memory until restarted.
 
 `infra/cert/` is gitignored, so a fresh clone has no certificate until `make certs` has run. In
 that case the dev servers **fall back to plain HTTP** and print a one-line notice rather than
-refusing to boot; run `make certs` and restart to get `https://` back.
+refusing to boot; run `make certs` and restart to get `https://` back. Caddy is the exception: it
+exits rather than serve the api over something untrusted, which is why `make api` generates the
+certificate first if it is missing.
 
-The two mechanisms differ because Storybook differs:
+The mechanisms differ per server:
 
 | Server | Where TLS is configured |
 | --- | --- |
 | minerva-manager, minerva-button | `server.https` / `preview.https` in each `vite.config.ts`, loaded from `vite.https.ts` |
 | Storybook | `--https --ssl-cert --ssl-key --ssl-ca` flags, passed by `scripts/storybook-dev.sh` |
+| api (`make api`) | `tls` directive in `infra/caddy/Caddyfile`; `infra/cert/` is mounted read-only into the container |
 
 Storybook runs Vite in *middleware mode* behind its own Node server, so `server.https` in a Vite
 config never reaches the listening socket — the certificate has to arrive on the command line
@@ -273,10 +392,14 @@ paths behave identically.
 Enabling TLS also switches the Vite dev servers to **HTTP/2**, which is closer to production than
 the HTTP/1.1 they served before.
 
-> **Not wired up yet:** `infra/docker/docker-compose.yml` has no make target, and the credentials
-> it requires (`POSTGRES_*`, `VALKEY_PASSWORD`, `S3_BUCKET`, `CAMO_HMAC_KEY`) are not in
-> `.env.template`. The dockerised services do not yet use the certificates either — only the
-> frontend dev servers and Storybook do.
+Firefox does not use the macOS keychain, so `mkcert -install` can only reach it when nss is
+present: `brew install nss && mkcert -install`. Chrome, Safari and Edge need nothing extra.
+
+The certificate covers every hostname the stack serves, listed one by one in `CERT_DOMAINS` in
+`scripts/generate-certs.sh` — `*.localhost` is not a valid wildcard, because browsers and OpenSSL
+both refuse one whose parent is a single-label TLD. Giving a new service a hostname means adding a
+line there; the docker targets re-check coverage on every start and write a new certificate when it
+no longer matches.
 
 ---
 

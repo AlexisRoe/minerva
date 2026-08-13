@@ -13,17 +13,31 @@ get {
 assert {
   res.status: eq 200
   res.body.status: eq ok
-  res.body.service: eq api
+  res.body.name: eq api
+  res.headers['x-minerva-request-id']: isDefined
 }
 
 docs {
-  Liveness probe. Returns the `HealthReport` from `AppService.health()`:
+  The liveness verdict, from `HealthUseCase` via `HealthController.root()`:
 
   ```json
-  { "status": "ok", "service": "api" }
+  { "status": "ok", "name": "api" }
   ```
 
-  The `service` field is what distinguishes this from the queue-coordinator's identical
-  route, so the assertion checks it — a misconfigured `baseUrl` pointing at :3001 fails
-  here instead of passing silently.
+  Verdict only — it probes no database, queue or downstream service, so `ok` means this
+  process is up and routing works and says nothing about anything behind it. `status` is
+  the `ApiStatus` enum (`ok` | `error` | `pending`), which is why the assertion pins the
+  value rather than only checking the field is there.
+
+  `name` is what distinguishes this from the queue-coordinator's identical route, so a
+  `baseUrl` pointing at the wrong service fails here instead of passing silently.
+
+  `GET /health/live` and `GET /health/ready` answer with exactly this body — they exist so
+  a Kubernetes manifest can bind each probe to its own path.
+
+  The `X-MINERVA-REQUEST-ID` asserted above is on every response the api gives, this one
+  included: `RequestIdMiddleware` keeps the id you sent if it is a uuid v4 and mints one
+  otherwise. It is the id to quote when reporting what a route answered — `GET
+  /health/status` is the only one that also puts it in the body. Sending your own is a
+  collection-level header, disabled by default, because every route here accepts it.
 }

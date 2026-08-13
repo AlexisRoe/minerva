@@ -61,6 +61,71 @@ describe('Result.withFailure', () => {
   });
 });
 
+/* These assertions are as much for `tsc` as for vitest: every annotation below
+   is one the compiler rejects unless the guard narrowed in both directions. A
+   regression there fails `make typecheck`, not just this suite.
+
+   The helpers exist so the results arrive as the wide union. Assigning
+   `Result.withSuccess(…)` to a `Result` variable directly would narrow it at
+   the assignment, and the branch under test would collapse to `never` before
+   the guard ever ran. */
+describe('narrowing', () => {
+  function loadInvoice(id: string): Result<string, TestError> {
+    return id === 'inv_1' ? Result.withSuccess('INVOICE inv_1') : Result.withFailure(new TestError(id));
+  }
+
+  it('leaves a defined value after the failure branch returns', () => {
+    const result = loadInvoice('inv_1');
+
+    if (result.isFailure()) {
+      throw result.error;
+    }
+
+    const value: string = result.value;
+    expect(value).toBe('INVOICE inv_1');
+  });
+
+  it('leaves a defined error after the success branch returns', () => {
+    const result = loadInvoice('inv_404');
+
+    if (result.isSuccess()) {
+      throw new Error(`expected a failure, got ${result.value}`);
+    }
+
+    const error: TestError = result.error;
+    expect(error.code).toBe('ERR_042');
+  });
+
+  it('narrows the else branch of either guard', () => {
+    const described = ['inv_1', 'inv_404'].map((id) => {
+      const result = loadInvoice(id);
+
+      return result.isFailure() ? result.error.code : result.value;
+    });
+
+    expect(described).toEqual(['INVOICE inv_1', 'ERR_042']);
+  });
+
+  it('narrows on the successful discriminant alone', () => {
+    const result = loadInvoice('inv_1');
+
+    if (!result.successful) {
+      throw result.error;
+    }
+
+    const value: string = result.value;
+    expect(value).toBe('INVOICE inv_1');
+  });
+
+  it('needs no guard on what the factories return', () => {
+    const value: number = Result.withSuccess(42).value;
+    const error: TestError = Result.withFailure(new TestError('inv_1')).error;
+
+    expect(value).toBe(42);
+    expect(error.code).toBe('ERR_042');
+  });
+});
+
 describe('Result.is', () => {
   it('recognises a live result, success or failure', () => {
     expect(Result.is(Result.withSuccess(1))).toBe(true);

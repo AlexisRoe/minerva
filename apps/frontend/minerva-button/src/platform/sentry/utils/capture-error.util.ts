@@ -1,39 +1,21 @@
-import { convertToSentryLevel, MinervaError } from '@minerva/typescript-lib';
+import { CONSOLE_METHOD, convertToSentryLevel, MinervaError } from '@minerva/typescript-lib';
 import * as Sentry from '@sentry/react';
-import { CONSOLE_METHOD, DEFAULT_LEVEL } from '@/constants/errors.constants';
+import { DEFAULT_LEVEL } from '@/constants/errors.constants';
 import { useErrorLogStore } from '@/stores/error-log/error-log.store';
 
 /**
- * Reports an error to Sentry and to the console, as loudly as it asks for.
+ * The single way this app reports an error -- to Sentry, to the console and to
+ * the persisted error log -- and answers with the Sentry event id.
  *
- * The single way this app hands an error to Sentry, so every event is enriched
- * the same way. A {@link MinervaError} configures its own report: `logLevel`
- * becomes the Sentry severity (`'error'` when it carries none), `code` and
- * `reference` become searchable tags *and* the fingerprint, and `payload`
- * travels as unindexed extra data. Fingerprinting on the pair is what makes
- * grouping predictable -- one throw site is one issue, regardless of how the
- * message is later reworded, and two sites sharing a code do not collapse into
- * each other.
+ * A {@link MinervaError} configures its own report: `logLevel` picks both the
+ * Sentry severity and the console method, `code` and `reference` become tags and
+ * the fingerprint, and `payload` travels as extra data. Anything else is
+ * captured at {@link DEFAULT_LEVEL} without grouping.
  *
- * Anything else is captured at the default severity; it is still worth having,
- * just without the grouping. Both paths also log, because the DSN is unset in
- * local development and the console line is all there is -- and the console
- * *method* comes from the same `logLevel`, so an error that asks to be a warning
- * is a warning in both places rather than a red line in one and a yellow one in
- * the other. Only a `MinervaError` can ask; anything else is `console.error`,
- * because nothing else declares how loud it means to be.
- *
- * It also writes to the persisted error log, which is the copy that survives
- * when Sentry is off -- the usual case inside Outlook, where nobody can open a
- * console either. See `src/store/error-log/`.
- *
- * Safe to call before `Sentry.init()`: the SDK drops the event rather than
- * throwing, so the console line and the log entry survive either way.
- *
- * It returns Sentry's event id, which is the identifier that actually finds the
- * report: an error's `reference` names the *throw site* and is the same for
- * every occurrence, so it groups but does not identify. The event id is what a
- * user should be given to quote and what support searches on.
+ * Safe to call before `Sentry.init()`; the SDK drops the event rather than
+ * throwing, so the console line and the log entry survive either way. The event
+ * id is what a user quotes and what support searches on -- `reference` names the
+ * throw site and so groups, but does not identify one occurrence.
  *
  * @param error - Whatever a `catch` produced.
  * @returns The Sentry event id for this occurrence.

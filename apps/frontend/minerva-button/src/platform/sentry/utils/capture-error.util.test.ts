@@ -1,7 +1,6 @@
+import { CONSOLE_METHOD } from '@minerva/typescript-lib';
 import * as Sentry from '@sentry/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { CONSOLE_METHOD } from '@/constants/errors.constants';
 import { ConfigRequestFailedError, MissingRootElementError } from '@/domain/errors/config.errors';
 import { OfficeHostUnsupportedError } from '@/domain/errors/office.errors';
 import { useErrorLogStore } from '@/stores/error-log/error-log.store';

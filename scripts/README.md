@@ -1,6 +1,28 @@
 # Custom scripts
 
-`make setup` runs `check-dependencies.sh`, then `generate-certs.sh`, then `pnpm install`, stopping at the first failure. Each script also has its own target and can be run on its own — the sections below cover them individually.
+Every script in this directory, what it does and how to run it. All of them are reachable through a Makefile target, which is the intended way in; each also runs on its own.
+
+`make setup` is the one that chains several together, in the order the steps depend on each other, stopping at the first failure:
+
+1. `check-dependencies.sh` — is the tooling there at all
+2. `initial-setup.sh` — only if there is no `.env` yet
+3. `bootstrap-secrets.sh` — fill the credentials nobody chooses
+4. `generate-certs.sh` — local TLS
+5. `pnpm install`, then a build of the shared libraries
+
+| Script | Target | What it is for |
+| ------ | ------ | -------------- |
+| `check-dependencies.sh` | `make check-deps` | Is the local tooling installed |
+| `initial-setup.sh` | `make copy-env` | Create `.env` from `.env.template` |
+| `bootstrap-secrets.sh` | `make secrets` | Fill every empty credential in `.env` |
+| `generate-secret.sh` | `make secret` | Generate one secret, print it or write it |
+| `generate-certs.sh` | `make certs` | Locally-trusted TLS certificates |
+| `generate-icons.sh` | `make icons` | PWA/Outlook PNG icon sizes from one source |
+| `convert-fonts.sh` | `make fonts` | `.ttf`/`.otf` to `.woff2` |
+| `shutdown-frontends.sh` | `make shutdown-fe` | Force-kill stuck Vite dev servers |
+| `storybook-dev.sh` | `make storybook` | Storybook for the ui-lib, over HTTPS |
+| `sync-workspace.sh` | (git hooks) | Re-install and rebuild after a checkout or merge |
+| `check-i18n-*.py` | `make verify-i18n` | Translation catalogue checks |
 
 ## check-dependencies.sh
 
@@ -52,7 +74,7 @@ Or via the Makefile target:
 make copy-env
 ```
 
-This one is not part of `make setup` — it writes a file you are expected to edit, and re-running it moves your existing `.env` aside.
+`make setup` calls this only when there is no `.env` at all, and never otherwise: it writes a file you are expected to edit, and re-running it moves your existing one aside. Running `make copy-env` directly is always an explicit act.
 
 Exits with status `0` on success, or `1` if `.env.template` is missing or the backup/copy fails.
 
@@ -63,16 +85,25 @@ Creates locally-trusted TLS certificates (via [mkcert](https://github.com/FiloSo
 It:
 - checks that `mkcert` is installed, and installs/trusts its local CA
 - checks that `infra/cert` exists, creating it if missing
-- checks whether a certificate already exists and is still valid (regenerating if it's missing, expired, or expires within 30 days)
-- generates a certificate/key pair covering `localhost`, `*.localhost`, `127.0.0.1`, and `::1` if needed
+- regenerates the pair if it is missing, expired, expires within 30 days, **or no longer covers the same names as `CERT_DOMAINS`**
 - prints a summary of what happened, including the certificate/key paths and expiry date
 
-The certificate is written to `infra/cert/minerva-local.pem` with its key at `infra/cert/minerva-local-key.pem`. Both are gitignored — run the script locally rather than committing them. Point frontend dev servers, the ui-lib dev server, and dockerised services' TLS config at these files (e.g. `https://minerva-manager.localhost`, `https://api.localhost`).
+**There is no wildcard.** `*.localhost` does not work — browsers and OpenSSL both refuse a wildcard whose parent is a single-label TLD, so it matches nothing and `https://api.localhost` fails as a name mismatch rather than as a trust error. Every origin is therefore listed one by one in the `CERT_DOMAINS` array at the top of the script:
+
+```
+localhost  api.localhost  manager.localhost  button.localhost  reporter.localhost
+storybook.localhost  assets.localhost  proxy.localhost  127.0.0.1  ::1
+```
+
+Giving a new service a hostname means adding a line there. Nothing else: the name-coverage check notices that the existing certificate no longer matches and writes a new one.
+
+The certificate is written to `infra/cert/minerva-local.pem` with its key at `infra/cert/minerva-local-key.pem`. Both are gitignored — run the script locally rather than committing them. The Vite dev servers, Storybook and Caddy all read this one pair.
 
 ### Usage
 
 ```sh
 ./scripts/generate-certs.sh
+./scripts/generate-certs.sh --quiet
 ```
 
 Or via the Makefile target:
@@ -81,7 +112,72 @@ Or via the Makefile target:
 make certs
 ```
 
+`--quiet` prints nothing unless it actually had to write a certificate. Every docker target runs it that way through `make preflight`, on every start rather than only when the files are missing — the failure it exists to catch is a certificate that is present and trusted but does not carry the hostname you opened, and that one is invisible until a browser refuses the page.
+
+A regenerated certificate means every browser tab and dev server holding the old one has to be restarted, which is why that case is reported even under `--quiet`.
+
 Exits with status `0` on success, or `1` if mkcert is missing or certificate generation fails.
+
+## bootstrap-secrets.sh
+
+Fills every credential the local stack needs but nobody chooses: the api's cookie secret, the three Postgres passwords, the Valkey password, Garage's RPC secret, admin token and S3 key pair, and go-camo's HMAC key.
+
+Each is generated in the shape its consumer demands, which is the reason this exists rather than ten `make secret` calls: Garage rejects an RPC secret that is not exactly 64 hexadecimal characters, its access key id has to be `GK` followed by 24 more, and go-camo parses its key as hex. Getting one wrong surfaces as a service that starts and then refuses every request.
+
+It:
+- refuses to run without a `.env` (that is `make copy-env`) or without `openssl`
+- **never replaces a value that is already there**, so it is safe on every run
+- refuses to append a name that is not already in `.env`, since a missing one is far more often a variable that moved than a new one — it reports those and exits `1`
+- writes through the existing file, so the `chmod 600` that `initial-setup.sh` set survives
+
+Rotating a credential is deliberately not something this does. A Garage RPC secret changed under a running cluster locks the node out of its own data; use `FORCE=1 make secret VAR=…` when that is genuinely what you want.
+
+### Usage
+
+```sh
+./scripts/bootstrap-secrets.sh
+DRY_RUN=1 ./scripts/bootstrap-secrets.sh
+```
+
+Or via the Makefile target:
+
+```sh
+make secrets
+DRY_RUN=1 make secrets
+```
+
+Note that the Postgres passwords and the Garage credentials only take effect on a volume that does not exist yet — see `infra/README.md`, and `make reset-db` / `make reset-storage`.
+
+Exits `0` when everything is filled in, `1` if a variable is missing from `.env` or the file could not be written.
+
+## generate-secret.sh
+
+The single-value version of the above: one cryptographically random secret from `openssl`, either printed or written into `.env`.
+
+- With no argument it prints the secret on stdout and nothing else, so `make secret | pbcopy` is the whole workflow. Commentary goes to stderr.
+- With a variable name it writes it into `.env`, and **refuses to overwrite an existing value** unless `FORCE=1`. Rotating one invalidates everything already signed with it — every cookie a running api handed out.
+- It will not append an unknown variable name, for the same reason as `bootstrap-secrets.sh`.
+- `HEX=1` produces 64 hexadecimal characters instead of base64, which is what Garage and go-camo require.
+
+### Usage
+
+```sh
+./scripts/generate-secret.sh                              # print one
+./scripts/generate-secret.sh BE_API_COOKIE_SECRET          # write it
+HEX=1 ./scripts/generate-secret.sh INFRA_CAMO_KEY          # 64 hex characters
+FORCE=1 ./scripts/generate-secret.sh BE_API_COOKIE_SECRET  # rotate on purpose
+```
+
+Or via the Makefile target:
+
+```sh
+make secret
+make secret VAR=BE_API_COOKIE_SECRET
+make secret HEX=1 VAR=INFRA_CAMO_KEY
+FORCE=1 make secret VAR=BE_API_COOKIE_SECRET
+```
+
+Exits `0` on success, `1` if openssl is missing, there is no `.env`, the name is unknown, or the value is already set and `FORCE` is not `1`.
 
 ## generate-icons.sh
 
@@ -122,6 +218,92 @@ The output directory defaults to `./icons` and is created if missing.
 - Maskable icons are padded with a solid background (`MASKABLE_BG_COLOR`, white by default) since they are commonly rendered opaque. Change that variable at the top of the script to match your brand background.
 
 Exits with status `0` on success, or non-zero if the source is missing, `sips` is unavailable, or conversion fails.
+
+## convert-fonts.sh
+
+Converts every `.ttf`/`.otf` in `shared/assets/fonts/` to `.woff2` and deletes the original. woff2 is Brotli over the same glyph data — identical rendering, roughly 60% smaller — and the repository keeps only the converted files, since those are what the apps and Storybook serve.
+
+Run it after dropping a new upstream font file into `shared/assets/fonts/`. Nothing else in the build changes: the `url()`s in `shared/assets/fonts.css` and the preload links in the apps' `index.html` name the `.woff2` directly, and `sharedFonts()` in `vite.fonts.ts` already serves that content type.
+
+Requires `python3` (macOS built-in). fontTools and Brotli are installed into a throwaway virtualenv under the system temp directory, so nothing is added to the machine's Python.
+
+### Usage
+
+```sh
+./scripts/convert-fonts.sh
+```
+
+Or via the Makefile target:
+
+```sh
+make fonts
+```
+
+Already-converted `.woff2` files are left alone, and a directory with nothing to convert is not an error.
+
+## shutdown-frontends.sh
+
+Force-kills the local Vite dev servers for minerva-button and minerva-manager. Ctrl+C normally does this; the script is for when it did not — a detached `vite`, a shell closed out from under it, a port still held after `make dev-*` exited.
+
+Deliberately blunt: SIGTERM, a few seconds' grace, then SIGKILL.
+
+Two things keep that from being dangerous:
+
+- **Only processes whose command line mentions `vite` are killed.** Anything else listening on those ports is reported and left alone, because the swept range overlaps ports this repo does not own.
+- Vite falls forward to the next free port when its configured one is taken (4101 → 4102 → …), so both configured ports are swept together with the following `PORT_SCAN_RANGE` (default 9) ports each. A stuck server is often not on the port you expect.
+
+### Usage
+
+```sh
+./scripts/shutdown-frontends.sh
+DRY_RUN=1 ./scripts/shutdown-frontends.sh
+```
+
+Or via the Makefile target:
+
+```sh
+make shutdown-fe
+DRY_RUN=1 make shutdown-fe
+```
+
+`DRY_RUN=1` lists what would be killed and touches nothing.
+
+## storybook-dev.sh
+
+Starts Storybook for `shared/ui-lib` on port 4301 (`STORYBOOK_PORT` to override).
+
+It exists because Storybook runs Vite in middleware mode behind its own Node server, so the `server.https` option in a Vite config is ignored — TLS has to be passed on the command line. The script mirrors the fallback in `vite.https.ts`: HTTPS when the mkcert pair exists, plain HTTP when it does not, so a fresh clone still boots before `make certs` has run. It also passes mkcert's root CA, since Storybook otherwise counts the certificate as self-signed.
+
+### Usage
+
+```sh
+./scripts/storybook-dev.sh
+```
+
+Or via the Makefile target:
+
+```sh
+make storybook
+```
+
+## sync-workspace.sh
+
+Brings the working copy's dependencies and shared-library builds back in step with the revision just checked out or merged. Run from the `post-checkout` and `post-merge` git hooks rather than by hand.
+
+The apps resolve `@minerva/typescript-lib` and `@minerva/ui-lib` through their built `dist/` directories, which are gitignored. Pulling a change to `shared/**` therefore leaves every consumer typechecking against stale declarations, with errors that name the old symbols and look nothing like the change that caused them. A moved `pnpm-lock.yaml` leaves `node_modules` out of date the same way.
+
+This is a convenience, not a guarantee — `make typecheck` depends on `build-libs`, so the stale-`dist` failure cannot survive a verification run either way. Running here just means you rarely meet it.
+
+### Usage
+
+```sh
+./scripts/sync-workspace.sh <old-rev> <new-rev>
+```
+
+When `<old-rev>` is absent, empty or unresolvable — a fresh clone, an orphan checkout — the sync runs unconditionally, because nothing can be proven unnecessary.
+
+**Always exits `0`.** It runs from `post-*` hooks, after the operation git was asked to perform has already succeeded; reporting failure there would be misleading and, on `post-checkout`, actively confusing. Problems go to stderr and are left for the next `make` to surface properly.
+
 ## The i18n check scripts
 
 Three Python scripts check the translation catalogues. They need nothing but `python3` — standard library only, no venv and no install step. `i18n_common.py` is a shared helper module they import; it is not run directly.

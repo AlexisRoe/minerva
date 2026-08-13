@@ -12,6 +12,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "dev": "nest start --watch",
+    "dev:docker": "nest start --debug 0.0.0.0:9229 --watch --preserveWatchOutput",
     "lint": "biome check .",
     "lint:fix": "biome check --write ."
   },
@@ -21,6 +22,7 @@
     "@nestjs/core": "catalog:",
     "@nestjs/platform-express": "catalog:",
     "@sentry/nestjs": "catalog:",
+    "@sentry/profiling-node": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:"
   },

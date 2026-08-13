@@ -1,0 +1,304 @@
+import { MinervaError } from '@minerva/typescript-lib';
+import { Logger } from '@nestjs/common';
+import type { ValidationError } from 'class-validator';
+import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
+import { LogLevel, NodeEnvironment } from '../../../enum/environment.enum';
+import { EnvironmentValidationError } from '../../exception/errors/environment.errors';
+import { dropBlankValues, flattenValidationErrors, toServiceName, validateEnvironment } from './environment.util';
+
+const COOKIE_SECRET = 'a-test-secret-of-more-than-32-characters';
+
+const VALID_ENVIRONMENT = {
+  NODE_ENV: 'production',
+  LOG_LEVEL: 'warn',
+  API_PORT: '3000',
+  COOKIE_SECRET,
+} as const;
+
+function validationError(property: string, constraints: Record<string, string>, children: ValidationError[] = []) {
+  return { property, constraints, children } as ValidationError;
+}
+
+describe('toServiceName', () => {
+  it('drops the workspace scope npm needs and a reader does not', () => {
+    expect(toServiceName('@minerva/api')).toBe('api');
+  });
+
+  it('leaves an unscoped name alone', () => {
+    expect(toServiceName('api')).toBe('api');
+  });
+
+  it('keeps a value that is nothing but a scope, rather than answering with an empty name', () => {
+    expect(toServiceName('@minerva')).toBe('@minerva');
+    expect(toServiceName('@minerva/')).toBe('@minerva/');
+  });
+});
+
+describe('dropBlankValues', () => {
+  it('keeps values that say something', () => {
+    expect(dropBlankValues({ API_PORT: '3000', NODE_ENV: 'test' })).toEqual({ API_PORT: '3000', NODE_ENV: 'test' });
+  });
+
+  it('drops the empty strings a template .env and compose interpolation leave behind', () => {
+    expect(dropBlankValues({ COOKIE_SECRET: '', API_PORT: '3000' })).toEqual({ API_PORT: '3000' });
+  });
+
+  it('drops whitespace-only values and trims the rest', () => {
+    expect(dropBlankValues({ COOKIE_SECRET: '   ', API_PORT: ' 3000 ' })).toEqual({ API_PORT: '3000' });
+  });
+
+  it('drops unset and null variables, leaving the service to decide what absence means', () => {
+    expect(dropBlankValues({ API_PORT: undefined, LOG_LEVEL: null })).toEqual({});
+  });
+
+  it('passes non-string values through untouched', () => {
+    expect(dropBlankValues({ API_PORT: 0, ENABLED: false })).toEqual({
+      API_PORT: 0,
+      ENABLED: false,
+    });
+  });
+});
+
+describe('flattenValidationErrors', () => {
+  it('returns nothing for no errors', () => {
+    expect(flattenValidationErrors([])).toEqual([]);
+  });
+
+  it('writes one line per broken rule, prefixed with the variable', () => {
+    const errors = [
+      validationError('API_PORT', {
+        isInt: 'API_PORT must be an integer number',
+        min: 'API_PORT must not be less than 1',
+      }),
+    ];
+
+    expect(flattenValidationErrors(errors)).toEqual([
+      'API_PORT: API_PORT must be an integer number',
+      'API_PORT: API_PORT must not be less than 1',
+    ]);
+  });
+
+  it('joins nested properties into a dotted path', () => {
+    const errors = [
+      validationError('DATABASE', {}, [validationError('PORT', { isInt: 'PORT must be an integer number' })]),
+    ];
+
+    expect(flattenValidationErrors(errors)).toEqual(['DATABASE.PORT: PORT must be an integer number']);
+  });
+
+  it('survives an error carrying neither constraints nor children', () => {
+    expect(flattenValidationErrors([{ property: 'API_PORT' } as ValidationError])).toEqual([]);
+  });
+});
+
+describe('validateEnvironment', () => {
+  let fatal: MockInstance<Logger['fatal']>;
+
+  beforeEach(() => {
+    fatal = vi.spyOn(Logger.prototype, 'fatal').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('converts every value to the type the schema declares', () => {
+    const environment = validateEnvironment({ ...VALID_ENVIRONMENT });
+
+    expect(environment.API_PORT).toBe(3000);
+    expect(environment.NODE_ENV).toBe(NodeEnvironment.Production);
+    expect(environment.LOG_LEVEL).toBe(LogLevel.Warn);
+    expect(environment.COOKIE_SECRET).toBe(COOKIE_SECRET);
+  });
+
+  it('accepts an empty environment, leaving every value absent for the service to resolve', () => {
+    const environment = validateEnvironment({});
+
+    expect(environment.NODE_ENV).toBeUndefined();
+    expect(environment.LOG_LEVEL).toBeUndefined();
+    expect(environment.API_PORT).toBeUndefined();
+    expect(environment.COOKIE_SECRET).toBeUndefined();
+  });
+
+  it('keeps the package identity a package manager exported', () => {
+    const environment = validateEnvironment({ ...VALID_ENVIRONMENT, npm_package_name: '@minerva/api' });
+
+    expect(environment.npm_package_name).toBe('@minerva/api');
+  });
+
+  it('rejects a version that is not one, rather than putting it in the OpenAPI document', () => {
+    expect(() => validateEnvironment({ npm_package_version: 'latest' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('fills in no defaults of its own', () => {
+    const environment = validateEnvironment({ API_PORT: '4401' });
+
+    expect(environment.API_PORT).toBe(4401);
+    expect(environment.NODE_ENV).toBeUndefined();
+    expect(environment.LOG_LEVEL).toBeUndefined();
+    expect(environment.COOKIE_SECRET).toBeUndefined();
+  });
+
+  it('treats a declared-but-empty variable as unset rather than as an illegal value', () => {
+    const environment = validateEnvironment({ API_PORT: '', COOKIE_SECRET: '' });
+
+    expect(environment.API_PORT).toBeUndefined();
+    expect(environment.COOKIE_SECRET).toBeUndefined();
+  });
+
+  it('accepts the connection URIs the compose stack builds', () => {
+    const environment = validateEnvironment({
+      DATABASE_URL: 'postgres://minerva_rw:secret@postgres:5432/minerva',
+      VALKEY_URL: 'redis://:secret@valkey:6379',
+      S3_ENDPOINT: 'http://garage:3900',
+      S3_PUBLIC_BASE_URL: 'https://assets.localhost:4501',
+      CAMO_BASE_URL: 'https://proxy.localhost:4502',
+      QUEUE_COORDINATOR_URL: 'http://queue-coordinator:4301',
+    });
+
+    expect(environment.DATABASE_URL).toBe('postgres://minerva_rw:secret@postgres:5432/minerva');
+    expect(environment.VALKEY_URL).toBe('redis://:secret@valkey:6379');
+    expect(environment.S3_ENDPOINT).toBe('http://garage:3900');
+    expect(environment.QUEUE_COORDINATOR_URL).toBe('http://queue-coordinator:4301');
+  });
+
+  it('rejects a database url that is not a postgres one', () => {
+    // A mysql:// here would otherwise reach the driver and fail there, well past
+    // the point where the message can say which variable was wrong.
+    expect(() => validateEnvironment({ DATABASE_URL: 'mysql://user@host/db' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('rejects a valkey url that is not a redis one', () => {
+    expect(() => validateEnvironment({ VALKEY_URL: 'valkey://valkey:6379' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('rejects a public asset base url that carries a path', () => {
+    // It is concatenated with an object key, so a trailing path segment would
+    // silently produce URLs pointing at the wrong prefix.
+    expect(() => validateEnvironment({ S3_PUBLIC_BASE_URL: 'https://assets.localhost:4501/bucket' })).toThrow(
+      EnvironmentValidationError,
+    );
+  });
+
+  it('rejects a camo key that is not 64 hexadecimal characters', () => {
+    expect(() => validateEnvironment({ CAMO_KEY: 'not-hex' })).toThrow(EnvironmentValidationError);
+    expect(validateEnvironment({ CAMO_KEY: 'a'.repeat(64) }).CAMO_KEY).toBe('a'.repeat(64));
+  });
+
+  it('reads the Valkey database numbers as numbers, and refuses one outside the keyspace', () => {
+    expect(validateEnvironment({ VALKEY_DB_CACHE: '1' }).VALKEY_DB_CACHE).toBe(1);
+    expect(() => validateEnvironment({ VALKEY_DB_CACHE: '16' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('strips the unrelated variables process.env carries', () => {
+    const environment = validateEnvironment({ ...VALID_ENVIRONMENT, BE_API_PORT: '4401', HOME: '/root' });
+
+    // Asserted as an exclusion rather than as the full list of declared names:
+    // the point is that a variable the schema does not declare cannot get
+    // through, and enumerating the ones that can would have to be rewritten
+    // every time the api learns to talk to something new.
+    expect(Object.keys(environment)).not.toContain('BE_API_PORT');
+    expect(Object.keys(environment)).not.toContain('HOME');
+    expect(environment.API_PORT).toBe(3000);
+  });
+
+  it('rejects a port that is not a number', () => {
+    expect(() => validateEnvironment({ API_PORT: 'localhost' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('rejects a port outside the TCP range', () => {
+    expect(() => validateEnvironment({ API_PORT: '70000' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('rejects a stage it does not know', () => {
+    expect(() => validateEnvironment({ NODE_ENV: 'staging' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('rejects a log level Nest has no name for -- optional never means lenient', () => {
+    expect(() => validateEnvironment({ LOG_LEVEL: 'trace' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('reads the origin list as an array, trimming what a wrapped line leaves behind', () => {
+    const environment = validateEnvironment({ CORS_ORIGINS: 'https://localhost:4201, https://localhost:4101,' });
+
+    expect(environment.CORS_ORIGINS).toEqual(['https://localhost:4201', 'https://localhost:4101']);
+  });
+
+  it('reads a single origin as a list of one', () => {
+    expect(validateEnvironment({ CORS_ORIGINS: 'https://minerva.example.com' }).CORS_ORIGINS).toEqual([
+      'https://minerva.example.com',
+    ]);
+  });
+
+  it('reads a list of nothing but separators as the empty list', () => {
+    expect(validateEnvironment({ CORS_ORIGINS: ',,' }).CORS_ORIGINS).toEqual([]);
+  });
+
+  it('rejects an origin carrying a path, which would never match the Origin header', () => {
+    expect(() => validateEnvironment({ CORS_ORIGINS: 'https://localhost:4201/' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('rejects an origin that is not a url', () => {
+    expect(() => validateEnvironment({ CORS_ORIGINS: 'localhost:4201' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('says which list the bad entry is in, so a one-line report is still actionable', () => {
+    expect.assertions(2);
+
+    try {
+      validateEnvironment({ CORS_ORIGINS: 'https://localhost:4201,nonsense' });
+    } catch (error) {
+      const issues = (error as EnvironmentValidationError).payload?.issues as string[];
+      expect(issues.every((issue) => issue.startsWith('CORS_ORIGINS: '))).toBe(true);
+      expect(issues.join('\n')).toContain('each value');
+    }
+  });
+
+  it('accepts a secret long enough to be worth signing with', () => {
+    expect(validateEnvironment({ COOKIE_SECRET }).COOKIE_SECRET).toBe(COOKIE_SECRET);
+  });
+
+  it('rejects a guessable cookie secret, which is worse than none at all', () => {
+    expect(() => validateEnvironment({ COOKIE_SECRET: 'secret' })).toThrow(EnvironmentValidationError);
+  });
+
+  it('names no value in the payload for a rejected secret either', () => {
+    expect.assertions(1);
+
+    try {
+      validateEnvironment({ COOKIE_SECRET: 'hunter2' });
+    } catch (error) {
+      const issues = (error as EnvironmentValidationError).payload?.issues as string[];
+      expect(issues.join('\n')).not.toContain('hunter2');
+    }
+  });
+
+  it('carries every problem as its own string in the payload', () => {
+    expect.assertions(3);
+
+    try {
+      validateEnvironment({ NODE_ENV: 'staging', API_PORT: '70000' });
+    } catch (error) {
+      expect(MinervaError.is(error)).toBe(true);
+
+      const issues = (error as EnvironmentValidationError).payload?.issues as string[];
+      expect(issues).toHaveLength(2);
+      expect(issues.map((issue) => issue.split(':')[0]).sort()).toEqual(['API_PORT', 'NODE_ENV']);
+    }
+  });
+
+  it('logs a heading and then one line per problem, so a failed boot reads top to bottom', () => {
+    expect(() => validateEnvironment({ NODE_ENV: 'staging', API_PORT: '70000' })).toThrow();
+
+    expect(fatal).toHaveBeenCalledTimes(3);
+    expect(fatal.mock.calls[0]?.[0]).toContain('2 problem(s)');
+    expect(fatal.mock.calls[1]?.[0]).toMatch(/^(NODE_ENV|API_PORT): /);
+    expect(fatal.mock.calls[2]?.[0]).toMatch(/^(NODE_ENV|API_PORT): /);
+  });
+
+  it('says nothing when the environment is valid', () => {
+    validateEnvironment({ ...VALID_ENVIRONMENT });
+
+    expect(fatal).not.toHaveBeenCalled();
+  });
+});

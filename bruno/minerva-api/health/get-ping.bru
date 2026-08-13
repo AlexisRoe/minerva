@@ -1,0 +1,35 @@
+meta {
+  name: Get ping
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/health/ping
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: text/plain
+}
+
+assert {
+  res.status: eq 200
+  res.body: eq pong
+  res.headers['content-type']: contains text/plain
+  res.headers['x-minerva-request-id']: isDefined
+}
+
+docs {
+  The cheapest proof that the process is alive: `PingUseCase` returns the literal string
+  `pong` and touches nothing at all. Cheap enough to run once a second, which is what a
+  container or load balancer probe does — `GET /health` is the one to read when you want
+  a verdict with a shape.
+
+  The response is `text/plain`, not JSON, so this request overrides the collection's
+  `Accept: application/json`. The handler pins its own `Content-Type` with `@Header`, so
+  the override changes nothing on the wire — it is here so the request says what it
+  expects, and the header assertion catches the day the pinning is dropped and Nest
+  starts answering `"pong"` as a JSON string.
+}
