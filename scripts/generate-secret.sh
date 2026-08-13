@@ -9,6 +9,7 @@
 #   generate-secret.sh                          # print a fresh secret
 #   generate-secret.sh BE_API_COOKIE_SECRET     # set it in .env (refuses to overwrite)
 #   FORCE=1 generate-secret.sh BE_API_COOKIE_SECRET
+#   HEX=1 generate-secret.sh INFRA_GARAGE_RPC_SECRET   # 64 hex characters instead of base64
 #
 # Rotating a secret invalidates everything already signed with the old one —
 # every cookie a running api handed out — which is why an existing value is
@@ -24,6 +25,7 @@ ENV_FILE="${REPO_ROOT}/.env"
 
 VARIABLE="${1:-}"
 FORCE="${FORCE:-0}"
+HEX="${HEX:-0}"
 
 # 32 bytes: the floor the api's COOKIE_SECRET validation enforces is 32
 # characters, and base64 of 32 bytes is 44 of them.
@@ -45,7 +47,16 @@ if ! command -v openssl >/dev/null 2>&1; then
   exit 1
 fi
 
-SECRET="$(openssl rand -base64 "$SECRET_BYTES")"
+# Base64 packs the same 32 bytes into fewer characters, so it is the default.
+# HEX=1 exists for the values whose consumer parses them rather than compares
+# them: Garage rejects an rpc_secret that is not exactly 64 hexadecimal
+# characters, and go-camo's HMAC key is read the same way.
+if [[ "$HEX" == "1" ]]; then
+  SECRET="$(openssl rand -hex "$SECRET_BYTES")"
+else
+  SECRET="$(openssl rand -base64 "$SECRET_BYTES")"
+fi
+
 if [[ -z "$SECRET" ]]; then
   echo "${RED}Aborting:${RESET} openssl produced no output." >&2
   exit 1
