@@ -17,7 +17,7 @@ catalog:
   '@nestjs/platform-express': 11.1.28
   '@nestjs/schematics': 11.1.0
   '@nestjs/testing': 11.1.28
-  '@sentry/nestjs': 10.69.0
+  '@sentry/nestjs': 11.12.0
   '@sentry/react': 10.68.0
   '@swc/core': 1.15.46
   '@tabler/icons-react': 3.45.0
