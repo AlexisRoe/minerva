@@ -1,5 +1,7 @@
 # Minerva
 
+[![CI](https://github.com/AlexisRoe/minerva/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexisRoe/minerva/actions/workflows/ci.yml)
+
 Minerva turns incoming email into structured, reviewable work items. This repository is the
 second iteration (`minerva-v2`) and is organised as a **pnpm monorepo** holding two NestJS
 services, two React frontends, a shared UI library, a shared TypeScript contract library, and
